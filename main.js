@@ -15791,7 +15791,7 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.id = "obsidian-word-equation";
+    this.id = plugin?.manifest?.id || "word-equation";
   }
   display() {
     const { containerEl } = this;

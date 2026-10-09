@@ -100,7 +100,7 @@ export class WordEquationSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: WordEquationPlugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.id = 'obsidian-word-equation';
+    this.id = plugin?.manifest?.id || 'word-equation';
   }
 
   public display(): void {
