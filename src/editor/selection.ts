@@ -389,11 +389,25 @@ export function updateVisualCaretDom(
   if (!targetSlotEl) return;
 
   const doc = rootEl.ownerDocument || document;
-  const caretEl = doc.createElement('span');
-  caretEl.className = 'eq-caret';
-  caretEl.setAttribute('data-caret', 'true');
-  caretEl.setAttribute('aria-hidden', 'true');
-  caretEl.textContent = '|';
+  const caretEl: HTMLElement = typeof (doc as any).createEl === 'function'
+    ? (doc as any).createEl('span', {
+        cls: 'eq-caret',
+        attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
+        text: '|',
+      })
+    : typeof (targetSlotEl as any).createSpan === 'function'
+    ? (targetSlotEl as any).createSpan({
+        cls: 'eq-caret',
+        attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
+        text: '|',
+      })
+    : doc.createElement('span');
+  if (!caretEl.classList.contains('eq-caret')) {
+    caretEl.className = 'eq-caret';
+    caretEl.setAttribute('data-caret', 'true');
+    caretEl.setAttribute('aria-hidden', 'true');
+    caretEl.textContent = '|';
+  }
 
   // 4. Handle placeholder slot
   const placeholderEl = Array.from(targetSlotEl.children).find(
@@ -421,11 +435,11 @@ export function updateVisualCaretDom(
 
   // 6. Reset animation so caret is instantly visible
   try {
-    caretEl.style.animation = 'none';
+    caretEl.setCssStyles({ animation: 'none' });
     if (typeof (caretEl as any).offsetWidth === 'number') {
       void (caretEl as any).offsetWidth;
     }
-    caretEl.style.animation = '';
+    caretEl.setCssStyles({ animation: '' });
   } catch {
     // Ignore in non-layout environments
   }

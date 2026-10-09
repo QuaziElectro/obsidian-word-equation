@@ -309,7 +309,7 @@ describe('Requirement R4: Commands & Equation Gallery Sidebar', () => {
 
       expect(blockCmd).toBeDefined();
       expect(blockCmd.name).toBe('Insert block equation');
-      expect(blockCmd.hotkeys).toEqual([{ modifiers: ['Alt'], key: '=' }]);
+      expect(blockCmd.hotkeys).toBeUndefined();
 
       expect(inlineCmd).toBeDefined();
       expect(inlineCmd.name).toBe('Insert inline equation');

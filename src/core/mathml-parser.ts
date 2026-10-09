@@ -6,8 +6,6 @@
 import {
   MathNode,
   SlotNode,
-  SlotRole,
-  TokenKind,
 } from './types';
 import {
   createSlot,
@@ -21,7 +19,6 @@ import {
   createMatrix,
   createFenced,
   createUnderOver,
-  createPlaceholder,
   updateParentPointers,
 } from './ast';
 
@@ -35,7 +32,7 @@ function getDOMParserInstance(): DOMParser | null {
     return nodeDOMParser;
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-var-requires -- Dynamic require of jsdom in headless testing environments where DOMParser is not globally available
     const { JSDOM } = require('jsdom');
     const dom = new JSDOM();
     nodeDOMParser = new dom.window.DOMParser();
@@ -336,7 +333,6 @@ function fallbackParse(xml: string): SlotNode {
   // Basic regex match for common tags
   const tagRegex = /<([a-z0-9]+)([^>]*)>(.*?)<\/\1>/gis;
   let match: RegExpExecArray | null;
-  let lastIndex = 0;
 
   while ((match = tagRegex.exec(clean)) !== null) {
     const tag = match[1].toLowerCase();
@@ -350,7 +346,6 @@ function fallbackParse(xml: string): SlotNode {
     } else if (tag === 'mtext') {
       root.children.push(createToken(content, 'mtext'));
     }
-    lastIndex = tagRegex.lastIndex;
   }
 
   if (root.children.length === 0) {

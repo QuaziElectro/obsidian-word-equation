@@ -9,13 +9,10 @@ import { wordEquationStateField } from './state-field';
 import { WordEquationWidget } from './widget';
 import {
   getActiveEquationState,
-  setActiveEquationState,
   clearActiveEquationState,
   getActiveEquationWidget,
 } from './active-session';
-import { handleArrowKey } from './navigation';
 import { updateEquationSelectionDom } from './selection';
-import { isEquationEmpty } from '../core/ast';
 import { logDebugEvent, isDebugEnabled } from '../debug/debug-logger';
 
 export const equationTransactionFilterPlugin = EditorState.transactionFilter.of((tr: Transaction) => {
@@ -154,7 +151,7 @@ export function getActiveWidget(view: EditorView): WordEquationWidget | null {
   const decorations = view.state.field(wordEquationStateField, false);
   if (!decorations) return null;
   let targetWidget: WordEquationWidget | null = null;
-  decorations.between(active.from, active.to, (f, t, dec) => {
+  decorations.between(active.from, active.to, (_f, _t, dec) => {
     const w = (dec as any).widget || (dec.spec as any)?.widget;
     if (w && (w instanceof WordEquationWidget || typeof w.handleArrowNavigation === 'function')) {
       if (w.from === active.from) {
@@ -351,7 +348,7 @@ export function createEquationNavigationExtension(): Extension {
           // A. If an equation is selected across its range
           if (!sel.empty) {
             let targetWidget: WordEquationWidget | null = null;
-            decorations.between(sel.from, sel.to, (from, to, dec) => {
+            decorations.between(sel.from, sel.to, (_from, _to, dec) => {
               if ((dec.spec as any)?.widget instanceof WordEquationWidget) {
                 const w = (dec.spec as any).widget as WordEquationWidget;
                 if (w.from === sel.from && w.to === sel.to) {
@@ -370,7 +367,7 @@ export function createEquationNavigationExtension(): Extension {
           const pos = sel.head;
           let targetWidget: WordEquationWidget | null = null;
 
-          decorations.between(Math.max(0, pos - 10), pos, (from, to, dec) => {
+          decorations.between(Math.max(0, pos - 10), pos, (_from, to, dec) => {
             if ((dec.spec as any)?.widget instanceof WordEquationWidget) {
               const w = (dec.spec as any).widget as WordEquationWidget;
               if (w.isInline) {
@@ -411,7 +408,7 @@ export function createEquationNavigationExtension(): Extension {
           // A. If an equation is selected across its range
           if (!sel.empty) {
             let targetWidget: WordEquationWidget | null = null;
-            decorations.between(sel.from, sel.to, (from, to, dec) => {
+            decorations.between(sel.from, sel.to, (_from, _to, dec) => {
               if ((dec.spec as any)?.widget instanceof WordEquationWidget) {
                 const w = (dec.spec as any).widget as WordEquationWidget;
                 if (w.from === sel.from && w.to === sel.to) {
@@ -430,7 +427,7 @@ export function createEquationNavigationExtension(): Extension {
           const pos = sel.head;
           let targetWidget: WordEquationWidget | null = null;
 
-          decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
+          decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, _to, dec) => {
             if ((dec.spec as any)?.widget instanceof WordEquationWidget) {
               const w = (dec.spec as any).widget as WordEquationWidget;
               if (w.isInline) {
@@ -770,7 +767,7 @@ export function createEquationNavigationExtension(): Extension {
           if (!decorations) return false;
 
           let targetWidget: WordEquationWidget | null = null;
-          decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
+          decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, _to, dec) => {
             const w = (dec as any).widget || (dec.spec as any)?.widget;
             if (!(w instanceof WordEquationWidget || typeof w?.enterFromStart === 'function')) return;
 
@@ -831,7 +828,7 @@ export function createEquationNavigationExtension(): Extension {
           if (!decorations) return false;
 
           let targetWidget: WordEquationWidget | null = null;
-          decorations.between(Math.max(0, pos - 4), pos, (from, to, dec) => {
+          decorations.between(Math.max(0, pos - 4), pos, (_from, to, dec) => {
             const w = (dec as any).widget || (dec.spec as any)?.widget;
             if (!(w instanceof WordEquationWidget || typeof w?.enterFromEnd === 'function')) return;
 
@@ -899,7 +896,7 @@ export function createEquationNavigationExtension(): Extension {
             const decorations = view.state.field(wordEquationStateField, false);
             if (decorations) {
               let targetWidget: WordEquationWidget | null = null;
-              decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, to, dec) => {
+              decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, _to, dec) => {
                 const w = (dec as any).widget || (dec.spec as any)?.widget;
                 if ((from === nextPos || from === nextPos + 1 || from === nextPos + 2) && (w instanceof WordEquationWidget || typeof w?.enterFromStart === 'function')) {
                   targetWidget = w;
@@ -948,7 +945,7 @@ export function createEquationNavigationExtension(): Extension {
             const decorations = view.state.field(wordEquationStateField, false);
             if (decorations) {
               let targetWidget: WordEquationWidget | null = null;
-              decorations.between(Math.max(0, prevPos - 4), prevPos, (from, to, dec) => {
+              decorations.between(Math.max(0, prevPos - 4), prevPos, (_from, to, dec) => {
                 const w = (dec as any).widget || (dec.spec as any)?.widget;
                 if ((to === prevPos || to === prevPos - 1 || to === prevPos - 2) && (w instanceof WordEquationWidget || typeof w?.enterFromEnd === 'function')) {
                   const blockLine = view.state.doc.lineAt(to);
@@ -999,7 +996,7 @@ export function createEquationNavigationExtension(): Extension {
 
         const decorations = view.state.field(wordEquationStateField, false);
         if (decorations) {
-          decorations.between(active.from, active.to, (f, t, dec) => {
+          decorations.between(active.from, active.to, (_f, _t, dec) => {
             if ((dec.spec as any)?.widget instanceof WordEquationWidget) {
               const w = (dec.spec as any).widget as WordEquationWidget;
               w.isFocused = false;

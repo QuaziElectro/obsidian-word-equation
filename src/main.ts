@@ -31,7 +31,7 @@ import { WordEquationWidget } from './editor/widget';
 import { MATHML_NAMESPACE } from './core/types';
 import { registerConversionCommands } from './conversion';
 import { isEquationEmpty } from './core/ast';
-import { getDebugLogger, isDebugEnabled, logDebugEvent } from './debug/debug-logger';
+import { getDebugLogger, logDebugEvent } from './debug/debug-logger';
 
 export interface WordEquationPluginSettings {
   autoExpandShortcuts: boolean;
@@ -97,11 +97,10 @@ export default class WordEquationPlugin extends Plugin {
       editor.replaceSelection(template);
     };
 
-    // Primary R4 command: "Insert block equation" (Alt+=)
+    // Primary R4 command: "Insert block equation"
     this.addCommand({
       id: 'insert-block-equation',
       name: 'Insert block equation',
-      hotkeys: [{ modifiers: ['Alt'], key: '=' }],
       editorCallback: insertBlockEquation,
     });
 
@@ -249,21 +248,21 @@ export default class WordEquationPlugin extends Plugin {
     registerConversionCommands(this);
 
     // 6. Active equation focus hook: Auto-show / Auto-hide Equation Gallery
-    let hideGalleryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let hideGalleryTimeout: number | null = null;
     this.register(
       onActiveEquationChange((active) => {
         if (!this.settings.autoShowGallery) return;
         if (active) {
           if (hideGalleryTimeout) {
-            clearTimeout(hideGalleryTimeout);
+            window.clearTimeout(hideGalleryTimeout);
             hideGalleryTimeout = null;
           }
           this.activateGalleryView();
         } else {
           if (hideGalleryTimeout) {
-            clearTimeout(hideGalleryTimeout);
+            window.clearTimeout(hideGalleryTimeout);
           }
-          hideGalleryTimeout = setTimeout(() => {
+          hideGalleryTimeout = window.setTimeout(() => {
             hideGalleryTimeout = null;
             const currentState = getActiveEquationState();
             if (!currentState || !currentState.isFocused) {
@@ -275,7 +274,7 @@ export default class WordEquationPlugin extends Plugin {
     );
     this.register(() => {
       if (hideGalleryTimeout) {
-        clearTimeout(hideGalleryTimeout);
+        window.clearTimeout(hideGalleryTimeout);
         hideGalleryTimeout = null;
       }
     });
@@ -408,7 +407,7 @@ export default class WordEquationPlugin extends Plugin {
         }));
       };
 
-      setTimeout(recordFirstInteraction, 0);
+      window.setTimeout(recordFirstInteraction, 0);
     };
 
     if (typeof document !== 'undefined') {

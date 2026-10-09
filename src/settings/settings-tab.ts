@@ -5,7 +5,7 @@
 
 import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
 import type WordEquationPlugin from '../main';
-import { setCustomShortcuts, CustomShortcut } from '../shortcuts/catalog';
+import { setCustomShortcuts } from '../shortcuts/catalog';
 import { DomRenderer } from '../editor/dom-renderer';
 import { parseMathML } from '../core/mathml-parser';
 import { parseLinearEquation } from '../core/linear-parser';
@@ -22,15 +22,14 @@ export function renderExpansionPreview(expansion: string, container: HTMLElement
 
   const trimmed = (expansion || '').trim();
   if (!trimmed) {
-    const placeholder = container.createSpan
-      ? container.createSpan({ cls: 'weq-preview-empty', text: '⬚' })
-      : document.createElement('span');
-    if (!container.createSpan) {
+    if (typeof (container as any).createSpan === 'function') {
+      (container as any).createSpan({ cls: 'weq-preview-empty', text: '⬚' });
+    } else {
+      const placeholder = document.createElement('span');
       placeholder.className = 'weq-preview-empty';
       placeholder.textContent = '⬚';
       container.appendChild(placeholder);
     }
-    placeholder.style.color = 'var(--text-muted)';
     return;
   }
 
@@ -72,24 +71,22 @@ export function renderExpansionPreview(expansion: string, container: HTMLElement
         if (mathNode) {
           const imported = (document.importNode ? document.importNode(mathNode, true) : mathNode.cloneNode(true)) as HTMLElement;
           imported.classList.add('weq-native-mathml');
-          if (imported.style) {
-            imported.style.display = 'none';
-          } else {
-            imported.setAttribute('style', 'display: none;');
+          if (typeof (imported as any).setCssStyles === 'function') {
+            (imported as any).setCssStyles({ display: 'none' });
           }
           container.appendChild(imported);
         }
       } catch {}
     }
   } catch {
-    const errSpan = container.createSpan
-      ? container.createSpan({ text: trimmed })
-      : document.createElement('span');
-    if (!container.createSpan) {
+    if (typeof (container as any).createSpan === 'function') {
+      (container as any).createSpan({ cls: 'weq-preview-error', text: trimmed });
+    } else {
+      const errSpan = document.createElement('span');
+      errSpan.className = 'weq-preview-error';
       errSpan.textContent = trimmed;
       container.appendChild(errSpan);
     }
-    errSpan.style.color = 'var(--text-muted)';
   }
 }
 
@@ -107,7 +104,9 @@ export class WordEquationSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Word-like Equation Settings' });
+    new Setting(containerEl)
+      .setName('Word-like Equation Settings')
+      .setHeading();
 
     new Setting(containerEl)
       .setName('Auto-expand shortcuts in Markdown')
@@ -166,14 +165,16 @@ export class WordEquationSettingTab extends PluginSettingTab {
       .addButton((btn) =>
         btn
           .setButtonText('Clear Log')
-          .setWarning()
+          .setDestructive()
           .onClick(async () => {
             await getDebugLogger().clear();
             new Notice('Debug log cleared.');
           })
       );
 
-    containerEl.createEl('h3', { text: 'Custom Math Shortcuts' });
+    new Setting(containerEl)
+      .setName('Custom Math Shortcuts')
+      .setHeading();
     containerEl.createEl('p', {
       text: 'Define custom shortcuts. Column 1 is the trigger shortcut. Column 2 is the MathML equivalent or expansion result. Works in Markdown and inside equation blocks.',
       cls: 'setting-item-description',
@@ -181,27 +182,14 @@ export class WordEquationSettingTab extends PluginSettingTab {
 
     const tableWrapper = containerEl.createDiv({ cls: 'weq-shortcuts-table-wrapper' });
     const table = tableWrapper.createEl('table', { cls: 'weq-shortcuts-table' });
-    table.style.width = '100%';
-    table.style.borderCollapse = 'collapse';
 
     // Header row with 2 main columns: Trigger Shortcut and MathML / Expansion Result
     const thead = table.createEl('thead');
     const headerRow = thead.createEl('tr');
 
-    const thTrigger = headerRow.createEl('th', { text: 'Trigger Shortcut' });
-    thTrigger.style.textAlign = 'left';
-    thTrigger.style.width = '35%';
-    thTrigger.style.padding = '8px';
-
-    const thExpansion = headerRow.createEl('th', { text: 'MathML / Expansion Result' });
-    thExpansion.style.textAlign = 'left';
-    thExpansion.style.width = '50%';
-    thExpansion.style.padding = '8px';
-
-    const thActions = headerRow.createEl('th', { text: 'Actions' });
-    thActions.style.textAlign = 'center';
-    thActions.style.width = '15%';
-    thActions.style.padding = '8px';
+    headerRow.createEl('th', { cls: 'weq-th-trigger', text: 'Trigger Shortcut' });
+    headerRow.createEl('th', { cls: 'weq-th-expansion', text: 'MathML / Expansion Result' });
+    headerRow.createEl('th', { cls: 'weq-th-actions', text: 'Actions' });
 
     const tbody = table.createEl('tbody');
     const shortcuts = this.plugin.settings.customShortcuts;
@@ -209,17 +197,14 @@ export class WordEquationSettingTab extends PluginSettingTab {
     for (let i = 0; i < shortcuts.length; i++) {
       const item = shortcuts[i];
       const row = tbody.createEl('tr');
-      row.style.borderBottom = '1px solid var(--background-modifier-border)';
 
       // Column 1: Trigger Shortcut
       const tdTrigger = row.createEl('td', { cls: 'weq-col-trigger' });
-      tdTrigger.style.padding = '6px';
       const inputTrigger = tdTrigger.createEl('input', {
         type: 'text',
         value: item.trigger,
         cls: 'weq-input-trigger',
       });
-      inputTrigger.style.width = '100%';
       inputTrigger.placeholder = '\\trigger';
       inputTrigger.addEventListener('input', async () => {
         item.trigger = inputTrigger.value;
@@ -229,7 +214,6 @@ export class WordEquationSettingTab extends PluginSettingTab {
 
       // Column 2: MathML / Expansion Result (Single Fully Editable Visual Equation Box)
       const tdExp = row.createEl('td', { cls: 'weq-col-expansion' });
-      tdExp.style.padding = '6px';
 
       const previewEl = tdExp.createDiv({ cls: 'weq-expansion-preview' });
 
@@ -239,7 +223,9 @@ export class WordEquationSettingTab extends PluginSettingTab {
         value: item.expansion,
         cls: 'weq-input-expansion',
       });
-      inputExp.style.display = 'none';
+      if (typeof (inputExp as any).setCssStyles === 'function') {
+        (inputExp as any).setCssStyles({ display: 'none' });
+      }
 
       const interactiveBox = new InteractiveEquationBox({
         container: previewEl,
@@ -268,8 +254,6 @@ export class WordEquationSettingTab extends PluginSettingTab {
 
       // Column 3: Actions (Delete)
       const tdAct = row.createEl('td', { cls: 'weq-col-action' });
-      tdAct.style.padding = '6px';
-      tdAct.style.textAlign = 'center';
       const delBtn = tdAct.createEl('button', {
         text: 'Delete',
         cls: 'mod-warning weq-btn-delete',

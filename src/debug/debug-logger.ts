@@ -1,7 +1,7 @@
 /**
  * Debug Logger Subsystem for Obsidian Word-like Equation Plugin
  * Provides zero-overhead fast-branching event recording and debounced persistence
- * to .obsidian/plugins/obsidian-word-equation/debug-log.json.
+ * to ${app.vault.configDir}/plugins/obsidian-word-equation/debug-log.json.
  */
 
 import { App } from 'obsidian';
@@ -360,7 +360,7 @@ export class DebugLogger {
   private app: App | null = null;
   private manifestId: string = 'obsidian-word-equation';
   private events: DebugEvent[] = [];
-  private flushTimeout: ReturnType<typeof setTimeout> | null = null;
+  private flushTimeout: number | null = null;
   private isWriting: boolean = false;
   private pendingFlush: boolean = false;
 
@@ -429,14 +429,14 @@ export class DebugLogger {
   public scheduleFlush(immediate: boolean = false): void {
     if (immediate) {
       if (this.flushTimeout !== null) {
-        clearTimeout(this.flushTimeout);
+        window.clearTimeout(this.flushTimeout);
         this.flushTimeout = null;
       }
       void this.flush();
       return;
     }
     if (this.flushTimeout !== null) return;
-    this.flushTimeout = setTimeout(() => {
+    this.flushTimeout = window.setTimeout(() => {
       this.flushTimeout = null;
       void this.flush();
     }, 50);
@@ -446,7 +446,7 @@ export class DebugLogger {
     if (!this.enabled && this.events.length === 0) return;
 
     if (this.flushTimeout !== null) {
-      clearTimeout(this.flushTimeout);
+      window.clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
 
@@ -462,7 +462,7 @@ export class DebugLogger {
 
     this.isWriting = true;
     try {
-      const configDir = (app.vault as any).configDir || '.obsidian';
+      const configDir = app.vault.configDir;
       const logPath = `${configDir}/plugins/${this.manifestId}/debug-log.json`;
       const json = JSON.stringify(this.events, null, 2);
       await app.vault.adapter.write(logPath, json);
@@ -479,7 +479,7 @@ export class DebugLogger {
 
   public async clear(): Promise<void> {
     if (this.flushTimeout !== null) {
-      clearTimeout(this.flushTimeout);
+      window.clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
     this.events = [];
@@ -489,7 +489,7 @@ export class DebugLogger {
 
     const app = this.app || (typeof window !== 'undefined' ? (window as any).app : null);
     if (app?.vault?.adapter) {
-      const configDir = (app.vault as any).configDir || '.obsidian';
+      const configDir = app.vault.configDir;
       const logPath = `${configDir}/plugins/${this.manifestId}/debug-log.json`;
       try {
         await app.vault.adapter.write(logPath, '[]');
@@ -510,7 +510,7 @@ export class DebugLogger {
   public resetForTesting(): void {
     teardownGlobalTelemetry();
     if (this.flushTimeout !== null) {
-      clearTimeout(this.flushTimeout);
+      window.clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
     this.events = [];

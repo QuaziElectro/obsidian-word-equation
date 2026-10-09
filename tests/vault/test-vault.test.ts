@@ -38,7 +38,7 @@ describe('Test Vault & Real-World Application Workflows (Tier 4)', () => {
 
       const content = fs.readFileSync(manifestPath, 'utf8');
       const json = JSON.parse(content);
-      expect(json.id).toBe('obsidian-word-equation');
+      expect(json.id).toBe('word-equation');
       expect(json.name).toBe('Word Equation');
       expect(json.isDesktopOnly).toBe(false);
     });

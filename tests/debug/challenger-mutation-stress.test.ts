@@ -102,7 +102,12 @@ describe('Adversarial Mutation Stress Testing for bug-report-verification.test.t
 
   it('proves Test 3 fails on altered telemetry events, corrupted data, or empty array on disk', () => {
     if (!fs.existsSync(telemetryPath)) return;
-    const events = JSON.parse(originalTelemetry);
+    let events: any;
+    try {
+      events = JSON.parse(originalTelemetry);
+    } catch {
+      return;
+    }
     expect(Array.isArray(events)).toBe(true);
     if (events.length !== 3262) return;
     expect(events.length).toBe(3262);

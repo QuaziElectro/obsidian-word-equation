@@ -70,6 +70,12 @@ if (typeof HTMLElement !== 'undefined') {
       }
     };
   }
+
+  if (!(HTMLElement.prototype as any).setCssStyles) {
+    (HTMLElement.prototype as any).setCssStyles = function (styles: Partial<CSSStyleDeclaration>): void {
+      Object.assign(this.style, styles);
+    };
+  }
 }
 
 /**
@@ -201,6 +207,11 @@ export class Setting {
     return this;
   }
 
+  public setHeading(): this {
+    this.settingEl.classList.add('setting-item-heading');
+    return this;
+  }
+
   public addToggle(cb: (toggle: any) => any): this {
     const toggle = {
       setValue: (val: boolean) => toggle,
@@ -233,6 +244,10 @@ export class Setting {
         return btn;
       },
       setWarning: () => {
+        buttonEl.classList.add('mod-warning');
+        return btn;
+      },
+      setDestructive: () => {
         buttonEl.classList.add('mod-warning');
         return btn;
       },

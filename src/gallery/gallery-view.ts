@@ -3,12 +3,8 @@
  * Displays categorized mathematical elements that can be inserted into an active equation or markdown note.
  */
 
-import { ItemView, WorkspaceLeaf, MarkdownView } from 'obsidian';
-import { EditorView } from '@codemirror/view';
+import { ItemView, WorkspaceLeaf } from 'obsidian';
 import type WordEquationPlugin from '../main';
-import { getActiveEquationState, getActiveEquationWidget } from '../editor/active-session';
-import { getActiveWidget } from '../editor/navigation-extension';
-import { MATHML_NAMESPACE } from '../core/types';
 
 export const VIEW_TYPE_EQUATION_GALLERY = 'word-equation-gallery-view';
 export const EQUATION_GALLERY_VIEW_TYPE = VIEW_TYPE_EQUATION_GALLERY;

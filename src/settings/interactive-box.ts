@@ -19,9 +19,16 @@ import {
   extractSelectionAST,
   normalizeSelection,
   elevateSelectionForDrag,
-  getAllSlotsInOrder,
 } from '../core/ast';
 import { DomRenderer } from '../editor/dom-renderer';
+
+function isElement(obj: unknown): obj is HTMLElement {
+  return Boolean(obj && typeof obj === 'object' && (obj as any).nodeType === 1);
+}
+
+function isNode(obj: unknown): obj is Node {
+  return Boolean(obj && typeof obj === 'object' && typeof (obj as any).nodeType === 'number');
+}
 import { handleMouseClick } from '../editor/hit-testing';
 import { handleArrowKey, handleTabKey, handleSelectionStep } from '../editor/navigation';
 import {
@@ -203,10 +210,8 @@ export class InteractiveEquationBox {
             document.importNode ? document.importNode(mathNode, true) : mathNode.cloneNode(true)
           ) as HTMLElement;
           imported.classList.add('weq-native-mathml');
-          if (imported.style) {
-            imported.style.display = 'none';
-          } else {
-            imported.setAttribute('style', 'display: none;');
+          if (typeof imported.setCssStyles === 'function') {
+            imported.setCssStyles({ display: 'none' });
           }
           this.container.appendChild(imported);
         }
@@ -466,7 +471,7 @@ export class InteractiveEquationBox {
       this.isFocused = true;
       this.dom.focus({ preventScroll: true });
 
-      const targetEl = e.target instanceof Element ? (e.target as HTMLElement) : null;
+      const targetEl = isElement(e.target) ? (e.target as HTMLElement) : null;
       const anchorPos = handleMouseClick(
         this.ast,
         this.dom,
@@ -586,7 +591,7 @@ export class InteractiveEquationBox {
         if (isDragging) {
           moveEvt.preventDefault();
           moveEvt.stopPropagation();
-          const targetEl = moveEvt.target instanceof Element ? (moveEvt.target as HTMLElement) : null;
+          const targetEl = isElement(moveEvt.target) ? (moveEvt.target as HTMLElement) : null;
           const headPos = handleMouseClick(
             this.ast,
             this.dom,
@@ -607,7 +612,7 @@ export class InteractiveEquationBox {
         }
       };
 
-      const onPointerUp = (upEvt?: MouseEvent | PointerEvent) => {
+      const onPointerUp = (_upEvt?: MouseEvent | PointerEvent) => {
         cleanupDragListeners();
         if (
           this.selection &&
@@ -638,7 +643,7 @@ export class InteractiveEquationBox {
 
     // Clear selection on pointerdown outside equation box
     const onDocPointerDown = (evt: MouseEvent | PointerEvent) => {
-      const isInside = evt.target instanceof Node && this.dom.contains(evt.target);
+      const isInside = isNode(evt.target) && this.dom.contains(evt.target);
       if (this.dom && !isInside) {
         this.isFocused = false;
         if (this.selection || this.highlightedSlotId) {

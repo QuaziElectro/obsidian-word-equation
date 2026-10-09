@@ -13,20 +13,21 @@ export function handleMouseClick(
   clickY: number,
   explicitTarget?: HTMLElement | null
 ): CaretPosition {
+  // Cross-window safe DOM element type guard
+  const isElement = (obj: unknown): obj is HTMLElement =>
+    Boolean(obj && typeof obj === 'object' && (obj as any).nodeType === 1);
+
   // 1. Resolve clicked target element
-  let targetEl: HTMLElement | null =
-    explicitTarget && typeof Node !== 'undefined' && explicitTarget instanceof Node && explicitTarget instanceof Element
-      ? (explicitTarget as HTMLElement)
-      : null;
+  let targetEl: HTMLElement | null = isElement(explicitTarget) ? (explicitTarget as HTMLElement) : null;
   if (!targetEl && typeof document !== 'undefined' && typeof document.elementFromPoint === 'function') {
     const el = document.elementFromPoint(clickX, clickY) as HTMLElement | null;
-    if (el && typeof Node !== 'undefined' && el instanceof Node && rootEl.contains(el)) {
+    if (el && isElement(el) && rootEl.contains(el)) {
       targetEl = el;
     }
   }
 
   // 2. If targetEl was found inside rootEl, evaluate target element hierarchy
-  if (targetEl && typeof Node !== 'undefined' && targetEl instanceof Node && rootEl.contains(targetEl)) {
+  if (targetEl && isElement(targetEl) && rootEl.contains(targetEl)) {
     // (a) Clicked directly on placeholder box
     const placeholder = targetEl.closest('.eq-placeholder') as HTMLElement | null;
     if (placeholder) {

@@ -12,13 +12,7 @@ import {
   MATHML_NAMESPACE,
 } from '../core/types';
 import {
-  createSlot,
   createToken,
-  createFraction,
-  createSuperscript,
-  createSubscript,
-  createSubSup,
-  createRadical,
   cloneSlot,
   updateParentPointers,
   slotToPlainText,

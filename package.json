@@ -1,7 +1,7 @@
 {
   "name": "obsidian-word-equation",
   "version": "1.0.0",
-  "description": "Microsoft Word-like visual equation editing with MathML in Obsidian",
+  "description": "Microsoft Word-like visual equation editing with native MathML.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

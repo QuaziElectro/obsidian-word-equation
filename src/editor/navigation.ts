@@ -7,7 +7,6 @@ import {
   SlotNode,
   CaretPosition,
   NavigationResult,
-  MathNode,
   SelectionRange,
 } from '../core/types';
 import {
@@ -16,8 +15,6 @@ import {
   findParentSlotOfNode,
   getChildSlots,
   getAllSlotsInOrder,
-  findFirstEditableSlot,
-  findLastEditableSlot,
   isSlotEmpty,
 } from '../core/ast';
 import { isDebugEnabled, logDebugEvent } from '../debug/debug-logger';

@@ -7,7 +7,6 @@
 import {
   MathNode,
   SlotNode,
-  TokenKind,
 } from './types';
 import {
   createSlot,
@@ -411,7 +410,6 @@ export class LinearParser {
     closeChar: string
   ): MathNode {
     // Check if inner content contains & or ; or @
-    const savedPos = this.pos;
     let isMatrix = false;
     let depth = 0;
     for (let i = this.pos; i < this.tokens.length; i++) {

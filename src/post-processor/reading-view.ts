@@ -15,7 +15,7 @@ export function createReadingViewProcessor() {
   return (
     source: string,
     el: HTMLElement,
-    ctx: MarkdownPostProcessorContext
+    _ctx: MarkdownPostProcessorContext
   ): void => {
     const trimmed = source.trim();
     let ast: SlotNode;
@@ -48,10 +48,17 @@ export function createReadingViewProcessor() {
       } else {
         el.innerHTML = '';
       }
-      const errEl = document.createElement('div');
-      errEl.className = 'word-equation-error';
-      errEl.textContent = `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`;
-      el.appendChild(errEl);
+      if (typeof (el as any).createDiv === 'function') {
+        (el as any).createDiv({
+          cls: 'word-equation-error',
+          text: `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`,
+        });
+      } else {
+        const errEl = document.createElement('div');
+        errEl.className = 'word-equation-error';
+        errEl.textContent = `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`;
+        el.appendChild(errEl);
+      }
     }
   };
 }

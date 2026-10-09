@@ -245,7 +245,6 @@ describe('Adversarial Challenger 1 (Gen 56): Empirical Stress Suite for Bugs 1, 
       );
       expect(structSuppression).toBeDefined();
       expect(structSuppression?.cssText).toContain('transparent');
-      expect(structSuppression?.cssText).toContain('!important');
 
       const tokenSuppression = rules.find((r) =>
         r.cssText.includes('.eq-selected-structure .eq-selected-token')

@@ -2,8 +2,8 @@
   "id": "word-equation",
   "name": "Word Equation",
   "version": "1.0.0",
-  "minAppVersion": "1.0.0",
-  "description": "Microsoft Word-like visual equation editing with MathML in Obsidian",
+  "minAppVersion": "1.7.2",
+  "description": "Microsoft Word-like visual equation editing with native MathML.",
   "author": "QuaziElectro",
   "authorUrl": "https://github.com/QuaziElectro",
   "isDesktopOnly": false

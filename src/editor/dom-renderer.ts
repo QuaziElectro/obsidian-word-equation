@@ -29,25 +29,42 @@ export class DomRenderer {
       this.doc = document;
     } else {
       // In headless environment without global document
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires -- Dynamic require of jsdom in headless testing environments where document is not globally available
       const { JSDOM } = require('jsdom');
       this.doc = new JSDOM().window.document;
     }
   }
 
-  public render(root: SlotNode, ctx: RenderContext = {}): HTMLElement {
-    const rootContainer = this.doc.createElement(ctx.inline ? 'span' : 'div');
-    rootContainer.className = ctx.inline ? 'word-equation-inline' : 'word-equation-block';
-    rootContainer.setAttribute('contenteditable', 'false');
+  private createEl<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    o?: { cls?: string; attr?: Record<string, string>; text?: string }
+  ): HTMLElementTagNameMap[K] {
+    if (typeof (this.doc as any).createEl === 'function') {
+      return (this.doc as any).createEl(tag, o);
+    }
+    const el = this.doc.createElement(tag);
+    if (o?.cls) el.className = o.cls;
+    if (o?.text) el.textContent = o.text;
+    if (o?.attr) {
+      for (const [k, v] of Object.entries(o.attr)) el.setAttribute(k, v);
+    }
+    return el;
+  }
 
-    const mathBox = this.doc.createElement(ctx.inline ? 'span' : 'div');
-    mathBox.className = 'word-equation-math';
-    mathBox.setAttribute('contenteditable', 'false');
+  public render(root: SlotNode, ctx: RenderContext = {}): HTMLElement {
+    const rootContainer = this.createEl(ctx.inline ? 'span' : 'div', {
+      cls: ctx.inline ? 'word-equation-inline' : 'word-equation-block',
+      attr: { contenteditable: 'false' },
+    });
+
+    const mathBox = this.createEl(ctx.inline ? 'span' : 'div', {
+      cls: 'word-equation-math',
+      attr: { contenteditable: 'false', 'data-equation-root': 'true' },
+    });
     if (ctx.isFocused) {
       mathBox.classList.add('eq-active');
     }
     mathBox.tabIndex = ctx.readOnly ? -1 : 0;
-    mathBox.setAttribute('data-equation-root', 'true');
 
     const renderedSlot = this.renderSlot(root, ctx);
     mathBox.appendChild(renderedSlot);
@@ -57,18 +74,19 @@ export class DomRenderer {
   }
 
   public renderSlot(slot: SlotNode, ctx: RenderContext): HTMLElement {
-    const slotEl = this.doc.createElement('span');
-    slotEl.className = 'eq-slot';
-    slotEl.setAttribute('data-slot-id', slot.id);
-    slotEl.setAttribute('data-slot-role', slot.role);
+    const slotEl = this.createEl('span', {
+      cls: 'eq-slot',
+      attr: { 'data-slot-id': slot.id, 'data-slot-role': slot.role },
+    });
 
     const isCaretInSlot = ctx.caret && ctx.caret.slotId === slot.id;
     const caretOffset = isCaretInSlot ? ctx.caret!.offset : -1;
 
     if (slot.children.length === 0) {
-      const placeholder = this.doc.createElement('span');
-      placeholder.className = 'eq-placeholder';
-      placeholder.setAttribute('data-placeholder-for', slot.id);
+      const placeholder = this.createEl('span', {
+        cls: 'eq-placeholder',
+        attr: { 'data-placeholder-for': slot.id },
+      });
 
       if (isCaretInSlot) {
         placeholder.classList.add('eq-focused');
@@ -131,10 +149,11 @@ export class DomRenderer {
   }
 
   private renderToken(node: MathNode & { type: 'token' }): HTMLElement {
-    const el = this.doc.createElement('span');
-    el.className = `eq-token eq-${node.tokenKind}`;
-    el.setAttribute('data-node-id', node.id);
-    el.textContent = node.text;
+    const el = this.createEl('span', {
+      cls: `eq-token eq-${node.tokenKind}`,
+      attr: { 'data-node-id': node.id },
+      text: node.text,
+    });
     if (node.attributes) {
       for (const [k, v] of Object.entries(node.attributes)) {
         el.setAttribute(`data-${k}`, v);
@@ -144,27 +163,26 @@ export class DomRenderer {
   }
 
   private renderPlaceholder(node: MathNode & { type: 'placeholder' }): HTMLElement {
-    const el = this.doc.createElement('span');
-    el.className = 'eq-placeholder';
-    el.setAttribute('data-node-id', node.id);
-    el.textContent = '⬚';
-    return el;
+    return this.createEl('span', {
+      cls: 'eq-placeholder',
+      attr: { 'data-node-id': node.id },
+      text: '⬚',
+    });
   }
 
   private renderFraction(
     node: MathNode & { type: 'fraction' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-fraction';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-fraction',
+      attr: { 'data-node-id': node.id },
+    });
 
-    const num = this.doc.createElement('div');
-    num.className = 'eq-numerator';
+    const num = this.createEl('div', { cls: 'eq-numerator' });
     num.appendChild(this.renderSlot(node.numerator, ctx));
 
-    const den = this.doc.createElement('div');
-    den.className = 'eq-denominator';
+    const den = this.createEl('div', { cls: 'eq-denominator' });
     den.appendChild(this.renderSlot(node.denominator, ctx));
 
     container.appendChild(num);
@@ -176,14 +194,14 @@ export class DomRenderer {
     node: MathNode & { type: 'superscript' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-script-box';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-script-box',
+      attr: { 'data-node-id': node.id },
+    });
 
     container.appendChild(this.renderSlot(node.base, ctx));
 
-    const sup = this.doc.createElement('span');
-    sup.className = 'eq-superscript';
+    const sup = this.createEl('span', { cls: 'eq-superscript' });
     sup.appendChild(this.renderSlot(node.sup, ctx));
 
     container.appendChild(sup);
@@ -194,14 +212,14 @@ export class DomRenderer {
     node: MathNode & { type: 'subscript' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-script-box';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-script-box',
+      attr: { 'data-node-id': node.id },
+    });
 
     container.appendChild(this.renderSlot(node.base, ctx));
 
-    const sub = this.doc.createElement('span');
-    sub.className = 'eq-subscript';
+    const sub = this.createEl('span', { cls: 'eq-subscript' });
     sub.appendChild(this.renderSlot(node.sub, ctx));
 
     container.appendChild(sub);
@@ -212,21 +230,19 @@ export class DomRenderer {
     node: MathNode & { type: 'subsup' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-script-box';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-script-box',
+      attr: { 'data-node-id': node.id },
+    });
 
     container.appendChild(this.renderSlot(node.base, ctx));
 
-    const scriptsWrapper = this.doc.createElement('span');
-    scriptsWrapper.className = 'eq-subsup-scripts';
+    const scriptsWrapper = this.createEl('span', { cls: 'eq-subsup-scripts' });
 
-    const sup = this.doc.createElement('span');
-    sup.className = 'eq-superscript';
+    const sup = this.createEl('span', { cls: 'eq-superscript' });
     sup.appendChild(this.renderSlot(node.sup, ctx));
 
-    const sub = this.doc.createElement('span');
-    sub.className = 'eq-subscript';
+    const sub = this.createEl('span', { cls: 'eq-subscript' });
     sub.appendChild(this.renderSlot(node.sub, ctx));
 
     scriptsWrapper.appendChild(sup);
@@ -236,9 +252,10 @@ export class DomRenderer {
   }
 
   private createSurdElement(): HTMLElement {
-    const surd = this.doc.createElement('span');
-    surd.className = 'eq-radical-surd';
-    surd.setAttribute('aria-hidden', 'true');
+    const surd = this.createEl('span', {
+      cls: 'eq-radical-surd',
+      attr: { 'aria-hidden': 'true' },
+    });
     surd.innerHTML =
       '<svg viewBox="0 0 12 24" preserveAspectRatio="none" class="eq-radical-svg">' +
       '<path d="M1 13 L3 13 L6 23 L11 1 L12 1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square" stroke-linejoin="miter"/>' +
@@ -250,14 +267,14 @@ export class DomRenderer {
     node: MathNode & { type: 'radical' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-radical';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-radical',
+      attr: { 'data-node-id': node.id },
+    });
 
     const surd = this.createSurdElement();
 
-    const radicand = this.doc.createElement('span');
-    radicand.className = 'eq-radicand';
+    const radicand = this.createEl('span', { cls: 'eq-radicand' });
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
 
     container.appendChild(surd);
@@ -269,18 +286,17 @@ export class DomRenderer {
     node: MathNode & { type: 'root' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-radical';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-radical',
+      attr: { 'data-node-id': node.id },
+    });
 
-    const idx = this.doc.createElement('span');
-    idx.className = 'eq-radical-index';
+    const idx = this.createEl('span', { cls: 'eq-radical-index' });
     idx.appendChild(this.renderSlot(node.index, ctx));
 
     const surd = this.createSurdElement();
 
-    const radicand = this.doc.createElement('span');
-    radicand.className = 'eq-radicand';
+    const radicand = this.createEl('span', { cls: 'eq-radicand' });
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
 
     container.appendChild(idx);
@@ -293,26 +309,25 @@ export class DomRenderer {
     node: MathNode & { type: 'matrix' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-matrix';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-matrix',
+      attr: { 'data-node-id': node.id },
+    });
 
     if (node.openBracket) {
-      const open = this.doc.createElement('span');
-      open.className = 'eq-matrix-bracket';
-      open.textContent = node.openBracket;
+      const open = this.createEl('span', {
+        cls: 'eq-matrix-bracket',
+        text: node.openBracket,
+      });
       container.appendChild(open);
     }
 
-    const table = this.doc.createElement('table');
-    table.className = 'eq-matrix-table';
+    const table = this.createEl('table', { cls: 'eq-matrix-table' });
 
     for (const row of node.rows) {
-      const tr = this.doc.createElement('tr');
-      tr.className = 'eq-matrix-row';
+      const tr = this.createEl('tr', { cls: 'eq-matrix-row' });
       for (const cell of row) {
-        const td = this.doc.createElement('td');
-        td.className = 'eq-matrix-cell';
+        const td = this.createEl('td', { cls: 'eq-matrix-cell' });
         td.appendChild(this.renderSlot(cell, ctx));
         tr.appendChild(td);
       }
@@ -322,9 +337,10 @@ export class DomRenderer {
     container.appendChild(table);
 
     if (node.closeBracket) {
-      const close = this.doc.createElement('span');
-      close.className = 'eq-matrix-bracket';
-      close.textContent = node.closeBracket;
+      const close = this.createEl('span', {
+        cls: 'eq-matrix-bracket',
+        text: node.closeBracket,
+      });
       container.appendChild(close);
     }
 
@@ -335,23 +351,26 @@ export class DomRenderer {
     node: MathNode & { type: 'fenced' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-fenced';
-    container.setAttribute('data-node-id', node.id);
+    const container = this.createEl('span', {
+      cls: 'eq-fenced',
+      attr: { 'data-node-id': node.id },
+    });
 
     if (node.open) {
-      const open = this.doc.createElement('span');
-      open.className = 'eq-fence-open eq-token eq-mo';
-      open.textContent = node.open;
+      const open = this.createEl('span', {
+        cls: 'eq-fence-open eq-token eq-mo',
+        text: node.open,
+      });
       container.appendChild(open);
     }
 
     container.appendChild(this.renderSlot(node.content, ctx));
 
     if (node.close) {
-      const close = this.doc.createElement('span');
-      close.className = 'eq-fence-close eq-token eq-mo';
-      close.textContent = node.close;
+      const close = this.createEl('span', {
+        cls: 'eq-fence-close eq-token eq-mo',
+        text: node.close,
+      });
       container.appendChild(close);
     }
 
@@ -362,31 +381,23 @@ export class DomRenderer {
     node: MathNode & { type: 'underover' },
     ctx: RenderContext
   ): HTMLElement {
-    const container = this.doc.createElement('span');
-    container.className = 'eq-underover';
-    container.setAttribute('data-node-id', node.id);
-    container.style.display = 'inline-flex';
-    container.style.flexDirection = 'column';
-    container.style.alignItems = 'center';
-    container.style.verticalAlign = 'middle';
+    const container = this.createEl('span', {
+      cls: 'eq-underover',
+      attr: { 'data-node-id': node.id },
+    });
 
     if (node.over) {
-      const overEl = this.doc.createElement('span');
-      overEl.className = 'eq-over';
-      overEl.style.fontSize = '0.7em';
+      const overEl = this.createEl('span', { cls: 'eq-over' });
       overEl.appendChild(this.renderSlot(node.over, ctx));
       container.appendChild(overEl);
     }
 
-    const baseEl = this.doc.createElement('span');
-    baseEl.className = 'eq-base';
+    const baseEl = this.createEl('span', { cls: 'eq-base' });
     baseEl.appendChild(this.renderSlot(node.base, ctx));
     container.appendChild(baseEl);
 
     if (node.under) {
-      const underEl = this.doc.createElement('span');
-      underEl.className = 'eq-under';
-      underEl.style.fontSize = '0.7em';
+      const underEl = this.createEl('span', { cls: 'eq-under' });
       underEl.appendChild(this.renderSlot(node.under, ctx));
       container.appendChild(underEl);
     }
@@ -395,12 +406,11 @@ export class DomRenderer {
   }
 
   private createCaretElement(): HTMLElement {
-    const caret = this.doc.createElement('span');
-    caret.className = 'eq-caret';
-    caret.setAttribute('data-caret', 'true');
-    caret.setAttribute('aria-hidden', 'true');
-    caret.textContent = '|';
-    return caret;
+    return this.createEl('span', {
+      cls: 'eq-caret',
+      attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
+      text: '|',
+    });
   }
 }
 

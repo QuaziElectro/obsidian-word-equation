@@ -887,9 +887,8 @@ describe('Challenger Gen 62 Invariant Property Verification', () => {
       expect(blockCmd).toBeDefined();
       expect(inlineCmd).toBeDefined();
 
-      // Verify block command hotkey
-      expect(blockCmd.hotkeys).toBeDefined();
-      expect(blockCmd.hotkeys[0]).toEqual({ modifiers: ['Alt'], key: '=' });
+      // Verify block command hotkey is not defined per Obsidian review guidelines
+      expect(blockCmd.hotkeys).toBeUndefined();
 
       // Verify editorCallbacks are functions
       expect(typeof blockCmd.editorCallback).toBe('function');

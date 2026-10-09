@@ -22,8 +22,6 @@ import {
   getAllSlotsInOrder,
   updateParentPointers,
   comparePositions,
-  findFirstEditableSlot,
-  findLastEditableSlot,
   elevateSelectionForDrag,
   extractSelectionAST,
 } from '../core/ast';
@@ -32,9 +30,15 @@ import {
   handleArrowKey,
   handleTabKey,
   handleSelectionStep,
-  handleHierarchicalBoundaryExpansion,
-  SelectionStepResult,
 } from './navigation';
+
+function isElement(obj: unknown): obj is HTMLElement {
+  return Boolean(obj && typeof obj === 'object' && (obj as any).nodeType === 1);
+}
+
+function isNode(obj: unknown): obj is Node {
+  return Boolean(obj && typeof obj === 'object' && typeof (obj as any).nodeType === 'number');
+}
 
 export {
   handleSelectionStep,
@@ -78,7 +82,7 @@ const activeDragTeardown = () => {
   }
 };
 
-export function isBlockEquationStart(view: EditorView, line: { text: string; from: number }): boolean {
+export function isBlockEquationStart(_view: EditorView, line: { text: string; from: number }): boolean {
   const lineText = line.text.trimStart();
   if (lineText.startsWith('```math-word') || lineText.startsWith('```weq')) {
     return true;
@@ -1995,7 +1999,7 @@ export class WordEquationWidget extends WidgetType {
         }
       }
 
-      const targetEl = e.target instanceof Element ? (e.target as HTMLElement) : null;
+      const targetEl = isElement(e.target) ? (e.target as HTMLElement) : null;
       const anchorPos = handleMouseClick(widget.ast, dom, e.clientX, e.clientY, targetEl);
       let clickCount = widget.resolveClickCount(e);
 
@@ -2165,7 +2169,7 @@ export class WordEquationWidget extends WidgetType {
         if (isDragging) {
           moveEvt.preventDefault();
           moveEvt.stopPropagation();
-          const targetEl = moveEvt.target instanceof Element ? (moveEvt.target as HTMLElement) : null;
+          const targetEl = isElement(moveEvt.target) ? (moveEvt.target as HTMLElement) : null;
           const headPos = handleMouseClick(
             widget.ast,
             dom,
@@ -2314,7 +2318,7 @@ export class WordEquationWidget extends WidgetType {
 
     dom.addEventListener('pointerdown', handlePointerActivation);
     dom.addEventListener('mousedown', handlePointerActivation);
-    const onInterrupt = (e: Event) => {
+    const onInterrupt = (_e: Event) => {
       activeDragTeardown();
       const widget = ((dom as any).__widget as WordEquationWidget) || this;
       widget.lastClickCount = 0;
@@ -2338,7 +2342,7 @@ export class WordEquationWidget extends WidgetType {
       let widget = ((dom as any).__widget as WordEquationWidget) || this;
       widget.containerEl = dom;
       widget.currentView = view;
-      const targetEl = e.target instanceof Element ? (e.target as HTMLElement) : null;
+      const targetEl = isElement(e.target) ? (e.target as HTMLElement) : null;
       const clickPos = handleMouseClick(widget.ast, dom, e.clientX, e.clientY, targetEl);
       const targetSlot = findSlotById(widget.ast, clickPos.slotId) || widget.ast;
       if (targetSlot.children.length === 0) {
@@ -3040,18 +3044,18 @@ export class WordEquationWidget extends WidgetType {
 
       const related = e.relatedTarget as HTMLElement | null;
       // If focus moved within this equation container, ignore
-      if (related && related instanceof Node && dom.contains(related)) return;
+      if (related && isNode(related) && dom.contains(related)) return;
 
       // If relatedTarget is null (e.g. clicking non-focusable elements), do not blur if activeElement is still inside
       if (!related) {
-        if (typeof document !== 'undefined' && document.activeElement && document.activeElement instanceof Node && dom.contains(document.activeElement)) {
+        if (typeof document !== 'undefined' && document.activeElement && isNode(document.activeElement) && dom.contains(document.activeElement)) {
           return;
         }
         return;
       }
 
       // If focus shifted to CodeMirror editor content (.cm-content or view.contentDOM)
-      if (view && (related === view.contentDOM || (view.dom && related instanceof Node && view.dom.contains(related)))) {
+      if (view && (related === view.contentDOM || (view.dom && isNode(related) && view.dom.contains(related)))) {
         return;
       }
 
