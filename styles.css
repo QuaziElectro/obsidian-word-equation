@@ -1,0 +1,459 @@
+/* Obsidian Word-like Equation Plugin Stylesheet */
+
+.word-equation-block {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+  user-select: none;
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', 'Times New Roman', serif;
+  font-size: 1.25em;
+  line-height: normal;
+}
+
+.word-equation-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.2em;
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', 'Times New Roman', serif;
+  font-size: 1.1em;
+  line-height: normal;
+}
+
+.word-equation-math {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  background-color: var(--background-primary-alt, rgba(128, 128, 128, 0.05));
+  border: 1px solid var(--background-modifier-border, #ccc);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: text;
+  outline: none;
+  min-height: 2.2em;
+  min-width: 3em;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.word-equation-math:focus,
+.word-equation-math.eq-active {
+  border-color: var(--interactive-accent, #705dcf);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover, rgba(112, 93, 207, 0.25));
+}
+
+/* Slots */
+.eq-slot {
+  display: inline-flex;
+  align-items: center;
+  min-width: 6px;
+  min-height: 1.2em;
+  padding: 0 1px;
+  border-radius: 2px;
+  position: relative;
+  vertical-align: middle;
+}
+
+/* Empty Placeholder Box (⬚) */
+.eq-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.9em;
+  height: 1em;
+  border: 1px dashed transparent;
+  border-radius: 3px;
+  margin: 0 1px;
+  color: var(--text-muted, #888);
+  font-size: 0.85em;
+  background-color: var(--background-secondary, rgba(150, 150, 150, 0.1));
+}
+
+.eq-placeholder.eq-focused {
+  border-color: var(--interactive-accent, #705dcf);
+  background-color: var(--interactive-accent-hover, rgba(112, 93, 207, 0.15));
+  color: var(--text-normal, currentColor);
+}
+
+/* Blinking Caret - In-Flow Visual Cursor */
+.eq-caret {
+  display: inline-block !important;
+  vertical-align: middle;
+  line-height: 1;
+  margin: 0 -1px;
+  color: var(--text-normal, currentColor);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 300;
+  font-style: normal;
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+  z-index: 10;
+  animation: eq-blink 1s steps(1) infinite !important;
+}
+
+@keyframes eq-blink {
+  0%, 49.9% {
+    opacity: 1;
+    visibility: visible;
+  }
+  50%, 100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Structural Boxes */
+/* Fraction */
+.eq-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0 2px;
+  margin: 0 2px;
+}
+
+.eq-numerator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2px;
+  border-bottom: 1.2px solid currentColor;
+  width: 100%;
+  text-align: center;
+}
+
+.eq-denominator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Superscript and Subscript */
+.eq-script-box {
+  display: inline-flex;
+  vertical-align: middle;
+  position: relative;
+}
+
+.eq-superscript {
+  display: inline-flex;
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
+  margin-left: 1px;
+  position: relative;
+  bottom: 0.55em;
+}
+
+.eq-subscript {
+  display: inline-flex;
+  font-size: 0.72em;
+  vertical-align: sub;
+  line-height: 0;
+  margin-left: 1px;
+  position: relative;
+  top: 0.35em;
+}
+
+.eq-subsup-scripts {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 0.72em;
+  line-height: 1;
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+/* Radical / Square Root */
+.eq-radical {
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.eq-radical-index {
+  font-size: 0.65em;
+  position: relative;
+  top: -0.2em;
+  margin-right: -2px;
+}
+
+.eq-radical-surd {
+  display: inline-flex;
+  align-items: stretch;
+  padding-right: 0;
+  margin-right: -1px;
+  flex-shrink: 0;
+}
+
+.eq-radical-svg {
+  width: 0.65em;
+  height: 100%;
+  display: block;
+}
+
+.eq-radicand {
+  border-top: 1.2px solid currentColor;
+  padding-top: 1px;
+  padding-left: 2px;
+  padding-right: 2px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Matrix */
+.eq-matrix {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 3px;
+  vertical-align: middle;
+}
+
+.eq-matrix-bracket {
+  font-size: 1.4em;
+  line-height: 1;
+  user-select: none;
+}
+
+.eq-matrix-table {
+  display: inline-table;
+  border-collapse: collapse;
+  margin: 0 2px;
+}
+
+.eq-matrix-row {
+  display: table-row;
+}
+
+.eq-matrix-cell {
+  display: table-cell;
+  padding: 2px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Math Tokens */
+.eq-token {
+  display: inline-block;
+  white-space: pre;
+}
+
+.eq-mi {
+  font-style: italic;
+  padding: 0 0.5px;
+}
+
+.eq-mn {
+  font-style: normal;
+  padding: 0 0.5px;
+}
+
+.eq-mo {
+  font-style: normal;
+  padding: 0 2px;
+}
+
+.eq-mtext {
+  font-style: normal;
+  font-family: var(--font-text, sans-serif);
+}
+
+/* Selection Highlight */
+.eq-selected,
+.word-equation-math.eq-selected,
+.word-equation-block.eq-selected .word-equation-math,
+.word-equation-inline.eq-selected .word-equation-math {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.35)) !important;
+  border-color: var(--interactive-accent, #705dcf) !important;
+  box-shadow: 0 0 0 2px var(--text-selection, rgba(112, 93, 207, 0.4)) !important;
+}
+
+.word-equation-block.eq-selected,
+.word-equation-inline.eq-selected {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.15));
+  border-radius: 4px;
+}
+
+/* Composite Structure Highlight */
+.eq-selected-structure,
+.eq-fraction.eq-selected-structure,
+.eq-radical.eq-selected-structure,
+.eq-matrix.eq-selected-structure,
+.eq-script-box.eq-selected-structure,
+.eq-fenced.eq-selected-structure,
+.eq-underover.eq-selected-structure {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.25)) !important;
+  border-radius: 4px;
+}
+
+/* Partial Selection & Generalized Deletion Highlighting */
+.eq-selected-token,
+.eq-token.eq-selected-token,
+.eq-placeholder.eq-selected-token {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.35)) !important;
+  border-radius: 2px;
+}
+
+.eq-slot.eq-selected-slot,
+.eq-slot.eq-placeholder-highlighted,
+.eq-placeholder-highlighted {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.25)) !important;
+  border-radius: 2px;
+}
+
+.eq-numerator.eq-partial-selected,
+.eq-denominator.eq-partial-selected,
+.eq-slot:not([data-slot-role="root"]).eq-partial-selected {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.18)) !important;
+  border-radius: 3px;
+}
+
+.word-equation-math.eq-partial-selected,
+.word-equation-block.eq-partial-selected,
+.eq-slot[data-slot-role="root"].eq-partial-selected {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Suppress individual child highlights when entire composite structure is selected */
+.eq-selected-structure .eq-selected-structure,
+.eq-selected-structure .eq-selected-token,
+.eq-selected-structure .eq-token.eq-selected-token,
+.eq-selected-structure .eq-placeholder.eq-selected-token,
+.eq-selected-structure .eq-partial-selected,
+.eq-selected-structure .eq-numerator.eq-partial-selected,
+.eq-selected-structure .eq-denominator.eq-partial-selected,
+.eq-selected-structure .eq-slot.eq-partial-selected,
+.eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
+.eq-selected-structure .eq-slot.eq-selected-slot,
+.eq-selected-structure .eq-selected-slot {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Settings Tab Custom Shortcuts Table Preview */
+.weq-expansion-preview {
+  margin-bottom: 6px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  background-color: var(--background-secondary, rgba(150, 150, 150, 0.08));
+  border: 1px solid var(--background-modifier-border, rgba(128, 128, 128, 0.2));
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.weq-expansion-preview .word-equation-inline,
+.weq-expansion-preview .word-equation-block {
+  margin: 0;
+  display: inline-flex;
+}
+
+.weq-expansion-preview .word-equation-math {
+  min-height: 1.8em;
+  padding: 3px 8px;
+  font-size: 0.95em;
+  box-shadow: none;
+}
+
+.weq-native-mathml {
+  display: none !important;
+}
+
+/* Word-style Equation Gallery Sidebar */
+.equation-gallery-container {
+  padding: 12px;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-interface, sans-serif);
+}
+
+.equation-gallery-title,
+.weq-gallery-title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-normal);
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 6px;
+}
+
+.equation-gallery-category,
+.weq-gallery-section {
+  margin-bottom: 16px;
+}
+
+.equation-gallery-category-title,
+.weq-gallery-section-title {
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding-bottom: 2px;
+  border-bottom: 1px dashed var(--background-modifier-border);
+}
+
+.equation-gallery-grid,
+.weq-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+}
+
+.equation-gallery-btn,
+.weq-gallery-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 4px 6px;
+  background-color: var(--background-secondary, rgba(128, 128, 128, 0.08));
+  border: 1px solid var(--background-modifier-border, #ccc);
+  border-radius: 4px;
+  color: var(--text-normal);
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', 'Times New Roman', serif;
+  font-size: 1em;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.equation-gallery-btn:hover,
+.weq-gallery-item:hover {
+  background-color: var(--background-modifier-hover, rgba(112, 93, 207, 0.15));
+  border-color: var(--interactive-accent, #705dcf);
+  color: var(--text-accent, #705dcf);
+}
+
+.equation-gallery-btn:active,
+.weq-gallery-item:active {
+  background-color: var(--interactive-accent-hover, rgba(112, 93, 207, 0.25));
+  transform: scale(0.97);
+}
+
+/* Collapsed Line Gap for Consecutive Block Equations */
+.cm-line.word-equation-collapsed-gap,
+.word-equation-collapsed-gap {
+  height: 0px !important;
+  min-height: 0px !important;
+  line-height: 0px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+
+

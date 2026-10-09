@@ -1,0 +1,6648 @@
+[
+  {
+    "timestamp": "2026-10-07T00:35:57.007Z",
+    "type": "initialization",
+    "details": {
+      "action": "startup",
+      "debugMode": true,
+      "platform": "desktop",
+      "note": "gen49-selection-acceptance.md",
+      "timestamp": "2026-10-07T02:57:07.828Z"
+    },
+    "data": {
+      "action": "startup",
+      "debugMode": true,
+      "platform": "desktop",
+      "note": "gen49-selection-acceptance.md",
+      "timestamp": "2026-10-07T02:57:07.828Z"
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.009Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": false
+    },
+    "data": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.011Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.013Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.014Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.016Z",
+    "type": "mouse",
+    "details": {
+      "eventType": "mousedown",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "mousedown",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.018Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.020Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.022Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "mousedown",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "mousedown",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.024Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.026Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "pointerup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    },
+    "data": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "pointerup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.028Z",
+    "type": "mouse",
+    "details": {
+      "eventType": "mouseup",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "mouseup",
+      "phase": "capture",
+      "clientX": 60,
+      "clientY": 60,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.029Z",
+    "type": "mouse",
+    "details": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "mouseup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    },
+    "data": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "mouseup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.031Z",
+    "type": "mouse",
+    "details": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "click",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    },
+    "data": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "click",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.033Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 61,
+      "clientY": 61,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 61,
+      "clientY": 61,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.035Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "hover_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 61,
+      "clientY": 61,
+      "dx": 1,
+      "dy": 1,
+      "distance": 1.4142135623730951,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": false,
+      "thresholdExceeded": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "hover_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 61,
+      "clientY": 61,
+      "dx": 1,
+      "dy": 1,
+      "distance": 1.4142135623730951,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": false,
+      "thresholdExceeded": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.037Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "hover_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 61,
+      "clientY": 61,
+      "dx": 1,
+      "dy": 1,
+      "distance": 1.4142135623730951,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": false,
+      "thresholdExceeded": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "hover_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 61,
+      "clientY": 61,
+      "dx": 1,
+      "dy": 1,
+      "distance": 1.4142135623730951,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": false,
+      "thresholdExceeded": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.039Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "bubble",
+      "clientX": 61,
+      "clientY": 61,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "bubble",
+      "clientX": 61,
+      "clientY": 61,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.041Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 65,
+      "clientY": 64,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 65,
+      "clientY": 64,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.042Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 64,
+      "dx": 5,
+      "dy": 4,
+      "distance": 6.4031242374328485,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 64,
+      "dx": 5,
+      "dy": 4,
+      "distance": 6.4031242374328485,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.044Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.046Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 64,
+      "dx": 5,
+      "dy": 4,
+      "distance": 6.4031242374328485,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 64,
+      "dx": 5,
+      "dy": 4,
+      "distance": 6.4031242374328485,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.048Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.050Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.052Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.054Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 70,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 70,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.055Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 70,
+      "dx": 45,
+      "dy": 10,
+      "distance": 46.09772228646444,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 70,
+      "dx": 45,
+      "dy": 10,
+      "distance": 46.09772228646444,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.057Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.059Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.061Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.063Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 70,
+      "dx": 45,
+      "dy": 10,
+      "distance": 46.09772228646444,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 70,
+      "dx": 45,
+      "dy": 10,
+      "distance": 46.09772228646444,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.065Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.067Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.069Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.070Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 135,
+      "clientY": 70,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 135,
+      "clientY": 70,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.072Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 135,
+      "clientY": 70,
+      "dx": 75,
+      "dy": 10,
+      "distance": 75.66372975210777,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 135,
+      "clientY": 70,
+      "dx": 75,
+      "dy": 10,
+      "distance": 75.66372975210777,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.074Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.076Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.078Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.080Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 135,
+      "clientY": 70,
+      "dx": 75,
+      "dy": 10,
+      "distance": 75.66372975210777,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 135,
+      "clientY": 70,
+      "dx": 75,
+      "dy": 10,
+      "distance": 75.66372975210777,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.082Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.083Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.085Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.087Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.089Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 0,
+        "slotRole": "root",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 0,
+        "slotRole": "root",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.091Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 0,
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 0,
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.093Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.095Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 70,
+      "clientY": 170,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.096Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "pointerup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    },
+    "data": {
+      "eventCategory": "dom_interception",
+      "action": "stopPropagation",
+      "eventType": "pointerup",
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isPropagationStopped": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.098Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 75,
+      "clientY": 175,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 75,
+      "clientY": 175,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.100Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 15,
+      "dy": 115,
+      "distance": 115.97413504743201,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 15,
+      "dy": 115,
+      "distance": 115.97413504743201,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.102Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.104Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.106Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 15,
+      "dy": 115,
+      "distance": 115.97413504743201,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 15,
+      "dy": 115,
+      "distance": 115.97413504743201,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.108Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.110Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.111Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 5,
+      "dy": 5,
+      "distance": 7.0710678118654755,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 75,
+      "clientY": 175,
+      "dx": 5,
+      "dy": 5,
+      "distance": 7.0710678118654755,
+      "buttons": 0,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.113Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.115Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.117Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.119Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 65,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerdown",
+      "phase": "capture",
+      "clientX": 65,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "targetTag": "span",
+      "targetClass": "eq-token",
+      "isTargetEquation": true,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.121Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "slotRole": "numerator",
+        "parentType": "fraction",
+        "isAtEnd": false,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "numerator",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.123Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator eq-partial-selected eq-selected-slot",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-num",
+        "offset": 0,
+        "parentType": "fraction",
+        "isAtEnd": false
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-num\"]",
+        "role": "eq-slot eq-numerator eq-partial-selected eq-selected-slot",
+        "domOffset": 0,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.124Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "activation_start",
+      "eventType": "pointerdown",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 65,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": false,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.126Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 60,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.128Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 45,
+      "dy": 0,
+      "distance": 45,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 45,
+      "dy": 0,
+      "distance": 45,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.130Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.132Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.134Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 45,
+      "dy": 0,
+      "distance": 45,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 45,
+      "dy": 0,
+      "distance": 45,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.136Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.137Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.139Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.141Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 35,
+      "dy": -110,
+      "distance": 115.43396380615195,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 35,
+      "dy": -110,
+      "distance": 115.43396380615195,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.143Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.145Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.147Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.149Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 40,
+      "dy": 0,
+      "distance": 40,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_start",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 60,
+      "dx": 40,
+      "dy": 0,
+      "distance": 40,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.151Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.152Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.154Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.156Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 10,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 10,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.158Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 45,
+      "dy": -50,
+      "distance": 67.26812023536856,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 45,
+      "dy": -50,
+      "distance": 67.26812023536856,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.160Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.162Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.164Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.165Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 45,
+      "dy": -50,
+      "distance": 67.26812023536856,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 45,
+      "dy": -50,
+      "distance": 67.26812023536856,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.167Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.169Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.171Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 35,
+      "dy": -160,
+      "distance": 163.78339354159198,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 35,
+      "dy": -160,
+      "distance": 163.78339354159198,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.173Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.175Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.177Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.178Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 40,
+      "dy": -50,
+      "distance": 64.03124237432849,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 10,
+      "dx": 40,
+      "dy": -50,
+      "distance": 64.03124237432849,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.180Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.182Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.184Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.186Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointermove",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 1,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.188Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 45,
+      "dy": 70,
+      "distance": 83.2165848854662,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 45,
+      "dy": 70,
+      "distance": 83.2165848854662,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.190Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.192Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.193Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.195Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 45,
+      "dy": 70,
+      "distance": 83.2165848854662,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 45,
+      "dy": 70,
+      "distance": 83.2165848854662,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.197Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.199Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.201Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 35,
+      "dy": -40,
+      "distance": 53.15072906367325,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 35,
+      "dy": -40,
+      "distance": 53.15072906367325,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.203Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.205Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "eq-slot",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.206Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.208Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 40,
+      "dy": 70,
+      "distance": 80.62257748298549,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_move",
+      "eventType": "pointermove",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "dx": 40,
+      "dy": 70,
+      "distance": 80.62257748298549,
+      "buttons": 1,
+      "button": 0,
+      "isDragging": true,
+      "thresholdExceeded": true,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.210Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.212Z",
+    "type": "caret",
+    "details": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    },
+    "data": {
+      "source": "editor_widget",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "isAtEnd": true
+      },
+      "dom": {
+        "tagName": "span",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "eq-slot",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      }
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.214Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.216Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerup",
+      "phase": "capture",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.218Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.219Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.221Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.223Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 60,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.225Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.227Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.229Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "hasSelection": true
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 70,
+      "startY": 170,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "hasSelection": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.231Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq2-root",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq2-root",
+          "offset": 1
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq2-root"
+        ],
+        "selectedTokenIds": [
+          "tok-eq2-y"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.233Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 107,
+        "to": 170,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq2-root",
+        "offset": 1,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq2-root\"]",
+        "role": "root",
+        "domOffset": 1,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 107,
+        "to": 170
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.234Z",
+    "type": "pointer",
+    "details": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    },
+    "data": {
+      "eventCategory": "drag_lifecycle",
+      "lifecycleStage": "drag_end",
+      "eventType": "pointerup",
+      "startX": 65,
+      "startY": 60,
+      "clientX": 105,
+      "clientY": 130,
+      "isDragging": true,
+      "buttons": 0,
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "hasSelection": true
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.236Z",
+    "type": "selection",
+    "details": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    },
+    "data": {
+      "selectionType": "partial",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "partial": {
+        "anchor": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "head": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "normalizedStart": {
+          "slotId": "slot-eq1-num",
+          "offset": 0
+        },
+        "normalizedEnd": {
+          "slotId": "slot-eq1-root",
+          "offset": 3
+        },
+        "isBackward": false,
+        "selectedSlotIds": [
+          "slot-eq1-root",
+          "slot-eq1-num",
+          "slot-eq1-den"
+        ],
+        "selectedTokenIds": [
+          "tok-plus",
+          "tok-two",
+          "tok-num-1",
+          "tok-den-x"
+        ]
+      },
+      "highlightedSlotId": null
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.238Z",
+    "type": "caret",
+    "details": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    },
+    "data": {
+      "source": "active_session",
+      "equation": {
+        "from": 10,
+        "to": 95,
+        "isInline": false
+      },
+      "caret": {
+        "slotId": "slot-eq1-root",
+        "offset": 3,
+        "slotRole": "root",
+        "isAtEnd": true,
+        "isPlaceholder": false
+      },
+      "dom": {
+        "tagName": "div",
+        "targetSlotSelector": "[data-slot-id=\"slot-eq1-root\"]",
+        "role": "root",
+        "domOffset": 3,
+        "isPlaceholder": false
+      },
+      "codeMirrorRange": {
+        "from": 10,
+        "to": 95
+      },
+      "isPlaceholder": false
+    }
+  },
+  {
+    "timestamp": "2026-10-07T00:35:57.240Z",
+    "type": "pointer",
+    "details": {
+      "eventType": "pointerup",
+      "phase": "bubble",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    },
+    "data": {
+      "eventType": "pointerup",
+      "phase": "bubble",
+      "clientX": 105,
+      "clientY": 130,
+      "buttons": 0,
+      "button": 0,
+      "defaultPrevented": false,
+      "cancelBubble": false,
+      "isPropagationStopped": false,
+      "isTargetEquation": false,
+      "activeElementTag": "body",
+      "activeElementClass": "",
+      "isFocused": true
+    }
+  }
+]
