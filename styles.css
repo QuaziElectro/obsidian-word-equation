@@ -76,13 +76,8 @@
 }
 
 /* Blinking Caret - In-Flow Visual Cursor */
-.workspace-leaf .word-equation-math .eq-caret,
-.word-equation-math .eq-caret,
-.interactive-equation-box .eq-caret,
-.eq-slot .eq-caret,
-.eq-placeholder .eq-caret,
 .eq-caret {
-  display: inline-block;
+  display: inline-block !important;
   vertical-align: middle;
   line-height: 1;
   margin: 0 -1px;
@@ -94,7 +89,7 @@
   pointer-events: none;
   position: relative;
   z-index: 10;
-  animation: eq-blink 1s steps(1) infinite;
+  animation: eq-blink 1s steps(1) infinite !important;
 }
 
 @keyframes eq-blink {
@@ -271,18 +266,13 @@
 }
 
 /* Selection Highlight */
-.workspace-leaf .word-equation-math.eq-selected,
-.workspace-leaf .word-equation-math.eq-active.eq-selected,
-.word-equation-block.eq-selected .word-equation-math,
-.word-equation-inline.eq-selected .word-equation-math,
-.interactive-equation-box.eq-selected .word-equation-math,
-.interactive-equation-box .word-equation-math.eq-selected,
-.word-equation-math.eq-active.eq-selected,
+.eq-selected,
 .word-equation-math.eq-selected,
-.eq-selected {
-  background-color: var(--text-selection, rgba(112, 93, 207, 0.35));
-  border-color: var(--interactive-accent, #705dcf);
-  box-shadow: 0 0 0 2px var(--text-selection, rgba(112, 93, 207, 0.4));
+.word-equation-block.eq-selected .word-equation-math,
+.word-equation-inline.eq-selected .word-equation-math {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.35)) !important;
+  border-color: var(--interactive-accent, #705dcf) !important;
+  box-shadow: 0 0 0 2px var(--text-selection, rgba(112, 93, 207, 0.4)) !important;
 }
 
 .word-equation-block.eq-selected,
@@ -292,114 +282,47 @@
 }
 
 /* Composite Structure Highlight */
-.workspace-leaf .word-equation-math .eq-selected-structure,
-.word-equation-math .eq-fraction.eq-selected-structure,
-.word-equation-math .eq-radical.eq-selected-structure,
-.word-equation-math .eq-matrix.eq-selected-structure,
-.word-equation-math .eq-script-box.eq-selected-structure,
-.word-equation-math .eq-fenced.eq-selected-structure,
-.word-equation-math .eq-underover.eq-selected-structure,
-.interactive-equation-box .eq-selected-structure,
+.eq-selected-structure,
 .eq-fraction.eq-selected-structure,
 .eq-radical.eq-selected-structure,
 .eq-matrix.eq-selected-structure,
 .eq-script-box.eq-selected-structure,
 .eq-fenced.eq-selected-structure,
-.eq-underover.eq-selected-structure,
-.eq-selected-structure {
-  background-color: var(--text-selection, rgba(112, 93, 207, 0.25));
+.eq-underover.eq-selected-structure {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.25)) !important;
   border-radius: 4px;
 }
 
 /* Partial Selection & Generalized Deletion Highlighting */
-.workspace-leaf .word-equation-math .eq-selected-token,
-.word-equation-math .eq-token.eq-selected-token,
-.word-equation-math .eq-placeholder.eq-selected-token,
-.interactive-equation-box .eq-selected-token,
-.eq-placeholder.eq-focused.eq-selected-token,
+.eq-selected-token,
 .eq-token.eq-selected-token,
-.eq-placeholder.eq-selected-token,
-.eq-selected-token {
-  background-color: var(--text-selection, rgba(112, 93, 207, 0.35));
+.eq-placeholder.eq-selected-token {
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.35)) !important;
   border-radius: 2px;
 }
 
-.workspace-leaf .word-equation-math .eq-slot.eq-selected-slot,
-.workspace-leaf .word-equation-math .eq-slot.eq-placeholder-highlighted,
-.word-equation-math .eq-slot.eq-selected-slot,
-.word-equation-math .eq-slot.eq-placeholder-highlighted,
-.interactive-equation-box .eq-slot.eq-selected-slot,
-.interactive-equation-box .eq-slot.eq-placeholder-highlighted,
 .eq-slot.eq-selected-slot,
 .eq-slot.eq-placeholder-highlighted,
 .eq-placeholder-highlighted {
-  background-color: var(--text-selection, rgba(112, 93, 207, 0.25));
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.25)) !important;
   border-radius: 2px;
 }
 
-.workspace-leaf .word-equation-math .eq-numerator.eq-partial-selected,
-.workspace-leaf .word-equation-math .eq-denominator.eq-partial-selected,
-.workspace-leaf .word-equation-math .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
-.word-equation-math .eq-numerator.eq-partial-selected,
-.word-equation-math .eq-denominator.eq-partial-selected,
-.word-equation-math .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
-.interactive-equation-box .eq-numerator.eq-partial-selected,
-.interactive-equation-box .eq-denominator.eq-partial-selected,
-.interactive-equation-box .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
 .eq-numerator.eq-partial-selected,
 .eq-denominator.eq-partial-selected,
 .eq-slot:not([data-slot-role="root"]).eq-partial-selected {
-  background-color: var(--text-selection, rgba(112, 93, 207, 0.18));
+  background-color: var(--text-selection, rgba(112, 93, 207, 0.18)) !important;
   border-radius: 3px;
 }
 
-.workspace-leaf .word-equation-math.eq-partial-selected,
-.workspace-leaf .word-equation-block.eq-partial-selected,
-.workspace-leaf .word-equation-math .eq-slot[data-slot-role="root"].eq-partial-selected,
-.word-equation-math.eq-active.eq-partial-selected,
 .word-equation-math.eq-partial-selected,
 .word-equation-block.eq-partial-selected,
-.interactive-equation-box .eq-slot[data-slot-role="root"].eq-partial-selected,
-.word-equation-math .eq-slot[data-slot-role="root"].eq-partial-selected,
 .eq-slot[data-slot-role="root"].eq-partial-selected {
-  background-color: transparent;
-  box-shadow: none;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Suppress individual child highlights when entire composite structure is selected */
-.word-equation-math .eq-selected-structure .eq-selected-structure,
-.word-equation-math .eq-selected-structure .eq-selected-token,
-.word-equation-math .eq-selected-structure .eq-token.eq-selected-token,
-.word-equation-math .eq-selected-structure .eq-placeholder.eq-selected-token,
-.word-equation-math .eq-selected-structure .eq-partial-selected,
-.word-equation-math .eq-selected-structure .eq-numerator.eq-partial-selected,
-.word-equation-math .eq-selected-structure .eq-denominator.eq-partial-selected,
-.word-equation-math .eq-selected-structure .eq-slot.eq-partial-selected,
-.word-equation-math .eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
-.word-equation-math .eq-selected-structure .eq-slot.eq-selected-slot,
-.word-equation-math .eq-selected-structure .eq-selected-slot,
-.workspace-leaf .eq-selected-structure .eq-selected-structure,
-.workspace-leaf .eq-selected-structure .eq-selected-token,
-.workspace-leaf .eq-selected-structure .eq-token.eq-selected-token,
-.workspace-leaf .eq-selected-structure .eq-placeholder.eq-selected-token,
-.workspace-leaf .eq-selected-structure .eq-partial-selected,
-.workspace-leaf .eq-selected-structure .eq-numerator.eq-partial-selected,
-.workspace-leaf .eq-selected-structure .eq-denominator.eq-partial-selected,
-.workspace-leaf .eq-selected-structure .eq-slot.eq-partial-selected,
-.workspace-leaf .eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
-.workspace-leaf .eq-selected-structure .eq-slot.eq-selected-slot,
-.workspace-leaf .eq-selected-structure .eq-selected-slot,
-.interactive-equation-box .eq-selected-structure .eq-selected-structure,
-.interactive-equation-box .eq-selected-structure .eq-selected-token,
-.interactive-equation-box .eq-selected-structure .eq-token.eq-selected-token,
-.interactive-equation-box .eq-selected-structure .eq-placeholder.eq-selected-token,
-.interactive-equation-box .eq-selected-structure .eq-partial-selected,
-.interactive-equation-box .eq-selected-structure .eq-numerator.eq-partial-selected,
-.interactive-equation-box .eq-selected-structure .eq-denominator.eq-partial-selected,
-.interactive-equation-box .eq-selected-structure .eq-slot.eq-partial-selected,
-.interactive-equation-box .eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
-.interactive-equation-box .eq-selected-structure .eq-slot.eq-selected-slot,
-.interactive-equation-box .eq-selected-structure .eq-selected-slot,
 .eq-selected-structure .eq-selected-structure,
 .eq-selected-structure .eq-selected-token,
 .eq-selected-structure .eq-token.eq-selected-token,
@@ -411,8 +334,8 @@
 .eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
 .eq-selected-structure .eq-slot.eq-selected-slot,
 .eq-selected-structure .eq-selected-slot {
-  background-color: transparent;
-  box-shadow: none;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Settings Tab Custom Shortcuts Table Preview */
@@ -441,13 +364,8 @@
   box-shadow: none;
 }
 
-.workspace-leaf .weq-native-mathml,
-.weq-expansion-preview .weq-native-mathml,
-math.weq-native-mathml,
-div .weq-native-mathml,
-span .weq-native-mathml,
 .weq-native-mathml {
-  display: none;
+  display: none !important;
 }
 
 /* Word-style Equation Gallery Sidebar */
@@ -527,98 +445,15 @@ span .weq-native-mathml,
 }
 
 /* Collapsed Line Gap for Consecutive Block Equations */
-.workspace-leaf .cm-editor .cm-content .cm-line.word-equation-collapsed-gap,
-.cm-editor .cm-content > .cm-line.word-equation-collapsed-gap,
-.cm-editor .cm-line.word-equation-collapsed-gap,
-.cm-content .cm-line.word-equation-collapsed-gap,
 .cm-line.word-equation-collapsed-gap,
 .word-equation-collapsed-gap {
-  height: 0px;
-  min-height: 0px;
-  line-height: 0px;
-  margin: 0;
-  padding: 0;
-  overflow: visible;
+  height: 0px !important;
+  min-height: 0px !important;
+  line-height: 0px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
 }
-
-/* =========================================================================
-   UnderOver Equation Elements & Settings Layout Styles
-   ========================================================================= */
-
-.word-equation-container .eq-underover,
-.eq-underover {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  vertical-align: middle;
-}
-
-.word-equation-container .eq-over,
-.eq-over {
-  font-size: 0.7em;
-}
-
-.word-equation-container .eq-under,
-.eq-under {
-  font-size: 0.7em;
-}
-
-.weq-preview-empty {
-  color: var(--text-muted);
-}
-
-.weq-preview-error {
-  color: var(--text-muted);
-}
-
-.weq-shortcuts-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.weq-th-trigger {
-  text-align: left;
-  width: 35%;
-  padding: 8px;
-}
-
-.weq-th-expansion {
-  text-align: left;
-  width: 50%;
-  padding: 8px;
-}
-
-.weq-th-actions {
-  text-align: center;
-  width: 15%;
-  padding: 8px;
-}
-
-.weq-shortcuts-table tbody tr {
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.weq-col-trigger {
-  padding: 6px;
-}
-
-.weq-input-trigger {
-  width: 100%;
-}
-
-.weq-col-expansion {
-  padding: 6px;
-}
-
-.weq-input-expansion {
-  display: none;
-}
-
-.weq-col-action {
-  padding: 6px;
-  text-align: center;
-}
-
 
 
 

@@ -1334,10 +1334,10 @@ var require_dom = __commonJS({
         return doc;
       }
     };
-    function Node(symbol) {
+    function Node2(symbol) {
       checkSymbol(symbol);
     }
-    Node.prototype = {
+    Node2.prototype = {
       /**
        * The first child of this node.
        *
@@ -1902,10 +1902,10 @@ var require_dom = __commonJS({
     function _xmlEncoder(c) {
       return c == "<" && "&lt;" || c == ">" && "&gt;" || c == "&" && "&amp;" || c == '"' && "&quot;" || "&#" + c.charCodeAt() + ";";
     }
-    copy(NodeType, Node);
-    copy(NodeType, Node.prototype);
-    copy(DocumentPosition, Node);
-    copy(DocumentPosition, Node.prototype);
+    copy(NodeType, Node2);
+    copy(NodeType, Node2.prototype);
+    copy(DocumentPosition, Node2);
+    copy(DocumentPosition, Node2.prototype);
     function _visitNode(node, callback) {
       walkDOM(node, null, {
         enter: function(n) {
@@ -2003,19 +2003,19 @@ var require_dom = __commonJS({
       return child;
     }
     function hasValidParentNodeType(node) {
-      return node && (node.nodeType === Node.DOCUMENT_NODE || node.nodeType === Node.DOCUMENT_FRAGMENT_NODE || node.nodeType === Node.ELEMENT_NODE);
+      return node && (node.nodeType === Node2.DOCUMENT_NODE || node.nodeType === Node2.DOCUMENT_FRAGMENT_NODE || node.nodeType === Node2.ELEMENT_NODE);
     }
     function hasInsertableNodeType(node) {
-      return node && (node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE || node.nodeType === Node.DOCUMENT_FRAGMENT_NODE || node.nodeType === Node.DOCUMENT_TYPE_NODE || node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.PROCESSING_INSTRUCTION_NODE || node.nodeType === Node.TEXT_NODE);
+      return node && (node.nodeType === Node2.CDATA_SECTION_NODE || node.nodeType === Node2.COMMENT_NODE || node.nodeType === Node2.DOCUMENT_FRAGMENT_NODE || node.nodeType === Node2.DOCUMENT_TYPE_NODE || node.nodeType === Node2.ELEMENT_NODE || node.nodeType === Node2.PROCESSING_INSTRUCTION_NODE || node.nodeType === Node2.TEXT_NODE);
     }
     function isDocTypeNode(node) {
-      return node && node.nodeType === Node.DOCUMENT_TYPE_NODE;
+      return node && node.nodeType === Node2.DOCUMENT_TYPE_NODE;
     }
     function isElementNode(node) {
-      return node && node.nodeType === Node.ELEMENT_NODE;
+      return node && node.nodeType === Node2.ELEMENT_NODE;
     }
     function isTextNode(node) {
-      return node && node.nodeType === Node.TEXT_NODE;
+      return node && node.nodeType === Node2.TEXT_NODE;
     }
     function isElementInsertionPossible(doc, child) {
       var parentChildNodes = doc.childNodes || [];
@@ -2049,7 +2049,7 @@ var require_dom = __commonJS({
         // the sax parser currently adds top level text nodes, this will be fixed in 0.9.0
         // || (node.nodeType === Node.TEXT_NODE && parent.nodeType === Node.DOCUMENT_NODE)
         // or `node` is a doctype and `parent` is not a document, then throw a "HierarchyRequestError" DOMException.
-        isDocTypeNode(node) && parent.nodeType !== Node.DOCUMENT_NODE
+        isDocTypeNode(node) && parent.nodeType !== Node2.DOCUMENT_NODE
       ) {
         throw new DOMException(
           DOMException.HIERARCHY_REQUEST_ERR,
@@ -2060,7 +2060,7 @@ var require_dom = __commonJS({
     function assertPreInsertionValidityInDocument(parent, node, child) {
       var parentChildNodes = parent.childNodes || [];
       var nodeChildNodes = node.childNodes || [];
-      if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+      if (node.nodeType === Node2.DOCUMENT_FRAGMENT_NODE) {
         var nodeChildElements = nodeChildNodes.filter(isElementNode);
         if (nodeChildElements.length > 1 || find(nodeChildNodes, isTextNode)) {
           throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR, "More than one element or text in fragment");
@@ -2090,7 +2090,7 @@ var require_dom = __commonJS({
     function assertPreReplacementValidityInDocument(parent, node, child) {
       var parentChildNodes = parent.childNodes || [];
       var nodeChildNodes = node.childNodes || [];
-      if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+      if (node.nodeType === Node2.DOCUMENT_FRAGMENT_NODE) {
         var nodeChildElements = nodeChildNodes.filter(isElementNode);
         if (nodeChildElements.length > 1 || find(nodeChildNodes, isTextNode)) {
           throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR, "More than one element or text in fragment");
@@ -2119,7 +2119,7 @@ var require_dom = __commonJS({
     }
     function _insertBefore(parent, node, child, _inDocumentAssertion) {
       assertPreInsertionValidity1to5(parent, node, child);
-      if (parent.nodeType === Node.DOCUMENT_NODE) {
+      if (parent.nodeType === Node2.DOCUMENT_NODE) {
         (_inDocumentAssertion || assertPreInsertionValidityInDocument)(parent, node, child);
       }
       var cp = node.parentNode;
@@ -2259,7 +2259,7 @@ var require_dom = __commonJS({
        * @see https://dom.spec.whatwg.org/#concept-create-element
        */
       createElement: function(tagName) {
-        var node = new Element(PDC);
+        var node = new Element2(PDC);
         node.ownerDocument = this;
         if (this.type === "html") {
           tagName = tagName.toLowerCase();
@@ -2446,7 +2446,7 @@ var require_dom = __commonJS({
        */
       createElementNS: function(namespaceURI, qualifiedName) {
         var validated = validateAndExtract(namespaceURI, qualifiedName);
-        var node = new Element(PDC);
+        var node = new Element2(PDC);
         var attrs = node.attributes = new NamedNodeMap();
         node.childNodes = new NodeList();
         node.ownerDocument = this;
@@ -2478,12 +2478,12 @@ var require_dom = __commonJS({
         return node;
       }
     };
-    _extends(Document, Node);
-    function Element(symbol) {
+    _extends(Document, Node2);
+    function Element2(symbol) {
       checkSymbol(symbol);
       this._nsMap = /* @__PURE__ */ Object.create(null);
     }
-    Element.prototype = {
+    Element2.prototype = {
       nodeType: ELEMENT_NODE,
       /**
        * The attributes of this element.
@@ -2704,10 +2704,10 @@ var require_dom = __commonJS({
         });
       }
     };
-    Document.prototype.getElementsByClassName = Element.prototype.getElementsByClassName;
-    Document.prototype.getElementsByTagName = Element.prototype.getElementsByTagName;
-    Document.prototype.getElementsByTagNameNS = Element.prototype.getElementsByTagNameNS;
-    _extends(Element, Node);
+    Document.prototype.getElementsByClassName = Element2.prototype.getElementsByClassName;
+    Document.prototype.getElementsByTagName = Element2.prototype.getElementsByTagName;
+    Document.prototype.getElementsByTagNameNS = Element2.prototype.getElementsByTagNameNS;
+    _extends(Element2, Node2);
     function Attr(symbol) {
       checkSymbol(symbol);
       this.namespaceURI = null;
@@ -2715,7 +2715,7 @@ var require_dom = __commonJS({
       this.ownerElement = null;
     }
     Attr.prototype.nodeType = ATTRIBUTE_NODE;
-    _extends(Attr, Node);
+    _extends(Attr, Node2);
     function CharacterData(symbol) {
       checkSymbol(symbol);
     }
@@ -2743,7 +2743,7 @@ var require_dom = __commonJS({
         this.length = text2.length;
       }
     };
-    _extends(CharacterData, Node);
+    _extends(CharacterData, Node2);
     function Text2(symbol) {
       checkSymbol(symbol);
     }
@@ -2784,28 +2784,28 @@ var require_dom = __commonJS({
       checkSymbol(symbol);
     }
     DocumentType.prototype.nodeType = DOCUMENT_TYPE_NODE;
-    _extends(DocumentType, Node);
+    _extends(DocumentType, Node2);
     function Notation(symbol) {
       checkSymbol(symbol);
     }
     Notation.prototype.nodeType = NOTATION_NODE;
-    _extends(Notation, Node);
+    _extends(Notation, Node2);
     function Entity(symbol) {
       checkSymbol(symbol);
     }
     Entity.prototype.nodeType = ENTITY_NODE;
-    _extends(Entity, Node);
+    _extends(Entity, Node2);
     function EntityReference(symbol) {
       checkSymbol(symbol);
     }
     EntityReference.prototype.nodeType = ENTITY_REFERENCE_NODE;
-    _extends(EntityReference, Node);
+    _extends(EntityReference, Node2);
     function DocumentFragment2(symbol) {
       checkSymbol(symbol);
     }
     DocumentFragment2.prototype.nodeName = "#document-fragment";
     DocumentFragment2.prototype.nodeType = DOCUMENT_FRAGMENT_NODE;
-    _extends(DocumentFragment2, Node);
+    _extends(DocumentFragment2, Node2);
     function ProcessingInstruction(symbol) {
       checkSymbol(symbol);
     }
@@ -2816,7 +2816,7 @@ var require_dom = __commonJS({
     XMLSerializer.prototype.serializeToString = function(node, options) {
       return nodeSerializeToString.call(node, options);
     };
-    Node.prototype.toString = nodeSerializeToString;
+    Node2.prototype.toString = nodeSerializeToString;
     function nodeSerializeToString(options) {
       var opts;
       if (typeof options === "function") {
@@ -3203,7 +3203,7 @@ var require_dom = __commonJS({
             return this.$$length;
           }
         });
-        Object.defineProperty(Node.prototype, "textContent", {
+        Object.defineProperty(Node2.prototype, "textContent", {
           get: function() {
             if (this.nodeType === ELEMENT_NODE || this.nodeType === DOCUMENT_FRAGMENT_NODE) {
               var buf = [];
@@ -3259,7 +3259,7 @@ var require_dom = __commonJS({
           enumerable: true,
           configurable: true
         });
-        Object.defineProperty(Element.prototype, "children", {
+        Object.defineProperty(Element2.prototype, "children", {
           get: function() {
             return new LiveNodeList(this, childrenRefresh);
           }
@@ -3289,12 +3289,12 @@ var require_dom = __commonJS({
     exports.DocumentFragment = DocumentFragment2;
     exports.DocumentType = DocumentType;
     exports.DOMImplementation = DOMImplementation;
-    exports.Element = Element;
+    exports.Element = Element2;
     exports.Entity = Entity;
     exports.EntityReference = EntityReference;
     exports.LiveNodeList = LiveNodeList;
     exports.NamedNodeMap = NamedNodeMap;
-    exports.Node = Node;
+    exports.Node = Node2;
     exports.NodeList = NodeList;
     exports.Notation = Notation;
     exports.Text = Text2;
@@ -7441,6 +7441,7 @@ function fallbackParse(xml) {
     return root;
   const tagRegex = /<([a-z0-9]+)([^>]*)>(.*?)<\/\1>/gis;
   let match;
+  let lastIndex = 0;
   while ((match = tagRegex.exec(clean)) !== null) {
     const tag = match[1].toLowerCase();
     const content = match[3];
@@ -7453,6 +7454,7 @@ function fallbackParse(xml) {
     } else if (tag === "mtext") {
       root.children.push(createToken(content, "mtext"));
     }
+    lastIndex = tagRegex.lastIndex;
   }
   if (root.children.length === 0) {
     const stripped = clean.replace(/<[^>]+>/g, "").trim();
@@ -8197,6 +8199,7 @@ var LinearParser = class {
     return createToken(cmd.replace(/^\\/, ""), "mi");
   }
   parseMatrixOrBrackets(closeToken, openChar, closeChar) {
+    const savedPos = this.pos;
     let isMatrix = false;
     let depth = 0;
     for (let i = this.pos; i < this.tokens.length; i++) {
@@ -8291,69 +8294,34 @@ var DomRenderer = class {
       this.doc = new JSDOM().window.document;
     }
   }
-  createEl(tag, o) {
-    if (typeof this.doc.createEl === "function") {
-      return this.doc.createEl(tag, o);
-    }
-    const el = this.doc.createElement(tag);
-    if (o?.cls)
-      el.className = o.cls;
-    if (o?.text)
-      el.textContent = o.text;
-    if (o?.attr) {
-      for (const [k, v] of Object.entries(o.attr))
-        el.setAttribute(k, v);
-    }
-    return el;
-  }
-  createDiv(o) {
-    if (typeof this.doc.createDiv === "function") {
-      return this.doc.createDiv(o);
-    }
-    return this.createEl("div", o);
-  }
-  createSpan(o) {
-    if (typeof this.doc.createSpan === "function") {
-      return this.doc.createSpan(o);
-    }
-    return this.createEl("span", o);
-  }
   render(root, ctx = {}) {
-    const rootContainer = ctx.inline ? this.createSpan({
-      cls: "word-equation-inline",
-      attr: { contenteditable: "false" }
-    }) : this.createDiv({
-      cls: "word-equation-block",
-      attr: { contenteditable: "false" }
-    });
-    const mathBox = ctx.inline ? this.createSpan({
-      cls: "word-equation-math",
-      attr: { contenteditable: "false", "data-equation-root": "true" }
-    }) : this.createDiv({
-      cls: "word-equation-math",
-      attr: { contenteditable: "false", "data-equation-root": "true" }
-    });
+    const rootContainer = this.doc.createElement(ctx.inline ? "span" : "div");
+    rootContainer.className = ctx.inline ? "word-equation-inline" : "word-equation-block";
+    rootContainer.setAttribute("contenteditable", "false");
+    const mathBox = this.doc.createElement(ctx.inline ? "span" : "div");
+    mathBox.className = "word-equation-math";
+    mathBox.setAttribute("contenteditable", "false");
     if (ctx.isFocused) {
       mathBox.classList.add("eq-active");
     }
     mathBox.tabIndex = ctx.readOnly ? -1 : 0;
+    mathBox.setAttribute("data-equation-root", "true");
     const renderedSlot = this.renderSlot(root, ctx);
     mathBox.appendChild(renderedSlot);
     rootContainer.appendChild(mathBox);
     return rootContainer;
   }
   renderSlot(slot, ctx) {
-    const slotEl = this.createSpan({
-      cls: "eq-slot",
-      attr: { "data-slot-id": slot.id, "data-slot-role": slot.role }
-    });
+    const slotEl = this.doc.createElement("span");
+    slotEl.className = "eq-slot";
+    slotEl.setAttribute("data-slot-id", slot.id);
+    slotEl.setAttribute("data-slot-role", slot.role);
     const isCaretInSlot = ctx.caret && ctx.caret.slotId === slot.id;
     const caretOffset = isCaretInSlot ? ctx.caret.offset : -1;
     if (slot.children.length === 0) {
-      const placeholder = this.createSpan({
-        cls: "eq-placeholder",
-        attr: { "data-placeholder-for": slot.id }
-      });
+      const placeholder = this.doc.createElement("span");
+      placeholder.className = "eq-placeholder";
+      placeholder.setAttribute("data-placeholder-for", slot.id);
       if (isCaretInSlot) {
         placeholder.classList.add("eq-focused");
         if (!ctx.readOnly) {
@@ -8409,11 +8377,10 @@ var DomRenderer = class {
     }
   }
   renderToken(node) {
-    const el = this.createSpan({
-      cls: `eq-token eq-${node.tokenKind}`,
-      attr: { "data-node-id": node.id },
-      text: node.text
-    });
+    const el = this.doc.createElement("span");
+    el.className = `eq-token eq-${node.tokenKind}`;
+    el.setAttribute("data-node-id", node.id);
+    el.textContent = node.text;
     if (node.attributes) {
       for (const [k, v] of Object.entries(node.attributes)) {
         el.setAttribute(`data-${k}`, v);
@@ -8422,57 +8389,60 @@ var DomRenderer = class {
     return el;
   }
   renderPlaceholder(node) {
-    return this.createSpan({
-      cls: "eq-placeholder",
-      attr: { "data-node-id": node.id },
-      text: "\u2B1A"
-    });
+    const el = this.doc.createElement("span");
+    el.className = "eq-placeholder";
+    el.setAttribute("data-node-id", node.id);
+    el.textContent = "\u2B1A";
+    return el;
   }
   renderFraction(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-fraction",
-      attr: { "data-node-id": node.id }
-    });
-    const num = this.createDiv({ cls: "eq-numerator" });
+    const container = this.doc.createElement("span");
+    container.className = "eq-fraction";
+    container.setAttribute("data-node-id", node.id);
+    const num = this.doc.createElement("div");
+    num.className = "eq-numerator";
     num.appendChild(this.renderSlot(node.numerator, ctx));
-    const den = this.createDiv({ cls: "eq-denominator" });
+    const den = this.doc.createElement("div");
+    den.className = "eq-denominator";
     den.appendChild(this.renderSlot(node.denominator, ctx));
     container.appendChild(num);
     container.appendChild(den);
     return container;
   }
   renderSuperscript(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-script-box",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-script-box";
+    container.setAttribute("data-node-id", node.id);
     container.appendChild(this.renderSlot(node.base, ctx));
-    const sup = this.createSpan({ cls: "eq-superscript" });
+    const sup = this.doc.createElement("span");
+    sup.className = "eq-superscript";
     sup.appendChild(this.renderSlot(node.sup, ctx));
     container.appendChild(sup);
     return container;
   }
   renderSubscript(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-script-box",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-script-box";
+    container.setAttribute("data-node-id", node.id);
     container.appendChild(this.renderSlot(node.base, ctx));
-    const sub = this.createSpan({ cls: "eq-subscript" });
+    const sub = this.doc.createElement("span");
+    sub.className = "eq-subscript";
     sub.appendChild(this.renderSlot(node.sub, ctx));
     container.appendChild(sub);
     return container;
   }
   renderSubSup(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-script-box",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-script-box";
+    container.setAttribute("data-node-id", node.id);
     container.appendChild(this.renderSlot(node.base, ctx));
-    const scriptsWrapper = this.createSpan({ cls: "eq-subsup-scripts" });
-    const sup = this.createSpan({ cls: "eq-superscript" });
+    const scriptsWrapper = this.doc.createElement("span");
+    scriptsWrapper.className = "eq-subsup-scripts";
+    const sup = this.doc.createElement("span");
+    sup.className = "eq-superscript";
     sup.appendChild(this.renderSlot(node.sup, ctx));
-    const sub = this.createSpan({ cls: "eq-subscript" });
+    const sub = this.doc.createElement("span");
+    sub.className = "eq-subscript";
     sub.appendChild(this.renderSlot(node.sub, ctx));
     scriptsWrapper.appendChild(sup);
     scriptsWrapper.appendChild(sub);
@@ -8480,47 +8450,34 @@ var DomRenderer = class {
     return container;
   }
   createSurdElement() {
-    const surd = this.createSpan({
-      cls: "eq-radical-surd",
-      attr: { "aria-hidden": "true" }
-    });
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = this.doc.createElementNS ? this.doc.createElementNS(svgNS, "svg") : this.doc.createElement("svg");
-    svg.setAttribute("viewBox", "0 0 12 24");
-    svg.setAttribute("preserveAspectRatio", "none");
-    svg.setAttribute("class", "eq-radical-svg");
-    const path = this.doc.createElementNS ? this.doc.createElementNS(svgNS, "path") : this.doc.createElement("path");
-    path.setAttribute("d", "M1 13 L3 13 L6 23 L11 1 L12 1");
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", "currentColor");
-    path.setAttribute("stroke-width", "1.3");
-    path.setAttribute("stroke-linecap", "square");
-    path.setAttribute("stroke-linejoin", "miter");
-    svg.appendChild(path);
-    surd.appendChild(svg);
+    const surd = this.doc.createElement("span");
+    surd.className = "eq-radical-surd";
+    surd.setAttribute("aria-hidden", "true");
+    surd.innerHTML = '<svg viewBox="0 0 12 24" preserveAspectRatio="none" class="eq-radical-svg"><path d="M1 13 L3 13 L6 23 L11 1 L12 1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square" stroke-linejoin="miter"/></svg>';
     return surd;
   }
   renderRadical(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-radical",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-radical";
+    container.setAttribute("data-node-id", node.id);
     const surd = this.createSurdElement();
-    const radicand = this.createSpan({ cls: "eq-radicand" });
+    const radicand = this.doc.createElement("span");
+    radicand.className = "eq-radicand";
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
     container.appendChild(surd);
     container.appendChild(radicand);
     return container;
   }
   renderRoot(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-radical",
-      attr: { "data-node-id": node.id }
-    });
-    const idx = this.createSpan({ cls: "eq-radical-index" });
+    const container = this.doc.createElement("span");
+    container.className = "eq-radical";
+    container.setAttribute("data-node-id", node.id);
+    const idx = this.doc.createElement("span");
+    idx.className = "eq-radical-index";
     idx.appendChild(this.renderSlot(node.index, ctx));
     const surd = this.createSurdElement();
-    const radicand = this.createSpan({ cls: "eq-radicand" });
+    const radicand = this.doc.createElement("span");
+    radicand.className = "eq-radicand";
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
     container.appendChild(idx);
     container.appendChild(surd);
@@ -8528,22 +8485,23 @@ var DomRenderer = class {
     return container;
   }
   renderMatrix(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-matrix",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-matrix";
+    container.setAttribute("data-node-id", node.id);
     if (node.openBracket) {
-      const open2 = this.createSpan({
-        cls: "eq-matrix-bracket",
-        text: node.openBracket
-      });
+      const open2 = this.doc.createElement("span");
+      open2.className = "eq-matrix-bracket";
+      open2.textContent = node.openBracket;
       container.appendChild(open2);
     }
-    const table = this.createEl("table", { cls: "eq-matrix-table" });
+    const table = this.doc.createElement("table");
+    table.className = "eq-matrix-table";
     for (const row of node.rows) {
-      const tr = this.createEl("tr", { cls: "eq-matrix-row" });
+      const tr = this.doc.createElement("tr");
+      tr.className = "eq-matrix-row";
       for (const cell of row) {
-        const td = this.createEl("td", { cls: "eq-matrix-cell" });
+        const td = this.doc.createElement("td");
+        td.className = "eq-matrix-cell";
         td.appendChild(this.renderSlot(cell, ctx));
         tr.appendChild(td);
       }
@@ -8551,62 +8509,67 @@ var DomRenderer = class {
     }
     container.appendChild(table);
     if (node.closeBracket) {
-      const close2 = this.createSpan({
-        cls: "eq-matrix-bracket",
-        text: node.closeBracket
-      });
+      const close2 = this.doc.createElement("span");
+      close2.className = "eq-matrix-bracket";
+      close2.textContent = node.closeBracket;
       container.appendChild(close2);
     }
     return container;
   }
   renderFenced(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-fenced",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-fenced";
+    container.setAttribute("data-node-id", node.id);
     if (node.open) {
-      const open2 = this.createSpan({
-        cls: "eq-fence-open eq-token eq-mo",
-        text: node.open
-      });
+      const open2 = this.doc.createElement("span");
+      open2.className = "eq-fence-open eq-token eq-mo";
+      open2.textContent = node.open;
       container.appendChild(open2);
     }
     container.appendChild(this.renderSlot(node.content, ctx));
     if (node.close) {
-      const close2 = this.createSpan({
-        cls: "eq-fence-close eq-token eq-mo",
-        text: node.close
-      });
+      const close2 = this.doc.createElement("span");
+      close2.className = "eq-fence-close eq-token eq-mo";
+      close2.textContent = node.close;
       container.appendChild(close2);
     }
     return container;
   }
   renderUnderOver(node, ctx) {
-    const container = this.createSpan({
-      cls: "eq-underover",
-      attr: { "data-node-id": node.id }
-    });
+    const container = this.doc.createElement("span");
+    container.className = "eq-underover";
+    container.setAttribute("data-node-id", node.id);
+    container.style.display = "inline-flex";
+    container.style.flexDirection = "column";
+    container.style.alignItems = "center";
+    container.style.verticalAlign = "middle";
     if (node.over) {
-      const overEl = this.createSpan({ cls: "eq-over" });
+      const overEl = this.doc.createElement("span");
+      overEl.className = "eq-over";
+      overEl.style.fontSize = "0.7em";
       overEl.appendChild(this.renderSlot(node.over, ctx));
       container.appendChild(overEl);
     }
-    const baseEl = this.createSpan({ cls: "eq-base" });
+    const baseEl = this.doc.createElement("span");
+    baseEl.className = "eq-base";
     baseEl.appendChild(this.renderSlot(node.base, ctx));
     container.appendChild(baseEl);
     if (node.under) {
-      const underEl = this.createSpan({ cls: "eq-under" });
+      const underEl = this.doc.createElement("span");
+      underEl.className = "eq-under";
+      underEl.style.fontSize = "0.7em";
       underEl.appendChild(this.renderSlot(node.under, ctx));
       container.appendChild(underEl);
     }
     return container;
   }
   createCaretElement() {
-    return this.createSpan({
-      cls: "eq-caret",
-      attr: { "data-caret": "true", "aria-hidden": "true" },
-      text: "|"
-    });
+    const caret = this.doc.createElement("span");
+    caret.className = "eq-caret";
+    caret.setAttribute("data-caret", "true");
+    caret.setAttribute("aria-hidden", "true");
+    caret.textContent = "|";
+    return caret;
   }
 };
 
@@ -8653,7 +8616,8 @@ function createPointerMouseHandler(eventName, phase) {
       buttons: me.buttons,
       button: me.button,
       defaultPrevented: me.defaultPrevented,
-      isPropagationStopped: Boolean(me.defaultPrevented || me.isPropagationStopped?.()),
+      cancelBubble: me.cancelBubble,
+      isPropagationStopped: Boolean(me.cancelBubble || me.defaultPrevented),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       isTargetEquation,
@@ -8734,7 +8698,8 @@ function setupGlobalTelemetry() {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      isPropagationStopped: Boolean(e.defaultPrevented || e.isPropagationStopped?.()),
+      cancelBubble: e.cancelBubble,
+      isPropagationStopped: Boolean(e.cancelBubble || e.defaultPrevented),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -8758,7 +8723,8 @@ function setupGlobalTelemetry() {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      isPropagationStopped: Boolean(e.defaultPrevented || e.isPropagationStopped?.()),
+      cancelBubble: e.cancelBubble,
+      isPropagationStopped: Boolean(e.cancelBubble),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -8964,7 +8930,7 @@ var DebugLogger = class _DebugLogger {
   scheduleFlush(immediate = false) {
     if (immediate) {
       if (this.flushTimeout !== null) {
-        window.clearTimeout(this.flushTimeout);
+        clearTimeout(this.flushTimeout);
         this.flushTimeout = null;
       }
       void this.flush();
@@ -8972,7 +8938,7 @@ var DebugLogger = class _DebugLogger {
     }
     if (this.flushTimeout !== null)
       return;
-    this.flushTimeout = window.setTimeout(() => {
+    this.flushTimeout = setTimeout(() => {
       this.flushTimeout = null;
       void this.flush();
     }, 50);
@@ -8981,7 +8947,7 @@ var DebugLogger = class _DebugLogger {
     if (!this.enabled && this.events.length === 0)
       return;
     if (this.flushTimeout !== null) {
-      window.clearTimeout(this.flushTimeout);
+      clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
     const app = this.app || (typeof window !== "undefined" ? window.app : null);
@@ -8994,7 +8960,7 @@ var DebugLogger = class _DebugLogger {
     }
     this.isWriting = true;
     try {
-      const configDir = app.vault.configDir;
+      const configDir = app.vault.configDir || ".obsidian";
       const logPath = `${configDir}/plugins/${this.manifestId}/debug-log.json`;
       const json = JSON.stringify(this.events, null, 2);
       await app.vault.adapter.write(logPath, json);
@@ -9010,7 +8976,7 @@ var DebugLogger = class _DebugLogger {
   }
   async clear() {
     if (this.flushTimeout !== null) {
-      window.clearTimeout(this.flushTimeout);
+      clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
     this.events = [];
@@ -9019,7 +8985,7 @@ var DebugLogger = class _DebugLogger {
     }
     const app = this.app || (typeof window !== "undefined" ? window.app : null);
     if (app?.vault?.adapter) {
-      const configDir = app.vault.configDir;
+      const configDir = app.vault.configDir || ".obsidian";
       const logPath = `${configDir}/plugins/${this.manifestId}/debug-log.json`;
       try {
         await app.vault.adapter.write(logPath, "[]");
@@ -9038,7 +9004,7 @@ var DebugLogger = class _DebugLogger {
   resetForTesting() {
     teardownGlobalTelemetry();
     if (this.flushTimeout !== null) {
-      window.clearTimeout(this.flushTimeout);
+      clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
     this.events = [];
@@ -9952,15 +9918,14 @@ function handleSelectionStep(root, currentSel, caret, direction, currentHighligh
 
 // src/editor/hit-testing.ts
 function handleMouseClick(root, rootEl, clickX, clickY, explicitTarget) {
-  const isElement3 = (obj) => Boolean(obj && typeof obj === "object" && obj.nodeType === 1);
-  let targetEl = isElement3(explicitTarget) ? explicitTarget : null;
+  let targetEl = explicitTarget && typeof Node !== "undefined" && explicitTarget instanceof Node && explicitTarget instanceof Element ? explicitTarget : null;
   if (!targetEl && typeof document !== "undefined" && typeof document.elementFromPoint === "function") {
     const el = document.elementFromPoint(clickX, clickY);
-    if (el && isElement3(el) && rootEl.contains(el)) {
+    if (el && typeof Node !== "undefined" && el instanceof Node && rootEl.contains(el)) {
       targetEl = el;
     }
   }
-  if (targetEl && isElement3(targetEl) && rootEl.contains(targetEl)) {
+  if (targetEl && typeof Node !== "undefined" && targetEl instanceof Node && rootEl.contains(targetEl)) {
     const placeholder = targetEl.closest(".eq-placeholder");
     if (placeholder) {
       const slotId2 = placeholder.getAttribute("data-placeholder-for");
@@ -10479,28 +10444,11 @@ function updateVisualCaretDom(rootEl, caret, isFocused) {
   if (!targetSlotEl)
     return;
   const doc = rootEl.ownerDocument || document;
-  const caretEl = typeof doc.createSpan === "function" ? doc.createSpan({
-    cls: "eq-caret",
-    attr: { "data-caret": "true", "aria-hidden": "true" },
-    text: "|"
-  }) : typeof doc.createEl === "function" ? doc.createEl("span", {
-    cls: "eq-caret",
-    attr: { "data-caret": "true", "aria-hidden": "true" },
-    text: "|"
-  }) : (() => {
-    const el = doc.createElement("span");
-    el.className = "eq-caret";
-    el.setAttribute("data-caret", "true");
-    el.setAttribute("aria-hidden", "true");
-    el.textContent = "|";
-    return el;
-  })();
-  if (!caretEl.classList.contains("eq-caret")) {
-    caretEl.className = "eq-caret";
-    caretEl.setAttribute("data-caret", "true");
-    caretEl.setAttribute("aria-hidden", "true");
-    caretEl.textContent = "|";
-  }
+  const caretEl = doc.createElement("span");
+  caretEl.className = "eq-caret";
+  caretEl.setAttribute("data-caret", "true");
+  caretEl.setAttribute("aria-hidden", "true");
+  caretEl.textContent = "|";
   const placeholderEl = Array.from(targetSlotEl.children).find(
     (el) => el.classList.contains("eq-placeholder") && (el.getAttribute("data-placeholder-for") === caret.slotId || el.getAttribute("data-placeholder-for") === targetSlotEl.getAttribute("data-slot-id"))
   );
@@ -10519,11 +10467,11 @@ function updateVisualCaretDom(rootEl, caret, isFocused) {
     }
   }
   try {
-    caretEl.setCssStyles({ animation: "none" });
+    caretEl.style.animation = "none";
     if (typeof caretEl.offsetWidth === "number") {
       void caretEl.offsetWidth;
     }
-    caretEl.setCssStyles({ animation: "" });
+    caretEl.style.animation = "";
   } catch {
   }
   logDebugEvent("caret", () => {
@@ -11234,12 +11182,6 @@ if (typeof window !== "undefined") {
 }
 
 // src/editor/widget.ts
-function isElement(obj) {
-  return Boolean(obj && typeof obj === "object" && obj.nodeType === 1);
-}
-function isNode(obj) {
-  return Boolean(obj && typeof obj === "object" && typeof obj.nodeType === "number");
-}
 var isUpdatingActiveEquation = false;
 var activeDragCleanup = null;
 var activeDragTeardown = () => {
@@ -11248,7 +11190,7 @@ var activeDragTeardown = () => {
     activeDragCleanup = null;
   }
 };
-function isBlockEquationStart(_view, line) {
+function isBlockEquationStart(view, line) {
   const lineText = line.text.trimStart();
   if (lineText.startsWith("```math-word") || lineText.startsWith("```weq")) {
     return true;
@@ -11921,7 +11863,7 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
         if (dom && activeView.dom.contains(dom)) {
           try {
             pos = activeView.posAtDOM(dom);
-          } catch {
+          } catch (e) {
           }
         }
         if (this.isInline) {
@@ -11997,7 +11939,7 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
             return { from: this.from, to: this.to };
           }
         }
-      } catch {
+      } catch (err) {
       }
     }
     return { from: this.from, to: this.to };
@@ -12061,14 +12003,14 @@ ${newXml}
           const handled = app.commands.executeCommandById(cmdId);
           if (handled !== false)
             return;
-        } catch {
+        } catch (e) {
         }
       }
       try {
         let MarkdownViewClass;
         try {
           MarkdownViewClass = require("obsidian").MarkdownView;
-        } catch {
+        } catch (e) {
         }
         const mdView = MarkdownViewClass && app.workspace?.getActiveViewOfType?.(MarkdownViewClass) || app.workspace?.getLeavesOfType?.("markdown")?.[0]?.view;
         if (mdView?.editor) {
@@ -12080,7 +12022,7 @@ ${newXml}
             return;
           }
         }
-      } catch {
+      } catch (e) {
       }
     }
     if (activeView) {
@@ -12092,13 +12034,13 @@ ${newXml}
           activeView.redo();
           return;
         }
-      } catch {
+      } catch (e) {
       }
     }
     if (typeof document !== "undefined" && document.execCommand) {
       try {
         document.execCommand(action);
-      } catch {
+      } catch (e) {
       }
     }
   }
@@ -12933,7 +12875,7 @@ ${newXml}
           }
         }
       }
-      const targetEl = isElement(e.target) ? e.target : null;
+      const targetEl = e.target instanceof Element ? e.target : null;
       const anchorPos = handleMouseClick(widget.ast, dom, e.clientX, e.clientY, targetEl);
       let clickCount = widget.resolveClickCount(e);
       if (e.type === "mousedown" && (!e.detail || e.detail < 2)) {
@@ -13082,7 +13024,7 @@ ${newXml}
         if (isDragging) {
           moveEvt.preventDefault();
           moveEvt.stopPropagation();
-          const targetEl2 = isElement(moveEvt.target) ? moveEvt.target : null;
+          const targetEl2 = moveEvt.target instanceof Element ? moveEvt.target : null;
           const headPos = handleMouseClick(
             widget.ast,
             dom,
@@ -13214,7 +13156,7 @@ ${newXml}
     };
     dom.addEventListener("pointerdown", handlePointerActivation);
     dom.addEventListener("mousedown", handlePointerActivation);
-    const onInterrupt = (_e) => {
+    const onInterrupt = (e) => {
       activeDragTeardown();
       const widget = dom.__widget || this;
       widget.lastClickCount = 0;
@@ -13237,7 +13179,7 @@ ${newXml}
       let widget = dom.__widget || this;
       widget.containerEl = dom;
       widget.currentView = view;
-      const targetEl = isElement(e.target) ? e.target : null;
+      const targetEl = e.target instanceof Element ? e.target : null;
       const clickPos = handleMouseClick(widget.ast, dom, e.clientX, e.clientY, targetEl);
       const targetSlot = findSlotById(widget.ast, clickPos.slotId) || widget.ast;
       if (targetSlot.children.length === 0) {
@@ -13359,12 +13301,13 @@ ${newXml}
         head: view.state.selection.main.head,
         empty: view.state.selection.main.empty
       } : void 0;
-      const isPropStopped = Boolean(e.defaultPrevented || e.isPropagationStopped?.());
+      const isPropStopped = Boolean(e.cancelBubble || e.isPropagationStopped?.());
       logDebugEvent("keydown", () => ({
         key: e.key,
         code: e.code,
         phase: e.eventPhase === 2 ? "target" : e.eventPhase === 1 ? "capture" : "bubble",
         defaultPrevented: e.defaultPrevented,
+        cancelBubble: e.cancelBubble,
         isPropagationStopped: isPropStopped,
         targetTag: e.target?.tagName?.toLowerCase?.(),
         targetClass: e.target?.className,
@@ -13845,15 +13788,15 @@ ${newXml}
       if (widget.isUpdatingDom)
         return;
       const related = e.relatedTarget;
-      if (related && isNode(related) && dom.contains(related))
+      if (related && related instanceof Node && dom.contains(related))
         return;
       if (!related) {
-        if (typeof document !== "undefined" && document.activeElement && isNode(document.activeElement) && dom.contains(document.activeElement)) {
+        if (typeof document !== "undefined" && document.activeElement && document.activeElement instanceof Node && dom.contains(document.activeElement)) {
           return;
         }
         return;
       }
-      if (view && (related === view.contentDOM || view.dom && isNode(related) && view.dom.contains(related))) {
+      if (view && (related === view.contentDOM || view.dom && related instanceof Node && view.dom.contains(related))) {
         return;
       }
       logDebugEvent("focus", () => ({
@@ -14142,7 +14085,7 @@ function getActiveWidget(view) {
   if (!decorations)
     return null;
   let targetWidget = null;
-  decorations.between(active.from, active.to, (_f, _t, dec) => {
+  decorations.between(active.from, active.to, (f, t, dec) => {
     const w = dec.widget || dec.spec?.widget;
     if (w && (w instanceof WordEquationWidget || typeof w.handleArrowNavigation === "function")) {
       if (w.from === active.from) {
@@ -14307,7 +14250,7 @@ function createEquationNavigationExtension() {
               return false;
             if (!sel.empty) {
               let targetWidget2 = null;
-              decorations.between(sel.from, sel.to, (_from, _to, dec) => {
+              decorations.between(sel.from, sel.to, (from, to, dec) => {
                 if (dec.spec?.widget instanceof WordEquationWidget) {
                   const w = dec.spec.widget;
                   if (w.from === sel.from && w.to === sel.to) {
@@ -14323,7 +14266,7 @@ function createEquationNavigationExtension() {
             }
             const pos = sel.head;
             let targetWidget = null;
-            decorations.between(Math.max(0, pos - 10), pos, (_from, to, dec) => {
+            decorations.between(Math.max(0, pos - 10), pos, (from, to, dec) => {
               if (dec.spec?.widget instanceof WordEquationWidget) {
                 const w = dec.spec.widget;
                 if (w.isInline) {
@@ -14359,7 +14302,7 @@ function createEquationNavigationExtension() {
               return false;
             if (!sel.empty) {
               let targetWidget2 = null;
-              decorations.between(sel.from, sel.to, (_from, _to, dec) => {
+              decorations.between(sel.from, sel.to, (from, to, dec) => {
                 if (dec.spec?.widget instanceof WordEquationWidget) {
                   const w = dec.spec.widget;
                   if (w.from === sel.from && w.to === sel.to) {
@@ -14375,7 +14318,7 @@ function createEquationNavigationExtension() {
             }
             const pos = sel.head;
             let targetWidget = null;
-            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, _to, dec) => {
+            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
               if (dec.spec?.widget instanceof WordEquationWidget) {
                 const w = dec.spec.widget;
                 if (w.isInline) {
@@ -14672,7 +14615,7 @@ function createEquationNavigationExtension() {
             if (!decorations)
               return false;
             let targetWidget = null;
-            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, _to, dec) => {
+            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
               const w = dec.widget || dec.spec?.widget;
               if (!(w instanceof WordEquationWidget || typeof w?.enterFromStart === "function"))
                 return;
@@ -14725,7 +14668,7 @@ function createEquationNavigationExtension() {
             if (!decorations)
               return false;
             let targetWidget = null;
-            decorations.between(Math.max(0, pos - 4), pos, (_from, to, dec) => {
+            decorations.between(Math.max(0, pos - 4), pos, (from, to, dec) => {
               const w = dec.widget || dec.spec?.widget;
               if (!(w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function"))
                 return;
@@ -14785,7 +14728,7 @@ function createEquationNavigationExtension() {
               const decorations = view.state.field(wordEquationStateField, false);
               if (decorations) {
                 let targetWidget = null;
-                decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, _to, dec) => {
+                decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, to, dec) => {
                   const w = dec.widget || dec.spec?.widget;
                   if ((from === nextPos || from === nextPos + 1 || from === nextPos + 2) && (w instanceof WordEquationWidget || typeof w?.enterFromStart === "function")) {
                     targetWidget = w;
@@ -14830,7 +14773,7 @@ function createEquationNavigationExtension() {
               const decorations = view.state.field(wordEquationStateField, false);
               if (decorations) {
                 let targetWidget = null;
-                decorations.between(Math.max(0, prevPos - 4), prevPos, (_from, to, dec) => {
+                decorations.between(Math.max(0, prevPos - 4), prevPos, (from, to, dec) => {
                   const w = dec.widget || dec.spec?.widget;
                   if ((to === prevPos || to === prevPos - 1 || to === prevPos - 2) && (w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function")) {
                     const blockLine = view.state.doc.lineAt(to);
@@ -14878,7 +14821,7 @@ function createEquationNavigationExtension() {
         }));
         const decorations = view.state.field(wordEquationStateField, false);
         if (decorations) {
-          decorations.between(active.from, active.to, (_f, _t, dec) => {
+          decorations.between(active.from, active.to, (f, t, dec) => {
             if (dec.spec?.widget instanceof WordEquationWidget) {
               const w = dec.spec.widget;
               w.isFocused = false;
@@ -15028,7 +14971,7 @@ function createMarkdownShortcutExtension() {
 // src/post-processor/reading-view.ts
 function createReadingViewProcessor() {
   const renderer = new DomRenderer();
-  return (source, el, _ctx) => {
+  return (source, el, ctx) => {
     const trimmed = source.trim();
     let ast;
     try {
@@ -15056,22 +14999,10 @@ function createReadingViewProcessor() {
       } else {
         el.innerHTML = "";
       }
-      if (typeof el.createDiv === "function") {
-        el.createDiv({
-          cls: "word-equation-error",
-          text: `[Equation Error: ${err.message || "Invalid equation"}]`
-        });
-      } else if (typeof el.createEl === "function") {
-        el.createEl("div", {
-          cls: "word-equation-error",
-          text: `[Equation Error: ${err.message || "Invalid equation"}]`
-        });
-      } else {
-        const errEl = document.createElement("div");
-        errEl.className = "word-equation-error";
-        errEl.textContent = `[Equation Error: ${err.message || "Invalid equation"}]`;
-        el.appendChild(errEl);
-      }
+      const errEl = document.createElement("div");
+      errEl.className = "word-equation-error";
+      errEl.textContent = `[Equation Error: ${err.message || "Invalid equation"}]`;
+      el.appendChild(errEl);
     }
   };
 }
@@ -15080,12 +15011,6 @@ function createReadingViewProcessor() {
 var import_obsidian2 = require("obsidian");
 
 // src/settings/interactive-box.ts
-function isElement2(obj) {
-  return Boolean(obj && typeof obj === "object" && obj.nodeType === 1);
-}
-function isNode2(obj) {
-  return Boolean(obj && typeof obj === "object" && typeof obj.nodeType === "number");
-}
 var InteractiveEquationBox = class {
   ast;
   caret;
@@ -15226,8 +15151,10 @@ var InteractiveEquationBox = class {
         if (mathNode) {
           const imported = document.importNode ? document.importNode(mathNode, true) : mathNode.cloneNode(true);
           imported.classList.add("weq-native-mathml");
-          if (typeof imported.setCssStyles === "function") {
-            imported.setCssStyles({ display: "none" });
+          if (imported.style) {
+            imported.style.display = "none";
+          } else {
+            imported.setAttribute("style", "display: none;");
           }
           this.container.appendChild(imported);
         }
@@ -15265,7 +15192,7 @@ var InteractiveEquationBox = class {
   }
   emitChange() {
     const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
-    void this.onChange(xml);
+    this.onChange(xml);
   }
   handleCopyEvent(e, isCut = false) {
     let xml = "";
@@ -15453,7 +15380,7 @@ var InteractiveEquationBox = class {
       e.preventDefault();
       this.isFocused = true;
       this.dom.focus({ preventScroll: true });
-      const targetEl = isElement2(e.target) ? e.target : null;
+      const targetEl = e.target instanceof Element ? e.target : null;
       const anchorPos = handleMouseClick(
         this.ast,
         this.dom,
@@ -15557,7 +15484,7 @@ var InteractiveEquationBox = class {
         if (isDragging) {
           moveEvt.preventDefault();
           moveEvt.stopPropagation();
-          const targetEl2 = isElement2(moveEvt.target) ? moveEvt.target : null;
+          const targetEl2 = moveEvt.target instanceof Element ? moveEvt.target : null;
           const headPos = handleMouseClick(
             this.ast,
             this.dom,
@@ -15577,7 +15504,7 @@ var InteractiveEquationBox = class {
           this.updateVisualState();
         }
       };
-      const onPointerUp = (_upEvt) => {
+      const onPointerUp = (upEvt) => {
         cleanupDragListeners();
         if (this.selection && this.selection.anchor.slotId === this.selection.head.slotId && this.selection.anchor.offset === this.selection.head.offset) {
           this.selection = null;
@@ -15600,7 +15527,7 @@ var InteractiveEquationBox = class {
     this.dom.addEventListener("click", handlePointerActivation);
     this.dom.addEventListener("dblclick", handlePointerActivation);
     const onDocPointerDown = (evt) => {
-      const isInside = isNode2(evt.target) && this.dom.contains(evt.target);
+      const isInside = evt.target instanceof Node && this.dom.contains(evt.target);
       if (this.dom && !isInside) {
         this.isFocused = false;
         if (this.selection || this.highlightedSlotId) {
@@ -15864,12 +15791,12 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.id = plugin?.manifest?.id || "word-equation";
+    this.id = "obsidian-word-equation";
   }
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    new import_obsidian2.Setting(containerEl).setName("General").setHeading();
+    containerEl.createEl("h2", { text: "Word-like Equation Settings" });
     new import_obsidian2.Setting(containerEl).setName("Auto-expand shortcuts in Markdown").setDesc("Automatically expand shortcuts when typing trigger followed by Space").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.autoExpandShortcuts).onChange(async (val) => {
         this.plugin.settings.autoExpandShortcuts = val;
@@ -15896,34 +15823,48 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
       })
     );
     new import_obsidian2.Setting(containerEl).setName("Clear Debug Log").setDesc("Clear recorded debug events and reset debug-log.json").addButton(
-      (btn) => btn.setButtonText("Clear Log").setClass("mod-destructive").onClick(async () => {
+      (btn) => btn.setButtonText("Clear Log").setWarning().onClick(async () => {
         await getDebugLogger().clear();
         new import_obsidian2.Notice("Debug log cleared.");
       })
     );
-    new import_obsidian2.Setting(containerEl).setName("Custom Math Shortcuts").setHeading();
+    containerEl.createEl("h3", { text: "Custom Math Shortcuts" });
     containerEl.createEl("p", {
       text: "Define custom shortcuts. Column 1 is the trigger shortcut. Column 2 is the MathML equivalent or expansion result. Works in Markdown and inside equation blocks.",
       cls: "setting-item-description"
     });
     const tableWrapper = containerEl.createDiv({ cls: "weq-shortcuts-table-wrapper" });
     const table = tableWrapper.createEl("table", { cls: "weq-shortcuts-table" });
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
     const thead = table.createEl("thead");
     const headerRow = thead.createEl("tr");
-    headerRow.createEl("th", { cls: "weq-th-trigger", text: "Trigger Shortcut" });
-    headerRow.createEl("th", { cls: "weq-th-expansion", text: "MathML / Expansion Result" });
-    headerRow.createEl("th", { cls: "weq-th-actions", text: "Actions" });
+    const thTrigger = headerRow.createEl("th", { text: "Trigger Shortcut" });
+    thTrigger.style.textAlign = "left";
+    thTrigger.style.width = "35%";
+    thTrigger.style.padding = "8px";
+    const thExpansion = headerRow.createEl("th", { text: "MathML / Expansion Result" });
+    thExpansion.style.textAlign = "left";
+    thExpansion.style.width = "50%";
+    thExpansion.style.padding = "8px";
+    const thActions = headerRow.createEl("th", { text: "Actions" });
+    thActions.style.textAlign = "center";
+    thActions.style.width = "15%";
+    thActions.style.padding = "8px";
     const tbody = table.createEl("tbody");
     const shortcuts = this.plugin.settings.customShortcuts;
     for (let i = 0; i < shortcuts.length; i++) {
       const item = shortcuts[i];
       const row = tbody.createEl("tr");
+      row.style.borderBottom = "1px solid var(--background-modifier-border)";
       const tdTrigger = row.createEl("td", { cls: "weq-col-trigger" });
+      tdTrigger.style.padding = "6px";
       const inputTrigger = tdTrigger.createEl("input", {
         type: "text",
         value: item.trigger,
         cls: "weq-input-trigger"
       });
+      inputTrigger.style.width = "100%";
       inputTrigger.placeholder = "\\trigger";
       inputTrigger.addEventListener("input", async () => {
         item.trigger = inputTrigger.value;
@@ -15931,15 +15872,14 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
         setCustomShortcuts(this.plugin.settings.customShortcuts);
       });
       const tdExp = row.createEl("td", { cls: "weq-col-expansion" });
+      tdExp.style.padding = "6px";
       const previewEl = tdExp.createDiv({ cls: "weq-expansion-preview" });
       const inputExp = tdExp.createEl("input", {
         type: "text",
         value: item.expansion,
         cls: "weq-input-expansion"
       });
-      if (typeof inputExp.setCssStyles === "function") {
-        inputExp.setCssStyles({ display: "none" });
-      }
+      inputExp.style.display = "none";
       const interactiveBox = new InteractiveEquationBox({
         container: previewEl,
         initialContent: item.expansion,
@@ -15963,6 +15903,8 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
         interactiveBox.dom.focus({ preventScroll: true });
       });
       const tdAct = row.createEl("td", { cls: "weq-col-action" });
+      tdAct.style.padding = "6px";
+      tdAct.style.textAlign = "center";
       const delBtn = tdAct.createEl("button", {
         text: "Delete",
         cls: "mod-warning weq-btn-delete"
@@ -16224,7 +16166,7 @@ var EquationGalleryView = class extends import_obsidian3.ItemView {
         cls: "equation-gallery-category weq-gallery-section"
       });
       catSection.setAttribute("data-category", cat.id);
-      catSection.createDiv({
+      catSection.createEl("div", {
         text: cat.title,
         cls: "equation-gallery-category-title weq-gallery-section-title"
       });
@@ -33721,7 +33663,7 @@ function convertMathMLToLatex(mathml) {
   try {
     const result = MathMLToLaTeX.convert(xmlToParse);
     return (result || "").trim();
-  } catch {
+  } catch (err) {
     try {
       const sanitized = xmlToParse.replace(/\s+(?:class|style|display)="[^"]*"/gi, "");
       const fallbackResult = MathMLToLaTeX.convert(sanitized);
@@ -33854,10 +33796,9 @@ async function convertCurrentNote(plugin, direction) {
   }
   const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian4.MarkdownView);
   let activeFile = app.workspace?.getActiveFile?.() || activeView?.file || activeView?.file || null;
-  if (!activeFile) {
-    const leaf = app.workspace?.getLeaf?.(false);
-    const leafView = leaf?.view;
-    if (leafView?.file) {
+  if (!activeFile && app.workspace?.activeLeaf?.view) {
+    const leafView = app.workspace.activeLeaf.view;
+    if (leafView.file) {
       activeFile = leafView.file;
     }
   }
@@ -33964,28 +33905,28 @@ function registerConversionCommands(plugin) {
     id: "convert-latex-to-mathml-note",
     name: "Convert LaTeX to MathML (Current Note)",
     callback: () => {
-      void convertCurrentNote(plugin, "latex-to-mathml");
+      convertCurrentNote(plugin, "latex-to-mathml");
     }
   });
   plugin.addCommand({
     id: "convert-mathml-to-latex-note",
     name: "Convert MathML to LaTeX (Current Note)",
     callback: () => {
-      void convertCurrentNote(plugin, "mathml-to-latex");
+      convertCurrentNote(plugin, "mathml-to-latex");
     }
   });
   plugin.addCommand({
     id: "convert-latex-to-mathml-vault",
     name: "Convert LaTeX to MathML (Entire Vault)",
     callback: () => {
-      void convertEntireVault(plugin, "latex-to-mathml");
+      convertEntireVault(plugin, "latex-to-mathml");
     }
   });
   plugin.addCommand({
     id: "convert-mathml-to-latex-vault",
     name: "Convert MathML to LaTeX (Entire Vault)",
     callback: () => {
-      void convertEntireVault(plugin, "mathml-to-latex");
+      convertEntireVault(plugin, "mathml-to-latex");
     }
   });
 }
@@ -34040,6 +33981,7 @@ ${initialXml}
     this.addCommand({
       id: "insert-block-equation",
       name: "Insert block equation",
+      hotkeys: [{ modifiers: ["Alt"], key: "=" }],
       editorCallback: insertBlockEquation
     });
     this.addCommand({
@@ -34053,7 +33995,7 @@ ${initialXml}
       callback: () => this.toggleGalleryView()
     });
     this.addCommand({
-      id: "convert-selection",
+      id: "convert-selection-to-word-equation",
       name: "Convert Linear Selection to Equation",
       editorCallback: (editor) => {
         const selection = editor.getSelection().trim();
@@ -34178,19 +34120,19 @@ ${xml}
           return;
         if (active) {
           if (hideGalleryTimeout) {
-            window.clearTimeout(hideGalleryTimeout);
+            clearTimeout(hideGalleryTimeout);
             hideGalleryTimeout = null;
           }
-          void this.activateGalleryView();
+          this.activateGalleryView();
         } else {
           if (hideGalleryTimeout) {
-            window.clearTimeout(hideGalleryTimeout);
+            clearTimeout(hideGalleryTimeout);
           }
-          hideGalleryTimeout = window.setTimeout(() => {
+          hideGalleryTimeout = setTimeout(() => {
             hideGalleryTimeout = null;
             const currentState = getActiveEquationState();
             if (!currentState || !currentState.isFocused) {
-              void this.hideGalleryView();
+              this.hideGalleryView();
             }
           }, 50);
         }
@@ -34198,7 +34140,7 @@ ${xml}
     );
     this.register(() => {
       if (hideGalleryTimeout) {
-        window.clearTimeout(hideGalleryTimeout);
+        clearTimeout(hideGalleryTimeout);
         hideGalleryTimeout = null;
       }
     });
@@ -34217,7 +34159,7 @@ ${xml}
       const activeView = workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
       const activeFile = workspace?.getActiveFile?.() || activeView?.file || null;
       const activeFilePath = activeFile?.path || null;
-      const activeViewType = activeView?.getViewType?.() || workspace?.getLeaf?.(false)?.view?.getViewType?.() || null;
+      const activeViewType = activeView?.getViewType?.() || workspace?.activeLeaf?.view?.getViewType?.() || null;
       const editor = activeView?.editor;
       const cm = editor?.cm;
       const docLength = cm?.state?.doc?.length ?? (editor?.getValue?.()?.length ?? 0);
@@ -34312,7 +34254,7 @@ ${xml}
           }
         }));
       };
-      window.setTimeout(recordFirstInteraction, 0);
+      setTimeout(recordFirstInteraction, 0);
     };
     if (typeof document !== "undefined") {
       document.addEventListener("pointerdown", handleFirstInteraction, true);
@@ -34324,12 +34266,12 @@ ${xml}
       });
     }
   }
-  onunload() {
+  async onunload() {
     if (this.firstInteractionCleanup) {
       this.firstInteractionCleanup();
       this.firstInteractionCleanup = null;
     }
-    void getDebugLogger().flush();
+    await getDebugLogger().flush();
     getDebugLogger().destroy();
     super.onunload?.();
   }
@@ -34351,7 +34293,7 @@ ${xml}
       }
     }
     if (leaf && workspace.revealLeaf) {
-      await workspace.revealLeaf(leaf);
+      workspace.revealLeaf(leaf);
     }
   }
   async hideGalleryView() {
@@ -34372,7 +34314,7 @@ ${xml}
         if (remaining.length === 0) {
           workspace.rightSplit.collapse();
         }
-      } catch {
+      } catch (e) {
       }
     }
   }
@@ -34394,12 +34336,12 @@ ${xml}
   insertMathFromGallery(snippet) {
     const activeState = getActiveEquationState();
     const activeWidget = getActiveEquationWidget();
-    let activeView = this.app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
-    if (!activeView) {
+    let activeLeaf = this.app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
+    if (!activeLeaf) {
       const mdLeaves = this.app.workspace?.getLeavesOfType?.("markdown") || [];
-      activeView = mdLeaves[0]?.view || this.app.workspace?.getMostRecentLeaf?.()?.view;
+      activeLeaf = mdLeaves[0]?.view || this.app.workspace?.getMostRecentLeaf?.()?.view;
     }
-    const cmView = activeView?.editor?.cm;
+    const cmView = activeLeaf?.editor?.cm;
     let targetWidget = null;
     if (cmView) {
       targetWidget = getActiveWidget(cmView);
@@ -34417,7 +34359,7 @@ ${xml}
       targetWidget.insertMathSnippet(snippet, cmView);
       return;
     }
-    const editor = activeView?.editor || this.app.workspace?.getLeaf?.(false)?.view?.editor;
+    const editor = activeLeaf?.editor || this.app.workspace?.activeLeaf?.view?.editor;
     if (editor && typeof editor.replaceSelection === "function") {
       const delimiter = this.settings.defaultDelimiter || "math-word";
       let xml = (snippet || "").trim();
