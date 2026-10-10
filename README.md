@@ -44,18 +44,27 @@ Edit mathematical formulas naturally with in-place visual slots, auto-expanding 
 
 ## 📦 Installation
 
-### Via BRAT *(Recommended for easy updates)*
+### Method 1: Via BRAT *(Recommended for auto-updates)*
 1. Install the [BRAT plugin](https://github.com/TfTHacker/obsidian-42-brat) in Obsidian.
-2. In BRAT settings, choose **Add Beta plugin**.
-3. Enter `QuaziElectro/obsidian-word-equation`.
+2. In Obsidian Settings &rarr; **BRAT** &rarr; click **Add Beta plugin**.
+3. Enter `QuaziElectro/obsidian-word-equation` and click **Add Plugin**.
+4. Enable **Word Equation** under **Community plugins**.
 
-### Manual Installation
-1. Go to the [Latest Releases](https://github.com/QuaziElectro/obsidian-word-equation/releases).
+### Method 2: Manual Installation (ZIP Archive)
+1. Go to the [Latest Releases](https://github.com/QuaziElectro/obsidian-word-equation/releases/latest).
+2. Download **`word-equation.zip`**.
+3. Extract the archive into your vault's plugins folder:
+   `<VaultFolder>/.obsidian/plugins/word-equation/`
+   *(Ensure `main.js`, `manifest.json`, and `styles.css` are placed directly inside this folder).*
+4. In Obsidian, go to **Settings** &rarr; **Community plugins**, click **Reload plugins**, and toggle on **Word Equation**.
+
+### Method 3: Manual Installation (Individual Files)
+1. Go to the [Latest Releases](https://github.com/QuaziElectro/obsidian-word-equation/releases/latest).
 2. Download `main.js`, `manifest.json`, and `styles.css`.
-3. Create a folder named `word-equation` in your vault's plugin directory:
+3. Create a folder named `word-equation` inside:
    `<VaultFolder>/.obsidian/plugins/word-equation/`
 4. Copy the downloaded files into that folder.
-5. In Obsidian, reload plugins and enable **Word Equation**.
+5. In Obsidian, go to **Settings** &rarr; **Community plugins**, reload, and enable **Word Equation**.
 
 ---
 
