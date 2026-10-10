@@ -53,7 +53,13 @@ export function createReadingViewProcessor() {
           cls: 'word-equation-error',
           text: `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`,
         });
+      } else if (typeof (el as any).createEl === 'function') {
+        (el as any).createEl('div', {
+          cls: 'word-equation-error',
+          text: `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`,
+        });
       } else {
+        // eslint-disable-next-line obsidianmd/prefer-create-el -- Fallback DOM element creation when Obsidian createEl helper is not available on container in headless tests
         const errEl = document.createElement('div');
         errEl.className = 'word-equation-error';
         errEl.textContent = `[Equation Error: ${(err as Error).message || 'Invalid equation'}]`;

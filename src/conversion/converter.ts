@@ -66,7 +66,7 @@ export function convertMathMLToLatex(mathml: string): string {
   try {
     const result = MathMLToLaTeX.convert(xmlToParse);
     return (result || '').trim();
-  } catch (err) {
+  } catch {
     // If standard parser failed, try stripping display attributes or class annotations
     try {
       const sanitized = xmlToParse.replace(/\s+(?:class|style|display)="[^"]*"/gi, '');

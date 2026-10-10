@@ -24,7 +24,10 @@ export function renderExpansionPreview(expansion: string, container: HTMLElement
   if (!trimmed) {
     if (typeof (container as any).createSpan === 'function') {
       (container as any).createSpan({ cls: 'weq-preview-empty', text: '⬚' });
+    } else if (typeof (container as any).createEl === 'function') {
+      (container as any).createEl('span', { cls: 'weq-preview-empty', text: '⬚' });
     } else {
+      // eslint-disable-next-line obsidianmd/prefer-create-el -- Fallback DOM element creation when Obsidian createEl helper is not available on container in headless tests
       const placeholder = document.createElement('span');
       placeholder.className = 'weq-preview-empty';
       placeholder.textContent = '⬚';
@@ -76,12 +79,17 @@ export function renderExpansionPreview(expansion: string, container: HTMLElement
           }
           container.appendChild(imported);
         }
-      } catch {}
+      } catch {
+        /* Ignore native MathML parse errors */
+      }
     }
   } catch {
     if (typeof (container as any).createSpan === 'function') {
       (container as any).createSpan({ cls: 'weq-preview-error', text: trimmed });
+    } else if (typeof (container as any).createEl === 'function') {
+      (container as any).createEl('span', { cls: 'weq-preview-error', text: trimmed });
     } else {
+      // eslint-disable-next-line obsidianmd/prefer-create-el -- Fallback DOM element creation when Obsidian createEl helper is not available on container in headless tests
       const errSpan = document.createElement('span');
       errSpan.className = 'weq-preview-error';
       errSpan.textContent = trimmed;
@@ -105,7 +113,7 @@ export class WordEquationSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName('Word-like Equation Settings')
+      .setName('General')
       .setHeading();
 
     new Setting(containerEl)
@@ -165,7 +173,7 @@ export class WordEquationSettingTab extends PluginSettingTab {
       .addButton((btn) =>
         btn
           .setButtonText('Clear Log')
-          .setDestructive()
+          .setClass('mod-destructive')
           .onClick(async () => {
             await getDebugLogger().clear();
             new Notice('Debug log cleared.');

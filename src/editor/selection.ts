@@ -389,19 +389,27 @@ export function updateVisualCaretDom(
   if (!targetSlotEl) return;
 
   const doc = rootEl.ownerDocument || document;
-  const caretEl: HTMLElement = typeof (doc as any).createEl === 'function'
+  const caretEl: HTMLElement = typeof (doc as any).createSpan === 'function'
+    ? (doc as any).createSpan({
+        cls: 'eq-caret',
+        attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
+        text: '|',
+      })
+    : typeof (doc as any).createEl === 'function'
     ? (doc as any).createEl('span', {
         cls: 'eq-caret',
         attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
         text: '|',
       })
-    : typeof (targetSlotEl as any).createSpan === 'function'
-    ? (targetSlotEl as any).createSpan({
-        cls: 'eq-caret',
-        attr: { 'data-caret': 'true', 'aria-hidden': 'true' },
-        text: '|',
-      })
-    : doc.createElement('span');
+    : (() => {
+        // eslint-disable-next-line obsidianmd/prefer-create-el -- Fallback DOM element creation when Obsidian helpers are not available on Document
+        const el = doc.createElement('span');
+        el.className = 'eq-caret';
+        el.setAttribute('data-caret', 'true');
+        el.setAttribute('aria-hidden', 'true');
+        el.textContent = '|';
+        return el;
+      })();
   if (!caretEl.classList.contains('eq-caret')) {
     caretEl.className = 'eq-caret';
     caretEl.setAttribute('data-caret', 'true');

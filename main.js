@@ -8306,12 +8306,30 @@ var DomRenderer = class {
     }
     return el;
   }
+  createDiv(o) {
+    if (typeof this.doc.createDiv === "function") {
+      return this.doc.createDiv(o);
+    }
+    return this.createEl("div", o);
+  }
+  createSpan(o) {
+    if (typeof this.doc.createSpan === "function") {
+      return this.doc.createSpan(o);
+    }
+    return this.createEl("span", o);
+  }
   render(root, ctx = {}) {
-    const rootContainer = this.createEl(ctx.inline ? "span" : "div", {
-      cls: ctx.inline ? "word-equation-inline" : "word-equation-block",
+    const rootContainer = ctx.inline ? this.createSpan({
+      cls: "word-equation-inline",
+      attr: { contenteditable: "false" }
+    }) : this.createDiv({
+      cls: "word-equation-block",
       attr: { contenteditable: "false" }
     });
-    const mathBox = this.createEl(ctx.inline ? "span" : "div", {
+    const mathBox = ctx.inline ? this.createSpan({
+      cls: "word-equation-math",
+      attr: { contenteditable: "false", "data-equation-root": "true" }
+    }) : this.createDiv({
       cls: "word-equation-math",
       attr: { contenteditable: "false", "data-equation-root": "true" }
     });
@@ -8325,14 +8343,14 @@ var DomRenderer = class {
     return rootContainer;
   }
   renderSlot(slot, ctx) {
-    const slotEl = this.createEl("span", {
+    const slotEl = this.createSpan({
       cls: "eq-slot",
       attr: { "data-slot-id": slot.id, "data-slot-role": slot.role }
     });
     const isCaretInSlot = ctx.caret && ctx.caret.slotId === slot.id;
     const caretOffset = isCaretInSlot ? ctx.caret.offset : -1;
     if (slot.children.length === 0) {
-      const placeholder = this.createEl("span", {
+      const placeholder = this.createSpan({
         cls: "eq-placeholder",
         attr: { "data-placeholder-for": slot.id }
       });
@@ -8391,7 +8409,7 @@ var DomRenderer = class {
     }
   }
   renderToken(node) {
-    const el = this.createEl("span", {
+    const el = this.createSpan({
       cls: `eq-token eq-${node.tokenKind}`,
       attr: { "data-node-id": node.id },
       text: node.text
@@ -8404,57 +8422,57 @@ var DomRenderer = class {
     return el;
   }
   renderPlaceholder(node) {
-    return this.createEl("span", {
+    return this.createSpan({
       cls: "eq-placeholder",
       attr: { "data-node-id": node.id },
       text: "\u2B1A"
     });
   }
   renderFraction(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-fraction",
       attr: { "data-node-id": node.id }
     });
-    const num = this.createEl("div", { cls: "eq-numerator" });
+    const num = this.createDiv({ cls: "eq-numerator" });
     num.appendChild(this.renderSlot(node.numerator, ctx));
-    const den = this.createEl("div", { cls: "eq-denominator" });
+    const den = this.createDiv({ cls: "eq-denominator" });
     den.appendChild(this.renderSlot(node.denominator, ctx));
     container.appendChild(num);
     container.appendChild(den);
     return container;
   }
   renderSuperscript(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-script-box",
       attr: { "data-node-id": node.id }
     });
     container.appendChild(this.renderSlot(node.base, ctx));
-    const sup = this.createEl("span", { cls: "eq-superscript" });
+    const sup = this.createSpan({ cls: "eq-superscript" });
     sup.appendChild(this.renderSlot(node.sup, ctx));
     container.appendChild(sup);
     return container;
   }
   renderSubscript(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-script-box",
       attr: { "data-node-id": node.id }
     });
     container.appendChild(this.renderSlot(node.base, ctx));
-    const sub = this.createEl("span", { cls: "eq-subscript" });
+    const sub = this.createSpan({ cls: "eq-subscript" });
     sub.appendChild(this.renderSlot(node.sub, ctx));
     container.appendChild(sub);
     return container;
   }
   renderSubSup(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-script-box",
       attr: { "data-node-id": node.id }
     });
     container.appendChild(this.renderSlot(node.base, ctx));
-    const scriptsWrapper = this.createEl("span", { cls: "eq-subsup-scripts" });
-    const sup = this.createEl("span", { cls: "eq-superscript" });
+    const scriptsWrapper = this.createSpan({ cls: "eq-subsup-scripts" });
+    const sup = this.createSpan({ cls: "eq-superscript" });
     sup.appendChild(this.renderSlot(node.sup, ctx));
-    const sub = this.createEl("span", { cls: "eq-subscript" });
+    const sub = this.createSpan({ cls: "eq-subscript" });
     sub.appendChild(this.renderSlot(node.sub, ctx));
     scriptsWrapper.appendChild(sup);
     scriptsWrapper.appendChild(sub);
@@ -8462,34 +8480,47 @@ var DomRenderer = class {
     return container;
   }
   createSurdElement() {
-    const surd = this.createEl("span", {
+    const surd = this.createSpan({
       cls: "eq-radical-surd",
       attr: { "aria-hidden": "true" }
     });
-    surd.innerHTML = '<svg viewBox="0 0 12 24" preserveAspectRatio="none" class="eq-radical-svg"><path d="M1 13 L3 13 L6 23 L11 1 L12 1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square" stroke-linejoin="miter"/></svg>';
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = this.doc.createElementNS ? this.doc.createElementNS(svgNS, "svg") : this.doc.createElement("svg");
+    svg.setAttribute("viewBox", "0 0 12 24");
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("class", "eq-radical-svg");
+    const path = this.doc.createElementNS ? this.doc.createElementNS(svgNS, "path") : this.doc.createElement("path");
+    path.setAttribute("d", "M1 13 L3 13 L6 23 L11 1 L12 1");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.3");
+    path.setAttribute("stroke-linecap", "square");
+    path.setAttribute("stroke-linejoin", "miter");
+    svg.appendChild(path);
+    surd.appendChild(svg);
     return surd;
   }
   renderRadical(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-radical",
       attr: { "data-node-id": node.id }
     });
     const surd = this.createSurdElement();
-    const radicand = this.createEl("span", { cls: "eq-radicand" });
+    const radicand = this.createSpan({ cls: "eq-radicand" });
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
     container.appendChild(surd);
     container.appendChild(radicand);
     return container;
   }
   renderRoot(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-radical",
       attr: { "data-node-id": node.id }
     });
-    const idx = this.createEl("span", { cls: "eq-radical-index" });
+    const idx = this.createSpan({ cls: "eq-radical-index" });
     idx.appendChild(this.renderSlot(node.index, ctx));
     const surd = this.createSurdElement();
-    const radicand = this.createEl("span", { cls: "eq-radicand" });
+    const radicand = this.createSpan({ cls: "eq-radicand" });
     radicand.appendChild(this.renderSlot(node.radicand, ctx));
     container.appendChild(idx);
     container.appendChild(surd);
@@ -8497,12 +8528,12 @@ var DomRenderer = class {
     return container;
   }
   renderMatrix(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-matrix",
       attr: { "data-node-id": node.id }
     });
     if (node.openBracket) {
-      const open2 = this.createEl("span", {
+      const open2 = this.createSpan({
         cls: "eq-matrix-bracket",
         text: node.openBracket
       });
@@ -8520,7 +8551,7 @@ var DomRenderer = class {
     }
     container.appendChild(table);
     if (node.closeBracket) {
-      const close2 = this.createEl("span", {
+      const close2 = this.createSpan({
         cls: "eq-matrix-bracket",
         text: node.closeBracket
       });
@@ -8529,12 +8560,12 @@ var DomRenderer = class {
     return container;
   }
   renderFenced(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-fenced",
       attr: { "data-node-id": node.id }
     });
     if (node.open) {
-      const open2 = this.createEl("span", {
+      const open2 = this.createSpan({
         cls: "eq-fence-open eq-token eq-mo",
         text: node.open
       });
@@ -8542,7 +8573,7 @@ var DomRenderer = class {
     }
     container.appendChild(this.renderSlot(node.content, ctx));
     if (node.close) {
-      const close2 = this.createEl("span", {
+      const close2 = this.createSpan({
         cls: "eq-fence-close eq-token eq-mo",
         text: node.close
       });
@@ -8551,27 +8582,27 @@ var DomRenderer = class {
     return container;
   }
   renderUnderOver(node, ctx) {
-    const container = this.createEl("span", {
+    const container = this.createSpan({
       cls: "eq-underover",
       attr: { "data-node-id": node.id }
     });
     if (node.over) {
-      const overEl = this.createEl("span", { cls: "eq-over" });
+      const overEl = this.createSpan({ cls: "eq-over" });
       overEl.appendChild(this.renderSlot(node.over, ctx));
       container.appendChild(overEl);
     }
-    const baseEl = this.createEl("span", { cls: "eq-base" });
+    const baseEl = this.createSpan({ cls: "eq-base" });
     baseEl.appendChild(this.renderSlot(node.base, ctx));
     container.appendChild(baseEl);
     if (node.under) {
-      const underEl = this.createEl("span", { cls: "eq-under" });
+      const underEl = this.createSpan({ cls: "eq-under" });
       underEl.appendChild(this.renderSlot(node.under, ctx));
       container.appendChild(underEl);
     }
     return container;
   }
   createCaretElement() {
-    return this.createEl("span", {
+    return this.createSpan({
       cls: "eq-caret",
       attr: { "data-caret": "true", "aria-hidden": "true" },
       text: "|"
@@ -8622,8 +8653,7 @@ function createPointerMouseHandler(eventName, phase) {
       buttons: me.buttons,
       button: me.button,
       defaultPrevented: me.defaultPrevented,
-      cancelBubble: me.cancelBubble,
-      isPropagationStopped: Boolean(me.cancelBubble || me.defaultPrevented),
+      isPropagationStopped: Boolean(me.defaultPrevented || me.isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       isTargetEquation,
@@ -8704,8 +8734,7 @@ function setupGlobalTelemetry() {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      cancelBubble: e.cancelBubble,
-      isPropagationStopped: Boolean(e.cancelBubble || e.defaultPrevented),
+      isPropagationStopped: Boolean(e.defaultPrevented || e.isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -8729,8 +8758,7 @@ function setupGlobalTelemetry() {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      cancelBubble: e.cancelBubble,
-      isPropagationStopped: Boolean(e.cancelBubble),
+      isPropagationStopped: Boolean(e.defaultPrevented || e.isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -10451,15 +10479,22 @@ function updateVisualCaretDom(rootEl, caret, isFocused) {
   if (!targetSlotEl)
     return;
   const doc = rootEl.ownerDocument || document;
-  const caretEl = typeof doc.createEl === "function" ? doc.createEl("span", {
+  const caretEl = typeof doc.createSpan === "function" ? doc.createSpan({
     cls: "eq-caret",
     attr: { "data-caret": "true", "aria-hidden": "true" },
     text: "|"
-  }) : typeof targetSlotEl.createSpan === "function" ? targetSlotEl.createSpan({
+  }) : typeof doc.createEl === "function" ? doc.createEl("span", {
     cls: "eq-caret",
     attr: { "data-caret": "true", "aria-hidden": "true" },
     text: "|"
-  }) : doc.createElement("span");
+  }) : (() => {
+    const el = doc.createElement("span");
+    el.className = "eq-caret";
+    el.setAttribute("data-caret", "true");
+    el.setAttribute("aria-hidden", "true");
+    el.textContent = "|";
+    return el;
+  })();
   if (!caretEl.classList.contains("eq-caret")) {
     caretEl.className = "eq-caret";
     caretEl.setAttribute("data-caret", "true");
@@ -11886,7 +11921,7 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
         if (dom && activeView.dom.contains(dom)) {
           try {
             pos = activeView.posAtDOM(dom);
-          } catch (e) {
+          } catch {
           }
         }
         if (this.isInline) {
@@ -11962,7 +11997,7 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
             return { from: this.from, to: this.to };
           }
         }
-      } catch (err) {
+      } catch {
       }
     }
     return { from: this.from, to: this.to };
@@ -12026,14 +12061,14 @@ ${newXml}
           const handled = app.commands.executeCommandById(cmdId);
           if (handled !== false)
             return;
-        } catch (e) {
+        } catch {
         }
       }
       try {
         let MarkdownViewClass;
         try {
           MarkdownViewClass = require("obsidian").MarkdownView;
-        } catch (e) {
+        } catch {
         }
         const mdView = MarkdownViewClass && app.workspace?.getActiveViewOfType?.(MarkdownViewClass) || app.workspace?.getLeavesOfType?.("markdown")?.[0]?.view;
         if (mdView?.editor) {
@@ -12045,7 +12080,7 @@ ${newXml}
             return;
           }
         }
-      } catch (e) {
+      } catch {
       }
     }
     if (activeView) {
@@ -12057,13 +12092,13 @@ ${newXml}
           activeView.redo();
           return;
         }
-      } catch (e) {
+      } catch {
       }
     }
     if (typeof document !== "undefined" && document.execCommand) {
       try {
         document.execCommand(action);
-      } catch (e) {
+      } catch {
       }
     }
   }
@@ -13324,13 +13359,12 @@ ${newXml}
         head: view.state.selection.main.head,
         empty: view.state.selection.main.empty
       } : void 0;
-      const isPropStopped = Boolean(e.cancelBubble || e.isPropagationStopped?.());
+      const isPropStopped = Boolean(e.defaultPrevented || e.isPropagationStopped?.());
       logDebugEvent("keydown", () => ({
         key: e.key,
         code: e.code,
         phase: e.eventPhase === 2 ? "target" : e.eventPhase === 1 ? "capture" : "bubble",
         defaultPrevented: e.defaultPrevented,
-        cancelBubble: e.cancelBubble,
         isPropagationStopped: isPropStopped,
         targetTag: e.target?.tagName?.toLowerCase?.(),
         targetClass: e.target?.className,
@@ -15027,6 +15061,11 @@ function createReadingViewProcessor() {
           cls: "word-equation-error",
           text: `[Equation Error: ${err.message || "Invalid equation"}]`
         });
+      } else if (typeof el.createEl === "function") {
+        el.createEl("div", {
+          cls: "word-equation-error",
+          text: `[Equation Error: ${err.message || "Invalid equation"}]`
+        });
       } else {
         const errEl = document.createElement("div");
         errEl.className = "word-equation-error";
@@ -15226,7 +15265,7 @@ var InteractiveEquationBox = class {
   }
   emitChange() {
     const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
-    this.onChange(xml);
+    void this.onChange(xml);
   }
   handleCopyEvent(e, isCut = false) {
     let xml = "";
@@ -15830,7 +15869,7 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    new import_obsidian2.Setting(containerEl).setName("Word-like Equation Settings").setHeading();
+    new import_obsidian2.Setting(containerEl).setName("General").setHeading();
     new import_obsidian2.Setting(containerEl).setName("Auto-expand shortcuts in Markdown").setDesc("Automatically expand shortcuts when typing trigger followed by Space").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.autoExpandShortcuts).onChange(async (val) => {
         this.plugin.settings.autoExpandShortcuts = val;
@@ -15857,7 +15896,7 @@ var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
       })
     );
     new import_obsidian2.Setting(containerEl).setName("Clear Debug Log").setDesc("Clear recorded debug events and reset debug-log.json").addButton(
-      (btn) => btn.setButtonText("Clear Log").setDestructive().onClick(async () => {
+      (btn) => btn.setButtonText("Clear Log").setClass("mod-destructive").onClick(async () => {
         await getDebugLogger().clear();
         new import_obsidian2.Notice("Debug log cleared.");
       })
@@ -16185,7 +16224,7 @@ var EquationGalleryView = class extends import_obsidian3.ItemView {
         cls: "equation-gallery-category weq-gallery-section"
       });
       catSection.setAttribute("data-category", cat.id);
-      catSection.createEl("div", {
+      catSection.createDiv({
         text: cat.title,
         cls: "equation-gallery-category-title weq-gallery-section-title"
       });
@@ -33682,7 +33721,7 @@ function convertMathMLToLatex(mathml) {
   try {
     const result = MathMLToLaTeX.convert(xmlToParse);
     return (result || "").trim();
-  } catch (err) {
+  } catch {
     try {
       const sanitized = xmlToParse.replace(/\s+(?:class|style|display)="[^"]*"/gi, "");
       const fallbackResult = MathMLToLaTeX.convert(sanitized);
@@ -33815,9 +33854,10 @@ async function convertCurrentNote(plugin, direction) {
   }
   const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian4.MarkdownView);
   let activeFile = app.workspace?.getActiveFile?.() || activeView?.file || activeView?.file || null;
-  if (!activeFile && app.workspace?.activeLeaf?.view) {
-    const leafView = app.workspace.activeLeaf.view;
-    if (leafView.file) {
+  if (!activeFile) {
+    const leaf = app.workspace?.getLeaf?.(false);
+    const leafView = leaf?.view;
+    if (leafView?.file) {
       activeFile = leafView.file;
     }
   }
@@ -33924,28 +33964,28 @@ function registerConversionCommands(plugin) {
     id: "convert-latex-to-mathml-note",
     name: "Convert LaTeX to MathML (Current Note)",
     callback: () => {
-      convertCurrentNote(plugin, "latex-to-mathml");
+      void convertCurrentNote(plugin, "latex-to-mathml");
     }
   });
   plugin.addCommand({
     id: "convert-mathml-to-latex-note",
     name: "Convert MathML to LaTeX (Current Note)",
     callback: () => {
-      convertCurrentNote(plugin, "mathml-to-latex");
+      void convertCurrentNote(plugin, "mathml-to-latex");
     }
   });
   plugin.addCommand({
     id: "convert-latex-to-mathml-vault",
     name: "Convert LaTeX to MathML (Entire Vault)",
     callback: () => {
-      convertEntireVault(plugin, "latex-to-mathml");
+      void convertEntireVault(plugin, "latex-to-mathml");
     }
   });
   plugin.addCommand({
     id: "convert-mathml-to-latex-vault",
     name: "Convert MathML to LaTeX (Entire Vault)",
     callback: () => {
-      convertEntireVault(plugin, "mathml-to-latex");
+      void convertEntireVault(plugin, "mathml-to-latex");
     }
   });
 }
@@ -34013,7 +34053,7 @@ ${initialXml}
       callback: () => this.toggleGalleryView()
     });
     this.addCommand({
-      id: "convert-selection-to-word-equation",
+      id: "convert-selection",
       name: "Convert Linear Selection to Equation",
       editorCallback: (editor) => {
         const selection = editor.getSelection().trim();
@@ -34141,7 +34181,7 @@ ${xml}
             window.clearTimeout(hideGalleryTimeout);
             hideGalleryTimeout = null;
           }
-          this.activateGalleryView();
+          void this.activateGalleryView();
         } else {
           if (hideGalleryTimeout) {
             window.clearTimeout(hideGalleryTimeout);
@@ -34150,7 +34190,7 @@ ${xml}
             hideGalleryTimeout = null;
             const currentState = getActiveEquationState();
             if (!currentState || !currentState.isFocused) {
-              this.hideGalleryView();
+              void this.hideGalleryView();
             }
           }, 50);
         }
@@ -34177,7 +34217,7 @@ ${xml}
       const activeView = workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
       const activeFile = workspace?.getActiveFile?.() || activeView?.file || null;
       const activeFilePath = activeFile?.path || null;
-      const activeViewType = activeView?.getViewType?.() || workspace?.activeLeaf?.view?.getViewType?.() || null;
+      const activeViewType = activeView?.getViewType?.() || workspace?.getLeaf?.(false)?.view?.getViewType?.() || null;
       const editor = activeView?.editor;
       const cm = editor?.cm;
       const docLength = cm?.state?.doc?.length ?? (editor?.getValue?.()?.length ?? 0);
@@ -34284,12 +34324,12 @@ ${xml}
       });
     }
   }
-  async onunload() {
+  onunload() {
     if (this.firstInteractionCleanup) {
       this.firstInteractionCleanup();
       this.firstInteractionCleanup = null;
     }
-    await getDebugLogger().flush();
+    void getDebugLogger().flush();
     getDebugLogger().destroy();
     super.onunload?.();
   }
@@ -34311,7 +34351,7 @@ ${xml}
       }
     }
     if (leaf && workspace.revealLeaf) {
-      workspace.revealLeaf(leaf);
+      await workspace.revealLeaf(leaf);
     }
   }
   async hideGalleryView() {
@@ -34332,7 +34372,7 @@ ${xml}
         if (remaining.length === 0) {
           workspace.rightSplit.collapse();
         }
-      } catch (e) {
+      } catch {
       }
     }
   }
@@ -34354,12 +34394,12 @@ ${xml}
   insertMathFromGallery(snippet) {
     const activeState = getActiveEquationState();
     const activeWidget = getActiveEquationWidget();
-    let activeLeaf = this.app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
-    if (!activeLeaf) {
+    let activeView = this.app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
+    if (!activeView) {
       const mdLeaves = this.app.workspace?.getLeavesOfType?.("markdown") || [];
-      activeLeaf = mdLeaves[0]?.view || this.app.workspace?.getMostRecentLeaf?.()?.view;
+      activeView = mdLeaves[0]?.view || this.app.workspace?.getMostRecentLeaf?.()?.view;
     }
-    const cmView = activeLeaf?.editor?.cm;
+    const cmView = activeView?.editor?.cm;
     let targetWidget = null;
     if (cmView) {
       targetWidget = getActiveWidget(cmView);
@@ -34377,7 +34417,7 @@ ${xml}
       targetWidget.insertMathSnippet(snippet, cmView);
       return;
     }
-    const editor = activeLeaf?.editor || this.app.workspace?.activeLeaf?.view?.editor;
+    const editor = activeView?.editor || this.app.workspace?.getLeaf?.(false)?.view?.editor;
     if (editor && typeof editor.replaceSelection === "function") {
       const delimiter = this.settings.defaultDelimiter || "math-word";
       let xml = (snippet || "").trim();

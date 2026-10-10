@@ -216,7 +216,9 @@ export class InteractiveEquationBox {
           this.container.appendChild(imported);
         }
       }
-    } catch {}
+    } catch {
+      /* Ignore native MathML sync errors */
+    }
   }
 
   private rerender(): void {
@@ -252,7 +254,7 @@ export class InteractiveEquationBox {
 
   private emitChange(): void {
     const xml = serializeMathML(this.ast, { display: 'inline', pretty: false });
-    this.onChange(xml);
+    void this.onChange(xml);
   }
 
   public handleCopyEvent(e?: ClipboardEvent, isCut = false): void {
@@ -283,7 +285,9 @@ export class InteractiveEquationBox {
       try {
         e.clipboardData.setData('application/mathml+xml', xml);
         e.clipboardData.setData('text/plain', xml);
-      } catch {}
+      } catch {
+        /* Fallback if clipboard setData throws */
+      }
     }
     if (typeof navigator !== 'undefined' && navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(xml).catch(() => {});

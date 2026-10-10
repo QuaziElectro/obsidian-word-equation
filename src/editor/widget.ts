@@ -891,7 +891,9 @@ export class WordEquationWidget extends WidgetType {
         if (dom && activeView.dom.contains(dom)) {
           try {
             pos = activeView.posAtDOM(dom);
-          } catch (e) {}
+          } catch {
+            /* Ignore posAtDOM failure for detached DOM elements */
+          }
         }
 
         if (this.isInline) {
@@ -975,7 +977,9 @@ export class WordEquationWidget extends WidgetType {
             return { from: this.from, to: this.to };
           }
         }
-      } catch (err) {}
+      } catch {
+        /* Fall back to current cached range if scanner throws */
+      }
     }
     return { from: this.from, to: this.to };
   }
@@ -1041,13 +1045,18 @@ export class WordEquationWidget extends WidgetType {
         try {
           const handled = app.commands.executeCommandById(cmdId);
           if (handled !== false) return;
-        } catch (e) {}
+        } catch {
+          /* Fallback if command execution fails */
+        }
       }
       try {
         let MarkdownViewClass: any;
         try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports -- Dynamic require of obsidian MarkdownView in undo fallback for headless environments
           MarkdownViewClass = require('obsidian').MarkdownView;
-        } catch (e) {}
+        } catch {
+          /* Fallback if obsidian require fails in headless test environment */
+        }
         const mdView =
           (MarkdownViewClass && app.workspace?.getActiveViewOfType?.(MarkdownViewClass)) ||
           app.workspace?.getLeavesOfType?.('markdown')?.[0]?.view;
@@ -1060,7 +1069,9 @@ export class WordEquationWidget extends WidgetType {
             return;
           }
         }
-      } catch (e) {}
+      } catch {
+        /* Continue to next fallback */
+      }
     }
 
     if (activeView) {
@@ -1072,13 +1083,17 @@ export class WordEquationWidget extends WidgetType {
           (activeView as any).redo();
           return;
         }
-      } catch (e) {}
+      } catch {
+        /* Fall through to document.execCommand */
+      }
     }
 
     if (typeof document !== 'undefined' && document.execCommand) {
       try {
         document.execCommand(action);
-      } catch (e) {}
+      } catch {
+        /* Fallback execCommand failure ignored */
+      }
     }
   }
 
@@ -2470,13 +2485,12 @@ export class WordEquationWidget extends WidgetType {
         head: view.state.selection.main.head,
         empty: view.state.selection.main.empty,
       } : undefined;
-      const isPropStopped = Boolean(e.cancelBubble || (e as any).isPropagationStopped?.());
+      const isPropStopped = Boolean(e.defaultPrevented || (e as any).isPropagationStopped?.());
       logDebugEvent('keydown', () => ({
         key: e.key,
         code: e.code,
         phase: e.eventPhase === 2 ? 'target' : (e.eventPhase === 1 ? 'capture' : 'bubble'),
         defaultPrevented: e.defaultPrevented,
-        cancelBubble: e.cancelBubble,
         isPropagationStopped: isPropStopped,
         targetTag: (e.target as HTMLElement)?.tagName?.toLowerCase?.(),
         targetClass: (e.target as HTMLElement)?.className,

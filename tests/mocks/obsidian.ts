@@ -78,6 +78,34 @@ if (typeof HTMLElement !== 'undefined') {
   }
 }
 
+// Extend Document prototype with Obsidian DOM helper methods if running in JSDOM
+if (typeof Document !== 'undefined') {
+  if (!(Document.prototype as any).createEl) {
+    (Document.prototype as any).createEl = function <K extends keyof HTMLElementTagNameMap>(
+      tag: K,
+      o?: any
+    ): HTMLElementTagNameMap[K] {
+      const el = this.createElement(tag);
+      if (o?.text) el.textContent = o.text;
+      if (o?.cls) el.className = o.cls;
+      if (o?.attr) {
+        for (const [k, v] of Object.entries(o.attr)) el.setAttribute(k, v as string);
+      }
+      return el;
+    };
+  }
+  if (!(Document.prototype as any).createDiv) {
+    (Document.prototype as any).createDiv = function (o?: any): HTMLDivElement {
+      return (this as Document).createEl('div', o);
+    };
+  }
+  if (!(Document.prototype as any).createSpan) {
+    (Document.prototype as any).createSpan = function (o?: any): HTMLSpanElement {
+      return (this as Document).createEl('span', o);
+    };
+  }
+}
+
 /**
  * Obsidian Live Preview detection state field.
  * true = Live Preview, false = Source Mode.
@@ -235,6 +263,7 @@ export class Setting {
     const buttonEl = document.createElement('button');
     this.controlEl.appendChild(buttonEl);
     const btn = {
+      buttonEl,
       setButtonText: (txt: string) => {
         buttonEl.textContent = txt;
         return btn;
@@ -249,6 +278,10 @@ export class Setting {
       },
       setDestructive: () => {
         buttonEl.classList.add('mod-warning');
+        return btn;
+      },
+      setClass: (cls: string) => {
+        buttonEl.classList.add(cls);
         return btn;
       },
       onClick: (fn: () => any) => {

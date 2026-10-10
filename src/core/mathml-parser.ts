@@ -32,7 +32,7 @@ function getDOMParserInstance(): DOMParser | null {
     return nodeDOMParser;
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires -- Dynamic require of jsdom in headless testing environments where DOMParser is not globally available
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports -- Dynamic require of jsdom in headless testing environments where DOMParser is not globally available
     const { JSDOM } = require('jsdom');
     const dom = new JSDOM();
     nodeDOMParser = new dom.window.DOMParser();

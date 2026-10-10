@@ -44,9 +44,10 @@ export async function convertCurrentNote(
     (activeView as any)?.file ||
     null;
 
-  if (!activeFile && app.workspace?.activeLeaf?.view) {
-    const leafView = app.workspace.activeLeaf.view as any;
-    if (leafView.file) {
+  if (!activeFile) {
+    const leaf = app.workspace?.getLeaf?.(false);
+    const leafView = leaf?.view as any;
+    if (leafView?.file) {
       activeFile = leafView.file;
     }
   }
@@ -155,7 +156,9 @@ export async function convertEntireVault(
         ) {
           try {
             activeView.editor.setValue(result.converted);
-          } catch {}
+          } catch {
+            /* Ignore editor update error if view is detached */
+          }
         }
 
         filesModified++;
@@ -194,7 +197,7 @@ export function registerConversionCommands(plugin: Plugin): void {
     id: 'convert-latex-to-mathml-note',
     name: 'Convert LaTeX to MathML (Current Note)',
     callback: () => {
-      convertCurrentNote(plugin, 'latex-to-mathml');
+      void convertCurrentNote(plugin, 'latex-to-mathml');
     },
   });
 
@@ -203,7 +206,7 @@ export function registerConversionCommands(plugin: Plugin): void {
     id: 'convert-mathml-to-latex-note',
     name: 'Convert MathML to LaTeX (Current Note)',
     callback: () => {
-      convertCurrentNote(plugin, 'mathml-to-latex');
+      void convertCurrentNote(plugin, 'mathml-to-latex');
     },
   });
 
@@ -212,7 +215,7 @@ export function registerConversionCommands(plugin: Plugin): void {
     id: 'convert-latex-to-mathml-vault',
     name: 'Convert LaTeX to MathML (Entire Vault)',
     callback: () => {
-      convertEntireVault(plugin, 'latex-to-mathml');
+      void convertEntireVault(plugin, 'latex-to-mathml');
     },
   });
 
@@ -221,7 +224,7 @@ export function registerConversionCommands(plugin: Plugin): void {
     id: 'convert-mathml-to-latex-vault',
     name: 'Convert MathML to LaTeX (Entire Vault)',
     callback: () => {
-      convertEntireVault(plugin, 'mathml-to-latex');
+      void convertEntireVault(plugin, 'mathml-to-latex');
     },
   });
 }

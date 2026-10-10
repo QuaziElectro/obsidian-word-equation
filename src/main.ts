@@ -119,7 +119,7 @@ export default class WordEquationPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'convert-selection-to-word-equation',
+      id: 'convert-selection',
       name: 'Convert Linear Selection to Equation',
       editorCallback: (editor: Editor) => {
         const selection = editor.getSelection().trim();
@@ -257,7 +257,7 @@ export default class WordEquationPlugin extends Plugin {
             window.clearTimeout(hideGalleryTimeout);
             hideGalleryTimeout = null;
           }
-          this.activateGalleryView();
+          void this.activateGalleryView();
         } else {
           if (hideGalleryTimeout) {
             window.clearTimeout(hideGalleryTimeout);
@@ -266,7 +266,7 @@ export default class WordEquationPlugin extends Plugin {
             hideGalleryTimeout = null;
             const currentState = getActiveEquationState();
             if (!currentState || !currentState.isFocused) {
-              this.hideGalleryView();
+              void this.hideGalleryView();
             }
           }, 50);
         }
@@ -298,7 +298,7 @@ export default class WordEquationPlugin extends Plugin {
       const activeView = workspace?.getActiveViewOfType?.(MarkdownView);
       const activeFile = workspace?.getActiveFile?.() || (activeView as any)?.file || null;
       const activeFilePath = activeFile?.path || null;
-      const activeViewType = activeView?.getViewType?.() || (workspace?.activeLeaf?.view as any)?.getViewType?.() || null;
+      const activeViewType = activeView?.getViewType?.() || (workspace?.getLeaf?.(false)?.view as any)?.getViewType?.() || null;
       const editor = activeView?.editor;
       const cm = (editor as any)?.cm;
       const docLength = cm?.state?.doc?.length ?? (editor?.getValue?.()?.length ?? 0);
@@ -422,12 +422,12 @@ export default class WordEquationPlugin extends Plugin {
     }
   }
 
-  public async onunload(): Promise<void> {
+  public onunload(): void {
     if (this.firstInteractionCleanup) {
       this.firstInteractionCleanup();
       this.firstInteractionCleanup = null;
     }
-    await getDebugLogger().flush();
+    void getDebugLogger().flush();
     getDebugLogger().destroy();
     super.onunload?.();
   }
@@ -449,7 +449,7 @@ export default class WordEquationPlugin extends Plugin {
       }
     }
     if (leaf && workspace.revealLeaf) {
-      workspace.revealLeaf(leaf);
+      await workspace.revealLeaf(leaf);
     }
   }
 
@@ -470,7 +470,9 @@ export default class WordEquationPlugin extends Plugin {
         if (remaining.length === 0) {
           (workspace.rightSplit as any).collapse();
         }
-      } catch (e) {}
+      } catch {
+        /* Ignore if rightSplit collapse fails */
+      }
     }
   }
 
@@ -492,12 +494,12 @@ export default class WordEquationPlugin extends Plugin {
   public insertMathFromGallery(snippet: string): void {
     const activeState = getActiveEquationState();
     const activeWidget = getActiveEquationWidget();
-    let activeLeaf = this.app.workspace?.getActiveViewOfType?.(MarkdownView);
-    if (!activeLeaf) {
+    let activeView = this.app.workspace?.getActiveViewOfType?.(MarkdownView);
+    if (!activeView) {
       const mdLeaves = this.app.workspace?.getLeavesOfType?.('markdown') || [];
-      activeLeaf = (mdLeaves[0]?.view as MarkdownView) || (this.app.workspace as any)?.getMostRecentLeaf?.()?.view;
+      activeView = (mdLeaves[0]?.view as MarkdownView) || (this.app.workspace as any)?.getMostRecentLeaf?.()?.view;
     }
-    const cmView = (activeLeaf as any)?.editor?.cm as EditorView | undefined;
+    const cmView = (activeView as any)?.editor?.cm as EditorView | undefined;
 
     let targetWidget: WordEquationWidget | null = null;
     if (cmView) {
@@ -520,8 +522,8 @@ export default class WordEquationPlugin extends Plugin {
 
     // If no equation is active, insert a new equation block at editor cursor
     const editor =
-      (activeLeaf as any)?.editor ||
-      (this.app.workspace as any)?.activeLeaf?.view?.editor;
+      (activeView as any)?.editor ||
+      (this.app.workspace as any)?.getLeaf?.(false)?.view?.editor;
     if (editor && typeof editor.replaceSelection === 'function') {
       const delimiter = this.settings.defaultDelimiter || 'math-word';
       let xml = (snippet || '').trim();

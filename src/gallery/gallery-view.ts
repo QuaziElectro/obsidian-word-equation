@@ -264,7 +264,7 @@ export class EquationGalleryView extends ItemView {
       });
       catSection.setAttribute('data-category', cat.id);
 
-      catSection.createEl('div', {
+      catSection.createDiv({
         text: cat.title,
         cls: 'equation-gallery-category-title weq-gallery-section-title',
       });

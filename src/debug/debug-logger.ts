@@ -93,8 +93,7 @@ function createPointerMouseHandler(eventName: string, phase: 'capture' | 'bubble
       buttons: me.buttons,
       button: me.button,
       defaultPrevented: me.defaultPrevented,
-      cancelBubble: me.cancelBubble,
-      isPropagationStopped: Boolean(me.cancelBubble || (me as any).defaultPrevented),
+      isPropagationStopped: Boolean(me.defaultPrevented || (me as any).isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       isTargetEquation,
@@ -157,7 +156,9 @@ export function disconnectEquationMutationObserver(observer: MutationObserver | 
   if (!observer) return;
   try {
     observer.disconnect();
-  } catch {}
+  } catch {
+    /* Ignore mutation observer disconnect error */
+  }
   _activeMutationObservers.delete(observer);
 }
 
@@ -177,8 +178,7 @@ function setupGlobalTelemetry(): void {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      cancelBubble: e.cancelBubble,
-      isPropagationStopped: Boolean(e.cancelBubble || (e as any).defaultPrevented),
+      isPropagationStopped: Boolean(e.defaultPrevented || (e as any).isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -202,8 +202,7 @@ function setupGlobalTelemetry(): void {
       key: e.key,
       code: e.code,
       defaultPrevented: e.defaultPrevented,
-      cancelBubble: e.cancelBubble,
-      isPropagationStopped: Boolean(e.cancelBubble),
+      isPropagationStopped: Boolean(e.defaultPrevented || (e as any).isPropagationStopped?.()),
       targetTag: target?.tagName?.toLowerCase(),
       targetClass: target?.className,
       activeElementTag: activeEl?.tagName?.toLowerCase(),
@@ -331,7 +330,9 @@ export function teardownGlobalTelemetry(): void {
     for (const item of _registeredPointerMouseListeners) {
       try {
         window.removeEventListener(item.type, item.listener, item.useCapture);
-      } catch {}
+      } catch {
+        /* Ignore removeEventListener error */
+      }
     }
   }
   if (typeof document !== 'undefined') {
@@ -349,7 +350,9 @@ export function teardownGlobalTelemetry(): void {
   for (const observer of _activeMutationObservers) {
     try {
       observer.disconnect();
-    } catch {}
+    } catch {
+      /* Ignore observer disconnect error */
+    }
   }
   _activeMutationObservers.clear();
 }
