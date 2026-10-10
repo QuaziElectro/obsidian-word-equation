@@ -24,24 +24,6 @@ Edit mathematical formulas naturally with in-place visual slots, auto-expanding 
 
 ---
 
-## ⌨️ Common Shortcuts Reference
-
-| Syntax / Shortcut | Expanded Structure | Action |
-|:---|:---|:---|
-| `\frac` + <kbd>Space</kbd> or `/` | Fraction $\frac{a}{b}$ | Inserts fraction with numerator and denominator |
-| `\sqrt` + <kbd>Space</kbd> | Square Root $\sqrt{x}$ | Inserts radical structure |
-| `\root` + <kbd>Space</kbd> | N-th Root $\sqrt[n]{x}$ | Inserts radical with custom root index |
-| `^` | Superscript $x^2$ | Creates exponent slot |
-| `_` | Subscript $x_i$ | Creates index slot |
-| `\int` + <kbd>Space</kbd> | Integral $\int$ | Inserts integral symbol |
-| `\sum` + <kbd>Space</kbd> | Summation $\sum$ | Inserts sigma summation |
-| `\alpha`, `\beta`, `\theta` | Greek Symbols ($\alpha, \beta, \theta$) | Replaces with Greek character |
-| `\pm`, `\times`, `\leq`, `\geq` | Math Operators ($\pm, \times, \leq, \geq$) | Replaces with mathematical operator |
-
-*(All shortcuts can be viewed and customized in Obsidian Settings &rarr; Word Equation)*
-
----
-
 ## 📦 Installation
 
 ### Method 1: Via BRAT *(Recommended for auto-updates)*
@@ -53,17 +35,17 @@ Edit mathematical formulas naturally with in-place visual slots, auto-expanding 
 ### Method 2: Manual Installation (ZIP Archive)
 1. Go to the [Latest Releases](https://github.com/QuaziElectro/obsidian-word-equation/releases/latest).
 2. Download **`word-equation.zip`**.
-3. Extract the archive into your vault's plugins folder:
-   `<VaultFolder>/.obsidian/plugins/word-equation/`
-   *(Ensure `main.js`, `manifest.json`, and `styles.css` are placed directly inside this folder).*
+3. Extract the ZIP archive directly into your vault's plugins directory:
+   `<VaultFolder>/.obsidian/plugins/`
+   *(The archive already contains the `word-equation` folder with `main.js`, `manifest.json`, and `styles.css`).*
 4. In Obsidian, go to **Settings** &rarr; **Community plugins**, click **Reload plugins**, and toggle on **Word Equation**.
 
 ### Method 3: Manual Installation (Individual Files)
 1. Go to the [Latest Releases](https://github.com/QuaziElectro/obsidian-word-equation/releases/latest).
 2. Download `main.js`, `manifest.json`, and `styles.css`.
 3. Create a folder named `word-equation` inside:
-   `<VaultFolder>/.obsidian/plugins/word-equation/`
-4. Copy the downloaded files into that folder.
+   `<VaultFolder>/.obsidian/plugins/`
+4. Place the 3 downloaded files inside `<VaultFolder>/.obsidian/plugins/word-equation/`.
 5. In Obsidian, go to **Settings** &rarr; **Community plugins**, reload, and enable **Word Equation**.
 
 ---
