@@ -6543,12 +6543,12 @@ __export(main_exports, {
   default: () => WordEquationPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian5 = require("obsidian");
+var import_obsidian6 = require("obsidian");
 
 // src/editor/state-field.ts
 var import_state = require("@codemirror/state");
 var import_view2 = require("@codemirror/view");
-var import_obsidian = require("obsidian");
+var import_obsidian2 = require("obsidian");
 
 // src/editor/widget.ts
 var import_view = require("@codemirror/view");
@@ -6723,10 +6723,73 @@ function createUnderOver(base, under, over, accent2 = false, id) {
     parentSlotId: null
   };
 }
+function createEnclosed(content, notation = "box", id) {
+  const nodeId = id || generateId("menclose");
+  content.role = "enclosed";
+  content.parentNodeId = nodeId;
+  return {
+    id: nodeId,
+    type: "enclosed",
+    notation,
+    content,
+    parentSlotId: null
+  };
+}
+function createPhantom(content, id) {
+  const nodeId = id || generateId("mphantom");
+  content.role = "phantom";
+  content.parentNodeId = nodeId;
+  return {
+    id: nodeId,
+    type: "phantom",
+    content,
+    parentSlotId: null
+  };
+}
+function createSpace(width = "1em", id) {
+  return {
+    id: id || generateId("mspace"),
+    type: "space",
+    width,
+    parentSlotId: null
+  };
+}
+function createMultiscripts(base, postSub, postSup, preSub, preSup, id) {
+  const nodeId = id || generateId("mmultiscripts");
+  base.role = "base";
+  base.parentNodeId = nodeId;
+  if (postSub) {
+    postSub.role = "sub";
+    postSub.parentNodeId = nodeId;
+  }
+  if (postSup) {
+    postSup.role = "sup";
+    postSup.parentNodeId = nodeId;
+  }
+  if (preSub) {
+    preSub.role = "presub";
+    preSub.parentNodeId = nodeId;
+  }
+  if (preSup) {
+    preSup.role = "presup";
+    preSup.parentNodeId = nodeId;
+  }
+  return {
+    id: nodeId,
+    type: "multiscripts",
+    base,
+    postSub,
+    postSup,
+    preSub,
+    preSup,
+    parentSlotId: null
+  };
+}
 function getChildSlots(node) {
   switch (node.type) {
     case "token":
     case "placeholder":
+    case "space":
       return [];
     case "fraction":
       return [node.numerator, node.denominator];
@@ -6744,6 +6807,22 @@ function getChildSlots(node) {
       return node.rows.flat();
     case "fenced":
       return [node.content];
+    case "enclosed":
+      return [node.content];
+    case "phantom":
+      return [node.content];
+    case "multiscripts": {
+      const slots = [node.base];
+      if (node.postSub)
+        slots.push(node.postSub);
+      if (node.postSup)
+        slots.push(node.postSup);
+      if (node.preSub)
+        slots.push(node.preSub);
+      if (node.preSup)
+        slots.push(node.preSup);
+      return slots;
+    }
     case "underover": {
       const slots = [node.base];
       if (node.under)
@@ -6892,6 +6971,28 @@ function cloneNode(node, preserveIds = true) {
         node.under ? cloneSlot(node.under, preserveIds) : void 0,
         node.over ? cloneSlot(node.over, preserveIds) : void 0,
         node.accent,
+        preserveIds ? node.id : void 0
+      );
+    case "enclosed":
+      return createEnclosed(
+        cloneSlot(node.content, preserveIds),
+        node.notation,
+        preserveIds ? node.id : void 0
+      );
+    case "phantom":
+      return createPhantom(
+        cloneSlot(node.content, preserveIds),
+        preserveIds ? node.id : void 0
+      );
+    case "space":
+      return createSpace(node.width, preserveIds ? node.id : void 0);
+    case "multiscripts":
+      return createMultiscripts(
+        cloneSlot(node.base, preserveIds),
+        node.postSub ? cloneSlot(node.postSub, preserveIds) : void 0,
+        node.postSup ? cloneSlot(node.postSup, preserveIds) : void 0,
+        node.preSub ? cloneSlot(node.preSub, preserveIds) : void 0,
+        node.preSup ? cloneSlot(node.preSup, preserveIds) : void 0,
         preserveIds ? node.id : void 0
       );
   }
@@ -7387,12 +7488,91 @@ function parseElement(el) {
       const accent2 = el.getAttribute("accent") === "true" || el.getAttribute("accentunder") === "true";
       return createUnderOver(baseSlot, underSlot, overSlot, accent2);
     }
+    case "menclose": {
+      const notation = el.getAttribute("notation") || "box";
+      const contentSlot = createSlot("enclosed", []);
+      parseChildrenIntoSlot(el, contentSlot);
+      return createEnclosed(contentSlot, notation);
+    }
+    case "mphantom": {
+      const contentSlot = createSlot("phantom", []);
+      parseChildrenIntoSlot(el, contentSlot);
+      return createPhantom(contentSlot);
+    }
+    case "mspace": {
+      const width = el.getAttribute("width") || "1em";
+      return createSpace(width);
+    }
+    case "mmultiscripts": {
+      const childEls = getElementChildNodes(el);
+      const baseSlot = createSlot("base", []);
+      if (childEls[0])
+        parseIntoSlot(childEls[0], baseSlot);
+      let postSub;
+      let postSup;
+      let preSub;
+      let preSup;
+      let isPre = false;
+      let postIndex = 0;
+      let preIndex = 0;
+      for (let i = 1; i < childEls.length; i++) {
+        const c = childEls[i];
+        const tag2 = (c.localName || c.tagName).toLowerCase();
+        if (tag2 === "mprescripts") {
+          isPre = true;
+          continue;
+        }
+        if (!isPre) {
+          if (postIndex === 0) {
+            postSub = createSlot("sub", []);
+            parseIntoSlot(c, postSub);
+            postIndex++;
+          } else if (postIndex === 1) {
+            postSup = createSlot("sup", []);
+            parseIntoSlot(c, postSup);
+            postIndex++;
+          }
+        } else {
+          if (preIndex === 0) {
+            preSub = createSlot("presub", []);
+            parseIntoSlot(c, preSub);
+            preIndex++;
+          } else if (preIndex === 1) {
+            preSup = createSlot("presup", []);
+            parseIntoSlot(c, preSup);
+            preIndex++;
+          }
+        }
+      }
+      return createMultiscripts(baseSlot, postSub, postSup, preSub, preSup);
+    }
+    case "mtr": {
+      const cellElements = Array.from(el.children).filter(
+        (c) => (c.localName || c.tagName).toLowerCase() === "mtd"
+      );
+      const rowSlots = [];
+      for (const cellEl of cellElements) {
+        const cellSlot = createSlot("cell", []);
+        parseChildrenIntoSlot(cellEl, cellSlot);
+        rowSlots.push(cellSlot);
+      }
+      if (rowSlots.length === 0) {
+        rowSlots.push(createSlot("cell", []));
+      }
+      return createMatrix([rowSlots]);
+    }
+    case "mtd": {
+      const cellSlot = createSlot("cell", []);
+      parseChildrenIntoSlot(el, cellSlot);
+      return createMatrix([[cellSlot]]);
+    }
+    case "merror":
     case "mpadded":
     case "mstyle":
     case "semantics": {
       const tempSlot = createSlot("root", []);
       parseChildrenIntoSlot(el, tempSlot);
-      return tempSlot.children;
+      return tempSlot.children.length > 0 ? tempSlot.children : [createToken(el.textContent || "", "mtext")];
     }
     default: {
       const text2 = el.textContent?.trim();
@@ -7692,6 +7872,51 @@ ${pad}</munder>`;
         }
         return base;
       }
+      case "enclosed": {
+        const notation = escapeXml(node.notation || "box");
+        const content = serializeSlotAsSingleElement(node.content, indentLevel + 1);
+        if (pretty) {
+          return `${pad}<menclose notation="${notation}">
+${content}
+${pad}</menclose>`;
+        }
+        return `<menclose notation="${notation}">${content}</menclose>`;
+      }
+      case "phantom": {
+        const content = serializeSlotAsSingleElement(node.content, indentLevel + 1);
+        if (pretty) {
+          return `${pad}<mphantom>
+${content}
+${pad}</mphantom>`;
+        }
+        return `<mphantom>${content}</mphantom>`;
+      }
+      case "space": {
+        const width = escapeXml(node.width || "1em");
+        return `${pad}<mspace width="${width}"/>`;
+      }
+      case "multiscripts": {
+        const base = serializeSlotAsSingleElement(node.base, indentLevel + 1);
+        const postSub = node.postSub ? serializeSlotAsSingleElement(node.postSub, indentLevel + 1) : `${padChild}<none/>`;
+        const postSup = node.postSup ? serializeSlotAsSingleElement(node.postSup, indentLevel + 1) : `${padChild}<none/>`;
+        let prescriptsPart = "";
+        if (node.preSub || node.preSup) {
+          const preSub = node.preSub ? serializeSlotAsSingleElement(node.preSub, indentLevel + 1) : `${padChild}<none/>`;
+          const preSup = node.preSup ? serializeSlotAsSingleElement(node.preSup, indentLevel + 1) : `${padChild}<none/>`;
+          prescriptsPart = pretty ? `
+${padChild}<mprescripts/>
+${preSub}
+${preSup}` : `<mprescripts/>${preSub}${preSup}`;
+        }
+        if (pretty) {
+          return `${pad}<mmultiscripts>
+${base}
+${postSub}
+${postSup}${prescriptsPart}
+${pad}</mmultiscripts>`;
+        }
+        return `<mmultiscripts>${base}${postSub}${postSup}${prescriptsPart}</mmultiscripts>`;
+      }
     }
   }
   const rootChildren = serializeSlotChildren(root, 1);
@@ -7834,7 +8059,14 @@ for (const entry of SHORTCUT_CATALOG) {
 }
 var customShortcuts = [];
 function setCustomShortcuts(shortcuts) {
-  customShortcuts = (shortcuts || []).filter((s) => s.trigger && s.trigger.trim().length > 0);
+  const list = Array.isArray(shortcuts) ? shortcuts : [];
+  customShortcuts = list.filter(
+    (s) => Boolean(s && s.trigger && typeof s.trigger === "string" && s.trigger.trim().length > 0)
+  ).map((s) => ({
+    trigger: s.trigger,
+    expansion: typeof s.expansion === "string" ? s.expansion : String(s.expansion ?? ""),
+    scope: s.scope === "block" ? "block" : "inline"
+  }));
 }
 function getCustomShortcuts() {
   return customShortcuts;
@@ -7847,7 +8079,12 @@ function lookupCustomOrCatalog(trigger) {
   );
   if (custom) {
     const isMathML = /<math|<m[a-z]+/i.test(custom.expansion);
-    return { trigger: custom.trigger, expansion: custom.expansion, isMathML };
+    return {
+      trigger: custom.trigger,
+      expansion: custom.expansion,
+      isMathML,
+      scope: custom.scope || "inline"
+    };
   }
   const entry = getShortcut(trigger.startsWith("\\") ? trigger : `\\${trigger}`);
   if (entry) {
@@ -8374,6 +8611,14 @@ var DomRenderer = class {
         return this.renderFenced(node, ctx);
       case "underover":
         return this.renderUnderOver(node, ctx);
+      case "enclosed":
+        return this.renderEnclosed(node, ctx);
+      case "phantom":
+        return this.renderPhantom(node, ctx);
+      case "space":
+        return this.renderSpace(node);
+      case "multiscripts":
+        return this.renderMultiscripts(node, ctx);
     }
   }
   renderToken(node) {
@@ -8560,6 +8805,70 @@ var DomRenderer = class {
       underEl.style.fontSize = "0.7em";
       underEl.appendChild(this.renderSlot(node.under, ctx));
       container.appendChild(underEl);
+    }
+    return container;
+  }
+  renderEnclosed(node, ctx) {
+    const container = this.doc.createElement("span");
+    container.className = `eq-enclosed eq-enclosed-${node.notation || "box"}`;
+    container.setAttribute("data-node-id", node.id);
+    container.setAttribute("data-notation", node.notation || "box");
+    container.appendChild(this.renderSlot(node.content, ctx));
+    return container;
+  }
+  renderPhantom(node, ctx) {
+    const container = this.doc.createElement("span");
+    container.className = "eq-phantom";
+    container.setAttribute("data-node-id", node.id);
+    container.appendChild(this.renderSlot(node.content, ctx));
+    return container;
+  }
+  renderSpace(node) {
+    const el = this.doc.createElement("span");
+    el.className = "eq-space";
+    el.setAttribute("data-node-id", node.id);
+    el.style.display = "inline-block";
+    el.style.width = node.width || "1em";
+    return el;
+  }
+  renderMultiscripts(node, ctx) {
+    const container = this.doc.createElement("span");
+    container.className = "eq-multiscripts";
+    container.setAttribute("data-node-id", node.id);
+    if (node.preSub || node.preSup) {
+      const preBox = this.doc.createElement("span");
+      preBox.className = "eq-prescripts";
+      if (node.preSup) {
+        const sup = this.doc.createElement("span");
+        sup.className = "eq-superscript";
+        sup.appendChild(this.renderSlot(node.preSup, ctx));
+        preBox.appendChild(sup);
+      }
+      if (node.preSub) {
+        const sub = this.doc.createElement("span");
+        sub.className = "eq-subscript";
+        sub.appendChild(this.renderSlot(node.preSub, ctx));
+        preBox.appendChild(sub);
+      }
+      container.appendChild(preBox);
+    }
+    container.appendChild(this.renderSlot(node.base, ctx));
+    if (node.postSub || node.postSup) {
+      const postBox = this.doc.createElement("span");
+      postBox.className = "eq-postscripts";
+      if (node.postSup) {
+        const sup = this.doc.createElement("span");
+        sup.className = "eq-superscript";
+        sup.appendChild(this.renderSlot(node.postSup, ctx));
+        postBox.appendChild(sup);
+      }
+      if (node.postSub) {
+        const sub = this.doc.createElement("span");
+        sub.className = "eq-subscript";
+        sub.appendChild(this.renderSlot(node.postSub, ctx));
+        postBox.appendChild(sub);
+      }
+      container.appendChild(postBox);
     }
     return container;
   }
@@ -9016,6 +9325,11 @@ var DebugLogger = class _DebugLogger {
     this.pendingFlush = false;
     this.syncWindowBridge();
   }
+  captureTableCellMetrics(widgetEl, transition, metaOrFrom, to) {
+    if (!this.enabled)
+      return null;
+    return captureTableCellMetrics(widgetEl, transition, metaOrFrom, to);
+  }
   destroy() {
     this.resetForTesting();
     teardownGlobalTelemetry();
@@ -9032,6 +9346,109 @@ function logDebugEvent(type, payloadOrFactory, immediate) {
     getDebugLogger().record(type, details, immediate);
   } catch (err) {
     console.error("[WordEquation] Telemetry error:", err);
+  }
+}
+function captureTableCellMetrics(widgetEl, transition, metaOrFrom, to) {
+  if (!_isDebugModeEnabled || !widgetEl)
+    return null;
+  try {
+    let equationFrom = 0;
+    let equationTo = 0;
+    if (typeof metaOrFrom === "number") {
+      equationFrom = metaOrFrom;
+      equationTo = typeof to === "number" ? to : metaOrFrom;
+    } else if (metaOrFrom && typeof metaOrFrom === "object") {
+      equationFrom = typeof metaOrFrom.from === "number" ? metaOrFrom.from : typeof metaOrFrom.equationFrom === "number" ? metaOrFrom.equationFrom : 0;
+      equationTo = typeof metaOrFrom.to === "number" ? metaOrFrom.to : typeof metaOrFrom.equationTo === "number" ? metaOrFrom.equationTo : typeof to === "number" ? to : 0;
+    } else if (widgetEl.__weqRange) {
+      equationFrom = widgetEl.__weqRange.from ?? 0;
+      equationTo = widgetEl.__weqRange.to ?? 0;
+    } else if (widgetEl.dataset && widgetEl.dataset.equationFrom) {
+      equationFrom = Number(widgetEl.dataset.equationFrom) || 0;
+      equationTo = Number(widgetEl.dataset.equationTo) || 0;
+    }
+    const mathBox = widgetEl.querySelector?.(".word-equation-math") ?? widgetEl;
+    const parentCell = widgetEl.closest?.("td, th, .table-cell-wrapper, .cm-line") ?? null;
+    const getMetrics = (el) => {
+      if (!el || typeof el.getBoundingClientRect !== "function") {
+        return { width: 0, height: 0, top: 0, bottom: 0, left: 0, right: 0 };
+      }
+      const r = el.getBoundingClientRect();
+      return {
+        width: typeof r.width === "number" ? r.width : 0,
+        height: typeof r.height === "number" ? r.height : 0,
+        top: typeof r.top === "number" ? r.top : 0,
+        bottom: typeof r.bottom === "number" ? r.bottom : 0,
+        left: typeof r.left === "number" ? r.left : 0,
+        right: typeof r.right === "number" ? r.right : 0
+      };
+    };
+    const getStyles = (el) => {
+      if (!el || typeof window === "undefined" || typeof window.getComputedStyle !== "function") {
+        return {
+          marginTop: "",
+          marginBottom: "",
+          marginLeft: "",
+          marginRight: "",
+          paddingTop: "",
+          paddingBottom: "",
+          paddingLeft: "",
+          paddingRight: "",
+          fontSize: "",
+          lineHeight: "",
+          height: "",
+          minHeight: "",
+          boxSizing: "",
+          boxShadow: "",
+          borderWidth: "",
+          borderRadius: ""
+        };
+      }
+      const cs = window.getComputedStyle(el);
+      return {
+        marginTop: cs.marginTop || "",
+        marginBottom: cs.marginBottom || "",
+        marginLeft: cs.marginLeft || "",
+        marginRight: cs.marginRight || "",
+        paddingTop: cs.paddingTop || "",
+        paddingBottom: cs.paddingBottom || "",
+        paddingLeft: cs.paddingLeft || "",
+        paddingRight: cs.paddingRight || "",
+        fontSize: cs.fontSize || "",
+        lineHeight: cs.lineHeight || "",
+        height: cs.height || "",
+        minHeight: cs.minHeight || "",
+        boxSizing: cs.boxSizing || "",
+        boxShadow: cs.boxShadow || "",
+        borderWidth: cs.borderWidth || "",
+        borderRadius: cs.borderRadius || ""
+      };
+    };
+    const isBlockInTable = Boolean(
+      widgetEl.classList?.contains("word-equation-table-block") || parentCell && (parentCell.tagName === "TD" || parentCell.tagName === "TH" || parentCell.classList?.contains("table-cell-wrapper"))
+    );
+    const payload = {
+      transition,
+      equationFrom,
+      equationTo,
+      isBlockInTable,
+      containerTag: parentCell?.tagName?.toLowerCase() || "unknown",
+      containerClasses: parentCell && parentCell.classList ? Array.from(parentCell.classList) : [],
+      widgetClasses: widgetEl.classList ? Array.from(widgetEl.classList) : [],
+      mathBoxClasses: mathBox && mathBox.classList ? Array.from(mathBox.classList) : [],
+      widgetRect: getMetrics(widgetEl),
+      mathBoxRect: mathBox ? getMetrics(mathBox) : getMetrics(null),
+      parentCellRect: parentCell ? getMetrics(parentCell) : void 0,
+      widgetComputedStyles: getStyles(widgetEl),
+      mathBoxComputedStyles: mathBox ? getStyles(mathBox) : getStyles(null),
+      hasActiveOutline: Boolean(mathBox?.classList?.contains("eq-active") || widgetEl.classList?.contains("eq-active")),
+      hasVisualCaret: Boolean(widgetEl.querySelector?.(".eq-caret"))
+    };
+    logDebugEvent("table_cell_metrics", payload);
+    return payload;
+  } catch (err) {
+    console.error("[WordEquation] Failed to record table cell metrics:", err);
+    return null;
   }
 }
 function getDebugLogger() {
@@ -10570,10 +10987,36 @@ function deleteSelection(root, selection) {
       s.children = [];
     }
   }
+  let fallbackCaret = null;
+  const pruneVisitor = (slot) => {
+    const nextChildren = [];
+    for (let i = 0; i < slot.children.length; i++) {
+      const child = slot.children[i];
+      if (child.type === "token") {
+        nextChildren.push(child);
+        continue;
+      }
+      const childSlots = getChildSlots(child);
+      const allSlotsEmpty = childSlots.every((cs) => cs.children.length === 0);
+      const encompassesAny = childSlots.some(
+        (cs) => cs.id === start.slotId || cs.id === end.slotId
+      );
+      if (allSlotsEmpty && childSlots.length > 0 && encompassesAny) {
+        fallbackCaret = { slotId: slot.id, offset: nextChildren.length };
+        continue;
+      }
+      nextChildren.push(child);
+      childSlots.forEach(pruneVisitor);
+    }
+    slot.children = nextChildren;
+  };
+  pruneVisitor(clonedRoot);
   updateParentPointers(clonedRoot);
+  const finalCaretSlot = findSlotById(clonedRoot, start.slotId);
+  const finalCaret = finalCaretSlot ? { slotId: start.slotId, offset: Math.min(start.offset, finalCaretSlot.children.length) } : fallbackCaret || { slotId: clonedRoot.id, offset: 0 };
   return {
     root: clonedRoot,
-    caret: { slotId: start.slotId, offset: start.offset }
+    caret: finalCaret
   };
 }
 function deleteParentStructure(root, slotId) {
@@ -10709,11 +11152,12 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
       continue;
     let hasSelected = false;
     let selectedCount = 0;
+    const isInsideSelectedStruct = Boolean(slotEl.closest(".eq-selected-structure"));
     if (slot.children.length === 0) {
       const pos = { slotId: slot.id, offset: 0 };
       if (comparePositions(rootAst, pos, start) >= 0 && comparePositions(rootAst, pos, end) <= 0) {
         const ph = slotEl.querySelector(".eq-placeholder");
-        if (ph) {
+        if (ph && !isInsideSelectedStruct) {
           ph.classList.add("eq-selected-token");
         }
         hasSelected = true;
@@ -10731,7 +11175,7 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
             selectedCount++;
             selectedTokenIds.push(childNode.id);
             const childEl = slotEl.querySelector(`[data-node-id="${childNode.id}"]`);
-            if (childEl) {
+            if (childEl && !isInsideSelectedStruct) {
               childEl.classList.add("eq-selected-token");
             }
           }
@@ -10744,6 +11188,12 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
               const hasParentSelectedStruct = Boolean(structEl.parentElement?.closest(".eq-selected-structure"));
               if (!hasParentSelectedStruct) {
                 structEl.classList.add("eq-selected-structure");
+                const descendants = structEl.querySelectorAll(
+                  ".eq-selected-token, .eq-selected-slot, .eq-partial-selected"
+                );
+                descendants.forEach((d) => {
+                  d.classList.remove("eq-selected-token", "eq-selected-slot", "eq-partial-selected");
+                });
               }
             }
           }
@@ -10755,7 +11205,7 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
         selectedSlotIds.push(slot.id);
       }
       const isCrossBoundary = start.slotId !== end.slotId;
-      if (isCrossBoundary) {
+      if (isCrossBoundary && !isInsideSelectedStruct) {
         if (slot.role !== "root" && slot.id !== rootAst.id) {
           slotEl.classList.add("eq-partial-selected");
           if (selectedCount === slot.children.length && slot.children.length > 0) {
@@ -10763,14 +11213,36 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
           }
         }
         const num = slotEl.closest(".eq-numerator");
-        if (num)
+        if (num && !num.closest(".eq-selected-structure"))
           num.classList.add("eq-partial-selected");
         const den = slotEl.closest(".eq-denominator");
-        if (den)
+        if (den && !den.closest(".eq-selected-structure"))
           den.classList.add("eq-partial-selected");
       }
     }
   }
+  const compositeElements = rootEl.querySelectorAll(".eq-matrix, .eq-fraction, .eq-radical, .eq-script, .eq-underover, .eq-fence");
+  compositeElements.forEach((el) => {
+    const parentSelected = Boolean(el.parentElement?.closest(".eq-selected-structure"));
+    if (!parentSelected) {
+      const childSlots = Array.from(el.querySelectorAll(".eq-slot"));
+      if (childSlots.length > 0 && childSlots.every((s) => {
+        const sid = s.getAttribute("data-slot-id");
+        if (!sid || !selectedSlotIds.includes(sid))
+          return false;
+        const slotAst = findSlotById(rootAst, sid);
+        return slotAst ? slotAst.children.length === 0 : false;
+      })) {
+        el.classList.add("eq-selected-structure");
+        const descendants = el.querySelectorAll(
+          ".eq-selected-token, .eq-selected-slot, .eq-partial-selected"
+        );
+        descendants.forEach((d) => {
+          d.classList.remove("eq-selected-token", "eq-selected-slot", "eq-partial-selected");
+        });
+      }
+    }
+  });
   logDebugEvent("selection", () => {
     const widget = rootEl.__widget;
     const fromAttr = rootEl.getAttribute("data-equation-from");
@@ -10807,7 +11279,7 @@ function updatePartialSelectionDom(rootEl, rootAst, selection, highlightedSlotId
 }
 
 // src/shortcuts/engine.ts
-function expandShortcutInMarkdown(textBefore) {
+function expandShortcutInMarkdown(textBefore, defaultDelimiter = "math-word") {
   const customList = getCustomShortcuts().slice().sort((a, b) => b.trigger.length - a.trigger.length);
   for (const item of customList) {
     const raw = item.trigger;
@@ -10819,16 +11291,28 @@ function expandShortcutInMarkdown(textBefore) {
     if (matchedCandidate) {
       const isMathML = /<math|<m[a-z]+/i.test(item.expansion);
       let replacement = item.expansion;
+      const scope = item.scope || "inline";
       if (isMathML) {
         let xml = item.expansion.trim();
-        if (!xml.startsWith("<math")) {
-          xml = `<math xmlns="${MATHML_NAMESPACE}" display="block">
+        if (scope === "block") {
+          if (!xml.startsWith("<math")) {
+            xml = `<math xmlns="${MATHML_NAMESPACE}" display="block">
   ${xml}
 </math>`;
-        }
-        replacement = `\`\`\`math-word
+          } else if (!xml.includes("display=")) {
+            xml = xml.replace(/<math/i, `<math display="block"`);
+          }
+          replacement = `\`\`\`${defaultDelimiter}
 ${xml}
 \`\`\``;
+        } else {
+          if (!xml.startsWith("<math")) {
+            xml = `<math xmlns="${MATHML_NAMESPACE}" display="inline">${xml}</math>`;
+          } else if (!xml.includes("display=")) {
+            xml = xml.replace(/<math/i, `<math display="inline"`);
+          }
+          replacement = `/weq_inline ${xml} /weq_inline`;
+        }
       }
       return {
         matched: true,
@@ -11053,6 +11537,7 @@ function expandShortcutInSlot(slot, caretOffset, triggerKey) {
 }
 
 // src/editor/active-session.ts
+var import_obsidian = require("obsidian");
 var currentActiveEquation = null;
 var currentActiveWidget = null;
 var listeners = /* @__PURE__ */ new Set();
@@ -11084,12 +11569,16 @@ function setActiveEquationState(state, widget) {
     currentActiveWidget = widget;
   } else if (!state) {
     currentActiveWidget = null;
+  } else if (currentActiveWidget && currentActiveWidget.from !== state.from) {
+    currentActiveWidget = null;
   }
   if (typeof window !== "undefined") {
     window.__eqActiveState = state;
     if (widget !== void 0) {
       window.__eqActiveWidget = widget;
     } else if (!state) {
+      window.__eqActiveWidget = null;
+    } else if (window.__eqActiveWidget && window.__eqActiveWidget.from !== state.from) {
       window.__eqActiveWidget = null;
     }
   }
@@ -11180,9 +11669,49 @@ function clearActiveEquationState() {
 if (typeof window !== "undefined") {
   window.__clearActiveEquationState = clearActiveEquationState;
 }
+var savedDocumentContext = null;
+function captureDocumentContext(app) {
+  const activeView = app?.workspace?.getActiveViewOfType?.(import_obsidian.MarkdownView) || app?.workspace?.getMostRecentLeaf?.()?.view || (typeof window !== "undefined" ? window.__lastActiveView : null);
+  const editor = activeView?.editor;
+  const cm = editor?.cm || activeView?.cm;
+  const activeWidget = getActiveEquationWidget();
+  const activeState = getActiveEquationState();
+  savedDocumentContext = {
+    view: activeView || null,
+    cursor: editor && typeof editor.getCursor === "function" ? editor.getCursor() : null,
+    cmSelection: cm?.state?.selection ? cm.state.selection : null,
+    widget: activeWidget || null,
+    equationState: activeState ? { ...activeState } : null
+  };
+}
+function restoreDocumentContext(app) {
+  if (!savedDocumentContext)
+    return;
+  const ctx = savedDocumentContext;
+  savedDocumentContext = null;
+  const restore = () => {
+    if (ctx.widget && typeof ctx.widget.restoreCaret === "function" && ctx.equationState?.caret) {
+      ctx.widget.restoreCaret(ctx.equationState.caret);
+    } else if (ctx.widget && typeof ctx.widget.focus === "function") {
+      ctx.widget.focus();
+    } else if (ctx.view?.editor) {
+      ctx.view.editor.focus();
+      if (ctx.cursor && typeof ctx.view.editor.setCursor === "function") {
+        ctx.view.editor.setCursor(ctx.cursor);
+      }
+    }
+  };
+  restore();
+  if (typeof requestAnimationFrame !== "undefined") {
+    requestAnimationFrame(restore);
+  }
+}
 
 // src/editor/widget.ts
 var isUpdatingActiveEquation = false;
+function isInternalEquationUpdating() {
+  return isUpdatingActiveEquation;
+}
 var activeDragCleanup = null;
 var activeDragTeardown = () => {
   if (activeDragCleanup) {
@@ -11215,13 +11744,16 @@ function isBlockEquationEnd(view, line) {
   return false;
 }
 var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetType {
-  constructor(code, from, to, isInline = false, delimiter = "math-word") {
+  constructor(code, from, to, isInline = false, delimiter = "math-word", isBlockInTable = false, displayMode = delimiter === "math-page" || delimiter === "weq-page" ? "full-page" : isInline ? "inline" : "block", isInlineInTable = false) {
     super();
     this.code = code;
     this.from = from;
     this.to = to;
     this.isInline = isInline;
     this.delimiter = delimiter;
+    this.isBlockInTable = isBlockInTable;
+    this.displayMode = displayMode;
+    this.isInlineInTable = isInlineInTable;
     const parsedAst = parseMathML(this.code);
     const active = getActiveEquationState();
     const isAstCompatible = Boolean(active && active.isFocused && active.from === this.from) && (!isEquationEmpty(parsedAst) ? !isEquationEmpty(active.ast || parsedAst) : isEquationEmpty(active.ast || parsedAst));
@@ -11328,7 +11860,7 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
     }
   }
   eq(other) {
-    return this.code === other.code && this.from === other.from && this.to === other.to && this.isInline === other.isInline && this.delimiter === other.delimiter;
+    return this.code === other.code && this.from === other.from && this.to === other.to && this.isInline === other.isInline && this.delimiter === other.delimiter && this.isBlockInTable === other.isBlockInTable && this.displayMode === other.displayMode && this.isInlineInTable === other.isInlineInTable;
   }
   toDOM(view) {
     this.currentView = view;
@@ -11756,11 +12288,68 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
     }
   }
   renderCurrentDom() {
-    return this.renderer.render(this.ast, {
+    const dom = this.renderer.render(this.ast, {
       caret: this.isFocused ? this.caret : null,
       isFocused: this.isFocused,
       inline: this.isInline
     });
+    if (this.displayMode === "full-page") {
+      dom.classList.add("word-equation-full-page");
+      dom.style.display = "flex";
+      dom.style.width = "100%";
+      dom.style.height = "100%";
+      dom.style.minHeight = "100%";
+      dom.style.alignItems = "center";
+      dom.style.justifyContent = "center";
+      const mathBox = dom.querySelector(".word-equation-math");
+      if (mathBox) {
+        mathBox.classList.add("eq-full-page");
+        mathBox.style.display = "flex";
+        mathBox.style.width = "100%";
+        mathBox.style.height = "100%";
+        mathBox.style.minHeight = "100%";
+        mathBox.style.alignItems = "center";
+        mathBox.style.justifyContent = "center";
+        mathBox.style.borderRadius = "0";
+      }
+    } else if (this.isBlockInTable) {
+      dom.classList.add("word-equation-table-block");
+      dom.style.display = "flex";
+      dom.style.width = "100%";
+      dom.style.margin = "0.25em 0";
+      dom.style.padding = "0";
+      dom.style.boxSizing = "border-box";
+      dom.style.alignItems = "center";
+      dom.style.justifyContent = "center";
+      const mathBox = dom.querySelector(".word-equation-math");
+      if (mathBox) {
+        mathBox.style.display = "inline-flex";
+        mathBox.style.width = "auto";
+        mathBox.style.height = "auto";
+        mathBox.style.alignItems = "center";
+        mathBox.style.justifyContent = "center";
+        mathBox.style.borderRadius = "6px";
+        mathBox.style.padding = "6px 12px";
+        mathBox.style.minHeight = "2.2em";
+        mathBox.style.margin = "0";
+        mathBox.style.boxSizing = "border-box";
+      }
+    } else if (this.isInlineInTable) {
+      dom.classList.add("word-equation-table-inline");
+      dom.style.margin = "0";
+      const mathBox = dom.querySelector(".word-equation-math");
+      if (mathBox) {
+        mathBox.style.padding = "2px 4px";
+        mathBox.style.minHeight = "1.6em";
+        mathBox.style.minWidth = "2em";
+        mathBox.style.margin = "0";
+        mathBox.style.boxSizing = "border-box";
+      }
+    }
+    if (this.isBlockInTable || this.isInlineInTable || dom.classList?.contains("word-equation-table-block") || dom.classList?.contains("word-equation-table-inline") || dom.closest?.("td, th, .table-cell-wrapper")) {
+      captureTableCellMetrics(dom, this.isFocused ? "cell_entry" : "cell_exit", this.from, this.to);
+    }
+    return dom;
   }
   updateDomContents(dom) {
     this.isUpdatingDom = true;
@@ -11774,6 +12363,9 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
         dom.classList.add("eq-active");
       } else {
         dom.classList.remove("eq-active");
+      }
+      if (this.isBlockInTable || this.isInlineInTable || dom.classList?.contains("word-equation-table-block") || dom.classList?.contains("word-equation-table-inline") || dom.closest?.("td, th, .table-cell-wrapper")) {
+        captureTableCellMetrics(dom, this.isFocused ? "cell_entry" : "cell_exit", this.from, this.to);
       }
     } finally {
       this.isUpdatingDom = false;
@@ -11812,6 +12404,42 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
           }
         }
       }
+      if (this.isBlockInTable || this.isInlineInTable || container.classList?.contains("word-equation-table-block") || container.classList?.contains("word-equation-table-inline") || container.closest?.("td, th, .table-cell-wrapper")) {
+        captureTableCellMetrics(container, this.isFocused ? "cell_entry" : "cell_exit", this.from, this.to);
+      }
+    }
+  }
+  restoreCaret(caret, view) {
+    if (view)
+      this.currentView = view;
+    this.isFocused = true;
+    this.caret = caret;
+    setActiveEquationState(
+      {
+        from: this.from,
+        to: this.to,
+        caret: this.caret,
+        selection: null,
+        highlightedSlotId: null,
+        isFocused: true,
+        ast: this.ast
+      },
+      this
+    );
+    this.updateCaretOnly();
+    const mathEl = this.containerEl?.querySelector(".word-equation-math");
+    if (mathEl && typeof mathEl.focus === "function") {
+      mathEl.focus({ preventScroll: true });
+    }
+  }
+  focus(view) {
+    if (view)
+      this.currentView = view;
+    this.isFocused = true;
+    this.updateCaretOnly();
+    const mathEl = this.containerEl?.querySelector(".word-equation-math");
+    if (mathEl && typeof mathEl.focus === "function") {
+      mathEl.focus({ preventScroll: true });
     }
   }
   rerender() {
@@ -11958,7 +12586,10 @@ var WordEquationWidget = class _WordEquationWidget extends import_view.WidgetTyp
         fullReplacement = `/weq_inline ${newXml} /weq_inline`;
       }
     } else {
-      const fence = this.delimiter === "weq" ? "weq" : "math-word";
+      let fence = this.delimiter === "weq" ? "weq" : "math-word";
+      if (this.displayMode === "full-page" || this.delimiter === "math-page" || this.delimiter === "weq-page") {
+        fence = this.delimiter === "weq-page" ? "weq-page" : "math-page";
+      }
       fullReplacement = `\`\`\`${fence}
 ${newXml}
 \`\`\``;
@@ -11967,13 +12598,16 @@ ${newXml}
     if (currentDoc !== fullReplacement) {
       const newTo = this.from + fullReplacement.length;
       if (this.isFocused) {
-        setActiveEquationState({
-          from: this.from,
-          to: newTo,
-          caret: this.caret,
-          isFocused: true,
-          ast: this.ast
-        });
+        setActiveEquationState(
+          {
+            from: this.from,
+            to: newTo,
+            caret: this.caret,
+            isFocused: true,
+            ast: this.ast
+          },
+          this
+        );
       }
       this.isUpdatingDom = true;
       isUpdatingActiveEquation = true;
@@ -12049,8 +12683,11 @@ ${newXml}
     if (!trimmed)
       return;
     const activeView = view || this.currentView;
-    const clonedRoot = cloneSlot(this.ast);
-    const targetSlot = findSlotById(clonedRoot, this.caret.slotId) || clonedRoot;
+    const activeState = getActiveEquationState();
+    if (activeState && activeState.from === this.from && activeState.ast) {
+      this.ast = activeState.ast;
+    }
+    const targetSlot = findSlotById(this.ast, this.caret.slotId) || this.ast;
     const isMathML = /<math[\s>]|<math[\s\S]*<\/math>/i.test(trimmed) || /<m[a-z]+/i.test(trimmed);
     let nodesToInsert = [];
     if (isMathML) {
@@ -12073,8 +12710,7 @@ ${newXml}
     }
     const insertOffset = Math.min(this.caret.offset, targetSlot.children.length);
     targetSlot.children.splice(insertOffset, 0, ...nodesToInsert);
-    updateParentPointers(clonedRoot);
-    this.ast = clonedRoot;
+    updateParentPointers(this.ast);
     this.selection = null;
     this.highlightedSlotId = null;
     const findFirstEmptySlot = (nodes) => {
@@ -12121,7 +12757,7 @@ ${newXml}
     if (activeView) {
       this.syncToDocument(activeView);
     }
-    const emptyPlaceholder = findFirstEmptySlot(nodesToInsert) || findFirstEmptySlot(this.ast.children);
+    const emptyPlaceholder = findFirstEmptySlot(nodesToInsert);
     if (emptyPlaceholder) {
       this.caret = { slotId: emptyPlaceholder.id, offset: 0 };
     }
@@ -12327,17 +12963,66 @@ ${newXml}
         this.updateCaretOnly();
         activeView.focus();
         let targetPos;
-        if (this.isInline) {
+        if (this.displayMode === "full-page") {
+          const curLine = activeView.state.doc.lineAt(this.from);
+          if (isTableRowLine(curLine)) {
+            const lineBeforeFrom = curLine.text.slice(0, Math.max(0, this.from - curLine.from));
+            const pipeIndex = lineBeforeFrom.lastIndexOf("|");
+            if (pipeIndex > 0) {
+              targetPos = curLine.from + pipeIndex - 1;
+              activeView.dispatch({ selection: { anchor: targetPos } });
+            } else {
+              this.isFocused = true;
+              this.caret = { slotId: this.ast.id, offset: 0 };
+              setActiveEquationState(
+                {
+                  from: this.from,
+                  to: this.to,
+                  caret: this.caret,
+                  isFocused: true,
+                  ast: this.ast
+                },
+                this
+              );
+              this.updateCaretOnly();
+              return true;
+            }
+          } else {
+            this.isFocused = true;
+            this.caret = { slotId: this.ast.id, offset: 0 };
+            setActiveEquationState(
+              {
+                from: this.from,
+                to: this.to,
+                caret: this.caret,
+                isFocused: true,
+                ast: this.ast
+              },
+              this
+            );
+            this.updateCaretOnly();
+            return true;
+          }
+        } else if (this.isBlockInTable || isInsideTableRow(activeView.state.doc, this.from, this.to)) {
+          const curLine = activeView.state.doc.lineAt(this.from);
+          const lineBeforeFrom = curLine.text.slice(0, Math.max(0, this.from - curLine.from));
+          const pipeIndex = lineBeforeFrom.lastIndexOf("|");
+          targetPos = pipeIndex !== -1 ? curLine.from + pipeIndex : this.from;
+          activeView.dispatch({ selection: { anchor: targetPos } });
+        } else if (this.isInline) {
           targetPos = this.from;
           activeView.dispatch({ selection: { anchor: targetPos } });
         } else {
           const curLine = activeView.state.doc.lineAt(this.from);
           if (curLine.number <= 1) {
+            activeView.dispatch({
+              changes: { from: 0, insert: "\n" },
+              selection: { anchor: 0 }
+            });
             targetPos = 0;
-            activeView.dispatch({ selection: { anchor: targetPos } });
           } else {
             const prevLine = activeView.state.doc.line(curLine.number - 1);
-            if (isBlockEquationEnd(activeView, prevLine)) {
+            if (isBlockEquationEnd(activeView, prevLine) || isTableRowLine(prevLine)) {
               activeView.dispatch({
                 changes: { from: this.from, insert: "\n" },
                 selection: { anchor: this.from }
@@ -12397,7 +13082,55 @@ ${newXml}
         this.updateCaretOnly();
         activeView.focus();
         let targetPos;
-        if (this.isInline) {
+        if (this.displayMode === "full-page") {
+          const curLine = activeView.state.doc.lineAt(Math.min(activeView.state.doc.length, this.to));
+          if (isTableRowLine(curLine)) {
+            const lineAfterTo = curLine.text.slice(Math.max(0, this.to - curLine.from));
+            const pipeIndex = lineAfterTo.indexOf("|");
+            if (pipeIndex !== -1 && lineAfterTo.slice(pipeIndex + 1).includes("|")) {
+              targetPos = this.to + pipeIndex + 1;
+              this.lastForwardExitPos = targetPos;
+              activeView.dispatch({ selection: { anchor: targetPos } });
+            } else {
+              this.isFocused = true;
+              this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+              setActiveEquationState(
+                {
+                  from: this.from,
+                  to: this.to,
+                  caret: this.caret,
+                  isFocused: true,
+                  ast: this.ast
+                },
+                this
+              );
+              this.updateCaretOnly();
+              return true;
+            }
+          } else {
+            this.isFocused = true;
+            this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+            setActiveEquationState(
+              {
+                from: this.from,
+                to: this.to,
+                caret: this.caret,
+                isFocused: true,
+                ast: this.ast
+              },
+              this
+            );
+            this.updateCaretOnly();
+            return true;
+          }
+        } else if (this.isBlockInTable || isInsideTableRow(activeView.state.doc, this.from, this.to)) {
+          const curLine = activeView.state.doc.lineAt(Math.min(activeView.state.doc.length, this.to));
+          const lineAfterTo = curLine.text.slice(Math.max(0, this.to - curLine.from));
+          const pipeIndex = lineAfterTo.indexOf("|");
+          targetPos = pipeIndex !== -1 ? this.to + pipeIndex + 1 : Math.min(activeView.state.doc.length, this.to);
+          this.lastForwardExitPos = targetPos;
+          activeView.dispatch({ selection: { anchor: targetPos } });
+        } else if (this.isInline) {
           targetPos = Math.min(activeView.state.doc.length, this.to);
           activeView.dispatch({ selection: { anchor: targetPos } });
         } else {
@@ -12411,7 +13144,7 @@ ${newXml}
             targetPos = docLen + 1;
           } else {
             const nextLine = activeView.state.doc.line(blockLine.number + 1);
-            if (isBlockEquationStart(activeView, nextLine)) {
+            if (isBlockEquationStart(activeView, nextLine) || isTableRowLine(nextLine)) {
               activeView.dispatch({
                 changes: { from: nextLine.from, insert: "\n" },
                 selection: { anchor: nextLine.from }
@@ -12468,8 +13201,30 @@ ${newXml}
         this.syncPeerWidgets(false);
         this.updateCaretOnly();
         activeView.focus();
-        const lineAbove = activeView.state.doc.lineAt(Math.max(0, this.from - 1));
-        activeView.dispatch({ selection: { anchor: lineAbove.to } });
+        let targetPos;
+        if (this.isBlockInTable || isInsideTableRow(activeView.state.doc, this.from, this.to)) {
+          const curLine = activeView.state.doc.lineAt(this.from);
+          if (curLine.number > 1) {
+            const prevLine = activeView.state.doc.line(curLine.number - 1);
+            targetPos = Math.min(prevLine.to, prevLine.from + (this.from - curLine.from));
+            activeView.dispatch({ selection: { anchor: targetPos } });
+          } else {
+            targetPos = 0;
+            activeView.dispatch({ selection: { anchor: targetPos } });
+          }
+        } else {
+          const lineAbove = activeView.state.doc.lineAt(Math.max(0, this.from - 1));
+          if (isBlockEquationEnd(activeView, lineAbove) || isTableRowLine(lineAbove)) {
+            activeView.dispatch({
+              changes: { from: this.from, insert: "\n" },
+              selection: { anchor: this.from }
+            });
+            targetPos = this.from;
+          } else {
+            targetPos = lineAbove.length === 0 ? lineAbove.from : lineAbove.to;
+            activeView.dispatch({ selection: { anchor: targetPos } });
+          }
+        }
         if (isDebugEnabled()) {
           const cmSelectionAfter = {
             anchor: activeView.state.selection.main.anchor,
@@ -12482,7 +13237,7 @@ ${newXml}
             shiftKey: false,
             navType: "exit_equation",
             from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
-            to: { cmPos: lineAbove.to },
+            to: { cmPos: targetPos },
             exitDirection: "up",
             equation: { from: this.from, to: this.to, isInline: this.isInline },
             cmSelectionBefore,
@@ -12494,7 +13249,7 @@ ${newXml}
             direction: "up",
             key,
             from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
-            to: { cmPos: lineAbove.to },
+            to: { cmPos: targetPos },
             activeElementBefore: activeElBefore,
             activeElementAfter: activeElAfter,
             cmSelectionBefore,
@@ -12514,7 +13269,21 @@ ${newXml}
         this.updateCaretOnly();
         activeView.focus();
         let targetPos;
-        if (this.isInline) {
+        if (this.isBlockInTable || isInsideTableRow(activeView.state.doc, this.from, this.to)) {
+          const curLine = activeView.state.doc.lineAt(this.from);
+          if (curLine.number < activeView.state.doc.lines) {
+            const nextLine = activeView.state.doc.line(curLine.number + 1);
+            targetPos = Math.min(nextLine.to, nextLine.from + (this.from - curLine.from));
+            activeView.dispatch({ selection: { anchor: targetPos } });
+          } else {
+            const docLen = activeView.state.doc.length;
+            activeView.dispatch({
+              changes: { from: docLen, insert: "\n" },
+              selection: { anchor: docLen + 1 }
+            });
+            targetPos = docLen + 1;
+          }
+        } else if (this.isInline) {
           const curLine = activeView.state.doc.lineAt(this.to);
           if (curLine.number < activeView.state.doc.lines) {
             const nextLine = activeView.state.doc.line(curLine.number + 1);
@@ -12539,8 +13308,16 @@ ${newXml}
             targetPos = docLen + 1;
           } else {
             const nextLine = activeView.state.doc.line(blockLine.number + 1);
-            activeView.dispatch({ selection: { anchor: nextLine.from } });
-            targetPos = nextLine.from;
+            if (isBlockEquationStart(activeView, nextLine) || isTableRowLine(nextLine)) {
+              activeView.dispatch({
+                changes: { from: nextLine.from, insert: "\n" },
+                selection: { anchor: nextLine.from }
+              });
+              targetPos = nextLine.from;
+            } else {
+              activeView.dispatch({ selection: { anchor: nextLine.from } });
+              targetPos = nextLine.from;
+            }
           }
         }
         if (isDebugEnabled()) {
@@ -13400,6 +14177,30 @@ ${newXml}
         widget.handleUndoRedo(isUndo ? "undo" : "redo", view);
         return;
       }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "a" || e.key === "A")) {
+        e.preventDefault();
+        e.stopPropagation();
+        widget.selection = {
+          anchor: { slotId: widget.ast.id, offset: 0 },
+          head: { slotId: widget.ast.id, offset: widget.ast.children.length }
+        };
+        widget.caret = { slotId: widget.ast.id, offset: widget.ast.children.length };
+        widget.highlightedSlotId = null;
+        setActiveEquationState(
+          {
+            from: widget.from,
+            to: widget.to,
+            caret: widget.caret,
+            selection: widget.selection,
+            highlightedSlotId: null,
+            isFocused: true,
+            ast: widget.ast
+          },
+          widget
+        );
+        widget.updateCaretOnly();
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "ArrowDown") {
         e.preventDefault();
         e.stopPropagation();
@@ -13464,52 +14265,72 @@ ${newXml}
         const isEmpty = slot ? isSlotEmpty(slot) : false;
         const isAtRoot = widget.caret.slotId === widget.ast.id || !findParentNodeOfSlot(widget.ast, widget.caret.slotId);
         if (widget.highlightedSlotId) {
-          if (widget.highlightedSlotId === widget.caret.slotId) {
-            if (isAtRoot) {
-              widget.isFocused = false;
-              clearActiveEquationState();
-              widget.updateCaretOnly(dom);
-              const range = widget.getLiveRange(view);
-              let deleteFrom = range.from;
-              let deleteTo = range.to;
-              if (!widget.isInline) {
-                if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 2) === "\r\n") {
-                  deleteTo += 2;
-                } else if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 1) === "\n") {
-                  deleteTo += 1;
-                }
+          const targetSlotId = widget.highlightedSlotId;
+          const isTargetAtRoot = targetSlotId === widget.ast.id || !findParentNodeOfSlot(widget.ast, targetSlotId);
+          if (isTargetAtRoot) {
+            widget.isFocused = false;
+            clearActiveEquationState();
+            widget.updateCaretOnly(dom);
+            const range = widget.getLiveRange(view);
+            let deleteFrom = range.from;
+            let deleteTo = range.to;
+            if (!widget.isInline) {
+              if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 2) === "\r\n") {
+                deleteTo += 2;
+              } else if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 1) === "\n") {
+                deleteTo += 1;
               }
-              view.dispatch({
-                changes: { from: deleteFrom, to: deleteTo },
-                selection: { anchor: deleteFrom }
-              });
-              view.focus();
-              return;
-            } else {
-              const clonedRoot = cloneSlot(widget.ast);
-              const targetSlot = findSlotById(clonedRoot, widget.caret.slotId);
-              if (targetSlot) {
-                targetSlot.children = [];
-                updateParentPointers(clonedRoot);
-                widget.ast = clonedRoot;
-                widget.caret = { slotId: targetSlot.id, offset: 0 };
-              }
-              widget.highlightedSlotId = null;
-              setActiveEquationState({
-                from: widget.from,
-                to: widget.to,
-                caret: widget.caret,
-                selection: null,
-                highlightedSlotId: null,
-                isFocused: true,
-                ast: widget.ast
-              });
-              widget.rerender();
-              widget.syncToDocument(view);
-              return;
             }
+            view.dispatch({
+              changes: { from: deleteFrom, to: deleteTo },
+              selection: { anchor: deleteFrom }
+            });
+            view.focus();
+            return;
           } else {
+            const currentSlot = findSlotById(widget.ast, targetSlotId);
+            if (currentSlot && currentSlot.children.length === 0) {
+              const res = deleteParentStructure(widget.ast, targetSlotId);
+              if (res.handled) {
+                widget.ast = res.root;
+                widget.caret = res.caret;
+                widget.highlightedSlotId = null;
+                widget.selection = null;
+                setActiveEquationState({
+                  from: widget.from,
+                  to: widget.to,
+                  caret: widget.caret,
+                  selection: null,
+                  highlightedSlotId: null,
+                  isFocused: true,
+                  ast: widget.ast
+                });
+                widget.rerender();
+                widget.syncToDocument(view);
+                return;
+              }
+            }
+            const clonedRoot = cloneSlot(widget.ast);
+            const targetSlot = findSlotById(clonedRoot, targetSlotId);
+            if (targetSlot) {
+              targetSlot.children = [];
+              updateParentPointers(clonedRoot);
+              widget.ast = clonedRoot;
+              widget.caret = { slotId: targetSlot.id, offset: 0 };
+            }
             widget.highlightedSlotId = null;
+            setActiveEquationState({
+              from: widget.from,
+              to: widget.to,
+              caret: widget.caret,
+              selection: null,
+              highlightedSlotId: null,
+              isFocused: true,
+              ast: widget.ast
+            });
+            widget.rerender();
+            widget.syncToDocument(view);
+            return;
           }
         }
         if (widget.caret.offset > 0) {
@@ -13664,6 +14485,54 @@ ${newXml}
           widget.rerender();
           widget.syncToDocument(view);
           return;
+        }
+        if (widget.highlightedSlotId) {
+          const targetSlotId = widget.highlightedSlotId;
+          const parentNode = findParentNodeOfSlot(widget.ast, targetSlotId);
+          if (parentNode) {
+            const res2 = deleteParentStructure(widget.ast, targetSlotId);
+            if (res2.handled) {
+              widget.ast = res2.root;
+              widget.caret = res2.caret;
+              widget.highlightedSlotId = null;
+              widget.selection = null;
+              setActiveEquationState({
+                from: widget.from,
+                to: widget.to,
+                caret: widget.caret,
+                selection: null,
+                highlightedSlotId: null,
+                isFocused: true,
+                ast: widget.ast
+              });
+              widget.rerender();
+              widget.syncToDocument(view);
+              return;
+            }
+          }
+          widget.highlightedSlotId = null;
+        }
+        const slot = findSlotById(widget.ast, widget.caret.slotId);
+        if (slot && slot.children.length === 0 && slot.role !== "root") {
+          const res2 = deleteParentStructure(widget.ast, widget.caret.slotId);
+          if (res2.handled) {
+            widget.ast = res2.root;
+            widget.caret = res2.caret;
+            widget.highlightedSlotId = null;
+            widget.selection = null;
+            setActiveEquationState({
+              from: widget.from,
+              to: widget.to,
+              caret: widget.caret,
+              selection: null,
+              highlightedSlotId: null,
+              isFocused: true,
+              ast: widget.ast
+            });
+            widget.rerender();
+            widget.syncToDocument(view);
+            return;
+          }
         }
         widget.selection = null;
         widget.highlightedSlotId = null;
@@ -13820,2388 +14689,6 @@ ${newXml}
       }
       widget.updateCaretOnly(dom);
     });
-  }
-};
-
-// src/editor/state-field.ts
-function isLivePreviewActive(state) {
-  try {
-    if (import_obsidian.editorLivePreviewField) {
-      const val = state.field(import_obsidian.editorLivePreviewField, false);
-      if (val !== void 0) {
-        return Boolean(val);
-      }
-    }
-  } catch {
-  }
-  return true;
-}
-function buildEquationDecorations(input) {
-  if ("field" in input && typeof input.field === "function") {
-    if (!isLivePreviewActive(input)) {
-      return import_view2.Decoration.none;
-    }
-  }
-  const doc = "doc" in input ? input.doc : input;
-  const docText = doc.toString();
-  const ranges = [];
-  const blockRegex = /```(math-word|weq)(?:[ \t]*\r?\n)([\s\S]*?)(?:\r?\n```|$)/g;
-  let match;
-  while ((match = blockRegex.exec(docText)) !== null) {
-    const from = match.index;
-    const to = from + match[0].length;
-    const delimiter = match[1];
-    const code = match[2] || "";
-    ranges.push({ from, to, code, inline: false, delimiter });
-  }
-  const slashInlineRegex = /\/weq_inline\s*([\s\S]*?)\s*\/weq_inline/g;
-  while ((match = slashInlineRegex.exec(docText)) !== null) {
-    const from = match.index;
-    const to = from + match[0].length;
-    const code = match[1] || "";
-    ranges.push({ from, to, code, inline: true, delimiter: "/weq_inline" });
-  }
-  const dollarInlineRegex = /\$weq(?:_inline)?\s*([\s\S]*?)\s*\$weq(?:_inline)?/g;
-  while ((match = dollarInlineRegex.exec(docText)) !== null) {
-    const from = match.index;
-    const to = from + match[0].length;
-    const code = match[1] || "";
-    ranges.push({ from, to, code, inline: true, delimiter: "$weq" });
-  }
-  ranges.sort((a, b) => a.from - b.from || b.to - a.to);
-  const builder = new import_state.RangeSetBuilder();
-  let lastEnd = 0;
-  for (const r of ranges) {
-    if (r.from < lastEnd) {
-      continue;
-    }
-    lastEnd = r.to;
-    const widget = new WordEquationWidget(r.code, r.from, r.to, r.inline, r.delimiter);
-    builder.add(
-      r.from,
-      r.to,
-      import_view2.Decoration.replace({
-        widget,
-        block: !r.inline
-      })
-    );
-  }
-  return builder.finish();
-}
-var wordEquationCollapsedGapField = import_state.StateField.define({
-  create(state) {
-    return buildCollapsedGapDecorations(state);
-  },
-  update(decorations, tr) {
-    const wasLP = isLivePreviewActive(tr.startState);
-    const isLP = isLivePreviewActive(tr.state);
-    if (tr.docChanged || wasLP !== isLP) {
-      return buildCollapsedGapDecorations(tr.state);
-    }
-    return decorations.map(tr.changes);
-  },
-  provide(field) {
-    return import_view2.EditorView.decorations.from(field);
-  }
-});
-function buildCollapsedGapDecorations(input) {
-  if ("field" in input && typeof input.field === "function") {
-    if (!isLivePreviewActive(input)) {
-      return import_view2.Decoration.none;
-    }
-  }
-  const doc = "doc" in input ? input.doc : input;
-  const docText = doc.toString();
-  const blockRegex = /```(math-word|weq)(?:[ \t]*\r?\n)([\s\S]*?)(?:\r?\n```|$)/g;
-  let match;
-  const blockRanges = [];
-  while ((match = blockRegex.exec(docText)) !== null) {
-    const from = match.index;
-    const to = from + match[0].length;
-    const startLine = doc.lineAt(from).number;
-    const endLine = doc.lineAt(Math.min(doc.length, to)).number;
-    blockRanges.push({ from, to, startLine, endLine });
-  }
-  if (blockRanges.length < 2) {
-    return import_view2.Decoration.none;
-  }
-  const builder = new import_state.RangeSetBuilder();
-  for (let i = 0; i < blockRanges.length - 1; i++) {
-    const prevBlock = blockRanges[i];
-    const nextBlock = blockRanges[i + 1];
-    if (nextBlock.startLine === prevBlock.endLine + 2) {
-      const intermediateLine = doc.line(prevBlock.endLine + 1);
-      if (intermediateLine.length === 0) {
-        builder.add(
-          intermediateLine.from,
-          intermediateLine.from,
-          import_view2.Decoration.line({ class: "word-equation-collapsed-gap" })
-        );
-      }
-    }
-  }
-  return builder.finish();
-}
-var wordEquationStateField = import_state.StateField.define({
-  create(state) {
-    return buildEquationDecorations(state);
-  },
-  update(decorations, tr) {
-    const wasLP = isLivePreviewActive(tr.startState);
-    const isLP = isLivePreviewActive(tr.state);
-    if (tr.docChanged || wasLP !== isLP) {
-      return buildEquationDecorations(tr.state);
-    }
-    return decorations.map(tr.changes);
-  },
-  provide(field) {
-    return [
-      import_view2.EditorView.decorations.from(field),
-      wordEquationCollapsedGapField
-    ];
-  }
-});
-
-// src/editor/navigation-extension.ts
-var import_state2 = require("@codemirror/state");
-var import_view3 = require("@codemirror/view");
-var equationTransactionFilterPlugin = import_state2.EditorState.transactionFilter.of((tr) => {
-  if (!isDebugEnabled())
-    return tr;
-  try {
-    const activeState = getActiveEquationState();
-    const userEvent = tr.annotation(import_state2.Transaction.userEvent);
-    const targetSel = tr.selection || tr.newSelection;
-    const selectionBefore = {
-      anchor: tr.startState.selection.main.anchor,
-      head: tr.startState.selection.main.head,
-      empty: tr.startState.selection.main.empty
-    };
-    const selectionAfter = {
-      anchor: targetSel.main.anchor,
-      head: targetSel.main.head,
-      empty: targetSel.main.empty
-    };
-    logDebugEvent("navigation", () => ({
-      eventCategory: "cm_transaction",
-      userEvent,
-      selectionChanged: !targetSel.eq(tr.startState.selection),
-      selectionBefore,
-      selectionAfter,
-      docChanged: tr.docChanged,
-      hasActiveEquation: Boolean(activeState?.isFocused),
-      activeEquationRange: activeState ? { from: activeState.from, to: activeState.to } : void 0
-    }));
-  } catch (err) {
-    console.error("[WordEquation] Telemetry error in transaction filter:", err);
-  }
-  return tr;
-});
-var equationSelectionHighlightPlugin = import_view3.ViewPlugin.fromClass(
-  class {
-    constructor(view) {
-      this.view = view;
-      this.syncSelection(view);
-    }
-    update(update) {
-      if (update.selectionSet && isDebugEnabled()) {
-        const activeState = getActiveEquationState();
-        const mainSel = update.state.selection.main;
-        logDebugEvent("selection", () => ({
-          selectionType: "cm_selection_update",
-          codeMirrorSelection: {
-            anchor: mainSel.anchor,
-            head: mainSel.head,
-            empty: mainSel.empty,
-            from: mainSel.from,
-            to: mainSel.to
-          },
-          hasActiveEquation: Boolean(activeState?.isFocused),
-          activeEquationRange: activeState ? { from: activeState.from, to: activeState.to } : void 0
-        }));
-      }
-      if (update.selectionSet || update.docChanged || update.viewportChanged) {
-        this.syncSelection(update.view);
-      }
-    }
-    syncSelection(view) {
-      const ranges = view.state.selection.ranges.filter((r) => !r.empty);
-      const activeState = getActiveEquationState();
-      const equationEls = view.dom.querySelectorAll("[data-equation-from]");
-      equationEls.forEach((el) => {
-        const from = Number(el.getAttribute("data-equation-from"));
-        const to = Number(el.getAttribute("data-equation-to"));
-        if (Number.isNaN(from) || Number.isNaN(to))
-          return;
-        const isInternallyActive = Boolean(activeState?.isFocused && activeState.from === from);
-        const hasInternalSelection = Boolean(activeState?.from === from && activeState?.selection);
-        const isSelected = !isInternallyActive && !hasInternalSelection && ranges.some((r) => r.from < to && r.to > from);
-        updateEquationSelectionDom(el, isSelected);
-        if (isSelected) {
-          logDebugEvent("selection", () => ({
-            selectionType: "full",
-            equation: {
-              from,
-              to,
-              isInline: el.classList.contains("word-equation-inline")
-            },
-            codeMirrorSelection: ranges[0] ? {
-              from: ranges[0].from,
-              to: ranges[0].to,
-              head: ranges[0].head,
-              anchor: ranges[0].anchor
-            } : void 0
-          }));
-        }
-      });
-    }
-  }
-);
-function getActiveWidget(view) {
-  const active = getActiveEquationState();
-  if (!active || !active.isFocused)
-    return null;
-  const activeWidget = getActiveEquationWidget();
-  if (activeWidget instanceof WordEquationWidget && activeWidget.from === active.from) {
-    if (!activeWidget.isFocused) {
-      clearActiveEquationState();
-      return null;
-    }
-    if (active.ast)
-      activeWidget.ast = active.ast;
-    return activeWidget;
-  }
-  const containerEl = view.dom.querySelector(`[data-equation-from="${active.from}"]`) || view.dom.querySelector(".word-equation-math.eq-active")?.closest("[data-equation-from]") || view.dom.querySelector(".word-equation-math.eq-active");
-  if (containerEl) {
-    const candidate = containerEl.__widget || containerEl.querySelector?.("[data-equation-from]")?.__widget;
-    if (candidate && (candidate instanceof WordEquationWidget || typeof candidate.handleArrowNavigation === "function") && candidate.from === active.from) {
-      candidate.isFocused = true;
-      if (active.ast)
-        candidate.ast = active.ast;
-      return candidate;
-    }
-  }
-  const decorations = view.state.field(wordEquationStateField, false);
-  if (!decorations)
-    return null;
-  let targetWidget = null;
-  decorations.between(active.from, active.to, (f, t, dec) => {
-    const w = dec.widget || dec.spec?.widget;
-    if (w && (w instanceof WordEquationWidget || typeof w.handleArrowNavigation === "function")) {
-      if (w.from === active.from) {
-        w.isFocused = true;
-        if (active.ast) {
-          w.ast = active.ast;
-        }
-        targetWidget = w;
-      }
-    }
-  });
-  if (!targetWidget) {
-    clearActiveEquationState();
-  }
-  return targetWidget;
-}
-function deleteEquationWidget(view, widget) {
-  const range = widget.getLiveRange ? widget.getLiveRange(view) : { from: widget.from, to: widget.to };
-  let deleteFrom = range.from;
-  let deleteTo = range.to;
-  if (!widget.isInline) {
-    if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 2) === "\r\n") {
-      deleteTo += 2;
-    } else if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 1) === "\n") {
-      deleteTo += 1;
-    }
-  }
-  clearActiveEquationState();
-  view.dispatch({
-    changes: { from: deleteFrom, to: deleteTo },
-    selection: { anchor: deleteFrom }
-  });
-}
-function resolveActualWidget(view, targetWidget) {
-  const mountedEl = view.dom.querySelector(`[data-equation-from="${targetWidget.from}"]`) || view.dom.querySelector(".word-equation-math")?.parentElement;
-  const domWidget = mountedEl?.__widget;
-  const actualWidget = domWidget instanceof WordEquationWidget && domWidget.code === targetWidget.code ? domWidget : targetWidget;
-  actualWidget.from = targetWidget.from;
-  actualWidget.to = targetWidget.to;
-  return actualWidget;
-}
-var isWindowCaptureInterceptorInstalled = false;
-function registerWindowArrowCaptureInterceptor() {
-  if (typeof window === "undefined" || isWindowCaptureInterceptorInstalled)
-    return;
-  isWindowCaptureInterceptorInstalled = true;
-  window.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.ctrlKey || e.altKey || e.metaKey)
-        return;
-      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "ArrowDown" && e.key !== "ArrowUp") {
-        return;
-      }
-      const activeState = getActiveEquationState();
-      if (!activeState?.isFocused || document.activeElement !== document.body)
-        return;
-      const activeWidget = getActiveEquationWidget();
-      if (!activeWidget || typeof activeWidget.handleArrowNavigation !== "function")
-        return;
-      if (activeWidget.containerEl && !activeWidget.containerEl.isConnected) {
-        clearActiveEquationState();
-        return;
-      }
-      const mathEl = activeWidget.containerEl?.classList?.contains("word-equation-math") ? activeWidget.containerEl : activeWidget.containerEl?.querySelector(".word-equation-math");
-      if (mathEl && typeof mathEl.focus === "function") {
-        mathEl.focus({ preventScroll: true });
-      }
-      const handled = activeWidget.handleArrowNavigation(
-        e.key,
-        e.shiftKey,
-        activeWidget.currentView
-      );
-      if (handled) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }
-    },
-    true
-  );
-}
-function createEquationNavigationExtension() {
-  registerWindowArrowCaptureInterceptor();
-  return [
-    equationTransactionFilterPlugin,
-    equationSelectionHighlightPlugin,
-    import_state2.Prec.highest(import_view3.EditorView.decorations.from(wordEquationStateField)),
-    import_state2.Prec.highest(
-      import_view3.keymap.of([
-        {
-          key: "Escape",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              logDebugEvent("keydown", () => ({
-                eventCategory: "cm_keymap_escape",
-                action: "deactivate_active_widget",
-                from: activeWidget.from,
-                to: activeWidget.to
-              }), true);
-              activeWidget.isFocused = false;
-              activeWidget.selection = null;
-              activeWidget.highlightedSlotId = null;
-              activeWidget.detachObserver();
-              clearActiveEquationState();
-              activeWidget.updateCaretOnly();
-              view.focus();
-              const targetPos = activeWidget.isInline ? activeWidget.from : Math.max(0, activeWidget.from - 1);
-              view.dispatch({
-                selection: { anchor: targetPos, head: targetPos },
-                scrollIntoView: true,
-                userEvent: "select"
-              });
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Mod-z",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              activeWidget.handleUndoRedo("undo", view);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Mod-y",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              activeWidget.handleUndoRedo("redo", view);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Mod-Shift-z",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              activeWidget.handleUndoRedo("redo", view);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Backspace",
-          run: (view) => {
-            const active = getActiveEquationState();
-            if (active && active.isFocused)
-              return false;
-            const sel = view.state.selection.main;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            if (!sel.empty) {
-              let targetWidget2 = null;
-              decorations.between(sel.from, sel.to, (from, to, dec) => {
-                if (dec.spec?.widget instanceof WordEquationWidget) {
-                  const w = dec.spec.widget;
-                  if (w.from === sel.from && w.to === sel.to) {
-                    targetWidget2 = w;
-                  }
-                }
-              });
-              if (targetWidget2) {
-                deleteEquationWidget(view, targetWidget2);
-                return true;
-              }
-              return false;
-            }
-            const pos = sel.head;
-            let targetWidget = null;
-            decorations.between(Math.max(0, pos - 10), pos, (from, to, dec) => {
-              if (dec.spec?.widget instanceof WordEquationWidget) {
-                const w = dec.spec.widget;
-                if (w.isInline) {
-                  if (to === pos) {
-                    targetWidget = w;
-                  }
-                } else {
-                  const blockLine = view.state.doc.lineAt(w.to);
-                  const curLine = view.state.doc.lineAt(pos);
-                  const isImmediatelyAfterBlock = pos === w.to || curLine.number === blockLine.number + 1 && curLine.from === pos;
-                  if (isImmediatelyAfterBlock) {
-                    targetWidget = w;
-                  }
-                }
-              }
-            });
-            if (targetWidget) {
-              deleteEquationWidget(view, targetWidget);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Delete",
-          run: (view) => {
-            const active = getActiveEquationState();
-            if (active && active.isFocused)
-              return false;
-            const sel = view.state.selection.main;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            if (!sel.empty) {
-              let targetWidget2 = null;
-              decorations.between(sel.from, sel.to, (from, to, dec) => {
-                if (dec.spec?.widget instanceof WordEquationWidget) {
-                  const w = dec.spec.widget;
-                  if (w.from === sel.from && w.to === sel.to) {
-                    targetWidget2 = w;
-                  }
-                }
-              });
-              if (targetWidget2) {
-                deleteEquationWidget(view, targetWidget2);
-                return true;
-              }
-              return false;
-            }
-            const pos = sel.head;
-            let targetWidget = null;
-            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
-              if (dec.spec?.widget instanceof WordEquationWidget) {
-                const w = dec.spec.widget;
-                if (w.isInline) {
-                  if (from === pos) {
-                    targetWidget = w;
-                  }
-                } else {
-                  const blockLine = view.state.doc.lineAt(w.from);
-                  const curLine = view.state.doc.lineAt(pos);
-                  if (pos === w.from || pos === w.from - 1 || pos === w.from - 2 || curLine.number === blockLine.number - 1 && curLine.to === pos) {
-                    targetWidget = w;
-                  }
-                }
-              }
-            });
-            if (targetWidget) {
-              deleteEquationWidget(view, targetWidget);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "Shift-ArrowRight",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowRight", true, view);
-            }
-            const sel = view.state.selection.main;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            const doc = view.state.doc;
-            const candidates = [];
-            decorations.between(
-              Math.max(0, sel.head - 4),
-              Math.min(doc.length, sel.head + 4),
-              (from, to, dec) => {
-                const w = dec.widget || dec.spec?.widget;
-                if (w instanceof WordEquationWidget || from < to) {
-                  if (!candidates.some((c) => c.from === from && c.to === to)) {
-                    candidates.push({
-                      from,
-                      to,
-                      isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
-                    });
-                  }
-                }
-              }
-            );
-            if (candidates.length === 0) {
-              decorations.between(
-                Math.max(0, sel.from),
-                Math.min(doc.length, sel.to + 1),
-                (from, to, dec) => {
-                  if (sel.head >= from && sel.head <= to) {
-                    const w = dec.widget || dec.spec?.widget;
-                    if (!candidates.some((c) => c.from === from && c.to === to)) {
-                      candidates.push({
-                        from,
-                        to,
-                        isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
-                      });
-                    }
-                  }
-                }
-              );
-            }
-            let candidateWidget = null;
-            if (candidates.length > 0) {
-              const atEntranceOrInside = candidates.find(
-                (c) => sel.head === c.from || sel.head > c.from && sel.head < c.to
-              );
-              if (atEntranceOrInside) {
-                candidateWidget = atEntranceOrInside;
-              } else {
-                const rightCandidates = candidates.filter((c) => c.to >= sel.head);
-                if (rightCandidates.length > 0) {
-                  candidateWidget = rightCandidates.reduce(
-                    (closest, curr) => curr.to < closest.to ? curr : closest
-                  );
-                } else {
-                  candidateWidget = candidates[0];
-                }
-              }
-            }
-            if (candidateWidget) {
-              const { from, to, isInline } = candidateWidget;
-              const exitPos = !isInline && to < doc.length && doc.sliceString(to, to + 1) === "\n" ? to + 1 : to;
-              if (sel.anchor <= from) {
-                if (sel.head < to) {
-                  if (sel.head === from || sel.head > from && sel.head < to) {
-                    logDebugEvent("selection", () => ({
-                      action: "external_shift_arrow",
-                      direction: "Shift-ArrowRight",
-                      step: "jump_across_equation",
-                      headBefore: sel.head,
-                      headAfter: exitPos,
-                      anchor: sel.anchor,
-                      equation: { from, to, isInline }
-                    }));
-                    view.dispatch({
-                      selection: { anchor: sel.anchor, head: exitPos },
-                      scrollIntoView: true,
-                      userEvent: "select.extend"
-                    });
-                    return true;
-                  }
-                } else if (sel.head >= to) {
-                  const nextPos = Math.min(doc.length, sel.head + 1);
-                  if (nextPos !== sel.head) {
-                    logDebugEvent("selection", () => ({
-                      action: "external_shift_arrow",
-                      direction: "Shift-ArrowRight",
-                      step: "extend_past_equation",
-                      headBefore: sel.head,
-                      headAfter: nextPos,
-                      anchor: sel.anchor,
-                      equation: { from, to, isInline }
-                    }));
-                    view.dispatch({
-                      selection: { anchor: sel.anchor, head: nextPos },
-                      scrollIntoView: true,
-                      userEvent: "select.extend"
-                    });
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          }
-        },
-        {
-          key: "Shift-ArrowLeft",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowLeft", true, view);
-            }
-            const sel = view.state.selection.main;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            const doc = view.state.doc;
-            const candidates = [];
-            decorations.between(
-              Math.max(0, sel.head - 4),
-              Math.min(doc.length, sel.head + 4),
-              (from, to, dec) => {
-                const w = dec.widget || dec.spec?.widget;
-                if (w instanceof WordEquationWidget || from < to) {
-                  if (!candidates.some((c) => c.from === from && c.to === to)) {
-                    candidates.push({
-                      from,
-                      to,
-                      isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
-                    });
-                  }
-                }
-              }
-            );
-            if (candidates.length === 0) {
-              decorations.between(
-                Math.max(0, sel.from - 1),
-                Math.min(doc.length, sel.to),
-                (from, to, dec) => {
-                  if (sel.head >= from && sel.head <= to) {
-                    const w = dec.widget || dec.spec?.widget;
-                    if (!candidates.some((c) => c.from === from && c.to === to)) {
-                      candidates.push({
-                        from,
-                        to,
-                        isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
-                      });
-                    }
-                  }
-                }
-              );
-            }
-            let candidateWidget = null;
-            if (candidates.length > 0) {
-              const atExitOrInside = candidates.find((c) => {
-                const exitPos = !c.isInline && c.to < doc.length && doc.sliceString(c.to, c.to + 1) === "\n" ? c.to + 1 : c.to;
-                return sel.head === exitPos || sel.head === c.to || sel.head < c.to && sel.head > c.from;
-              });
-              if (atExitOrInside) {
-                candidateWidget = atExitOrInside;
-              } else {
-                const leftCandidates = candidates.filter((c) => c.from <= sel.head);
-                if (leftCandidates.length > 0) {
-                  candidateWidget = leftCandidates.reduce(
-                    (closest, curr) => curr.from > closest.from ? curr : closest
-                  );
-                } else {
-                  candidateWidget = candidates[0];
-                }
-              }
-            }
-            if (candidateWidget) {
-              const { from, to, isInline } = candidateWidget;
-              const entrancePos = !isInline && from > 0 && doc.sliceString(from - 1, from) === "\n" ? from - 1 : from;
-              const exitPos = !isInline && to < doc.length && doc.sliceString(to, to + 1) === "\n" ? to + 1 : to;
-              if (sel.anchor >= to) {
-                if (sel.head > from) {
-                  if (sel.head === exitPos || sel.head === to || sel.head < to && sel.head > from) {
-                    logDebugEvent("selection", () => ({
-                      action: "external_shift_arrow",
-                      direction: "Shift-ArrowLeft",
-                      step: "jump_across_equation",
-                      headBefore: sel.head,
-                      headAfter: entrancePos,
-                      anchor: sel.anchor,
-                      equation: { from, to, isInline }
-                    }));
-                    view.dispatch({
-                      selection: { anchor: sel.anchor, head: entrancePos },
-                      scrollIntoView: true,
-                      userEvent: "select.extend"
-                    });
-                    return true;
-                  }
-                } else if (sel.head <= from) {
-                  const prevPos = Math.max(0, sel.head - 1);
-                  if (prevPos !== sel.head) {
-                    logDebugEvent("selection", () => ({
-                      action: "external_shift_arrow",
-                      direction: "Shift-ArrowLeft",
-                      step: "extend_past_equation",
-                      headBefore: sel.head,
-                      headAfter: prevPos,
-                      anchor: sel.anchor,
-                      equation: { from, to, isInline }
-                    }));
-                    view.dispatch({
-                      selection: { anchor: sel.anchor, head: prevPos },
-                      scrollIntoView: true,
-                      userEvent: "select.extend"
-                    });
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          }
-        },
-        {
-          key: "Shift-ArrowDown",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowDown", true, view);
-            }
-            return false;
-          }
-        },
-        {
-          key: "Shift-ArrowUp",
-          run: (view) => {
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowUp", true, view);
-            }
-            return false;
-          }
-        },
-        {
-          key: "ArrowRight",
-          run: (view) => {
-            logDebugEvent("keydown", () => ({
-              key: "ArrowRight",
-              code: "ArrowRight",
-              targetTag: "contentDOM",
-              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
-              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
-              isFocused: Boolean(getActiveEquationState()?.isFocused),
-              cmSelectionBefore: {
-                anchor: view.state.selection.main.anchor,
-                head: view.state.selection.main.head,
-                empty: view.state.selection.main.empty
-              }
-            }));
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowRight", false, view);
-            }
-            const sel = view.state.selection.main;
-            if (!sel.empty)
-              return false;
-            const pos = sel.head;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            let targetWidget = null;
-            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
-              const w = dec.widget || dec.spec?.widget;
-              if (!(w instanceof WordEquationWidget || typeof w?.enterFromStart === "function"))
-                return;
-              if (w.isInline) {
-                if (from === pos) {
-                  targetWidget = w;
-                }
-              } else {
-                const blockLine = view.state.doc.lineAt(from);
-                const curLine = view.state.doc.lineAt(pos);
-                const isAtBlockBoundary = from === pos || curLine.number === blockLine.number - 1 && curLine.to === pos || pos === from - 1 && view.state.doc.sliceString(pos, from) === "\n";
-                if (isAtBlockBoundary) {
-                  targetWidget = w;
-                }
-              }
-            });
-            if (targetWidget) {
-              const actualWidget = resolveActualWidget(view, targetWidget);
-              actualWidget.enterFromStart(view);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "ArrowLeft",
-          run: (view) => {
-            logDebugEvent("keydown", () => ({
-              key: "ArrowLeft",
-              code: "ArrowLeft",
-              targetTag: "contentDOM",
-              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
-              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
-              isFocused: Boolean(getActiveEquationState()?.isFocused),
-              cmSelectionBefore: {
-                anchor: view.state.selection.main.anchor,
-                head: view.state.selection.main.head,
-                empty: view.state.selection.main.empty
-              }
-            }));
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowLeft", false, view);
-            }
-            const sel = view.state.selection.main;
-            if (!sel.empty)
-              return false;
-            const pos = sel.head;
-            const decorations = view.state.field(wordEquationStateField, false);
-            if (!decorations)
-              return false;
-            let targetWidget = null;
-            decorations.between(Math.max(0, pos - 4), pos, (from, to, dec) => {
-              const w = dec.widget || dec.spec?.widget;
-              if (!(w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function"))
-                return;
-              if (w.isInline) {
-                if (to === pos) {
-                  targetWidget = w;
-                }
-              } else {
-                const blockLine = view.state.doc.lineAt(to);
-                const curLine = view.state.doc.lineAt(pos);
-                const isAtBlockBoundary = to === pos || curLine.number === blockLine.number + 1 && curLine.from === pos || pos === to + 1 && view.state.doc.sliceString(to, pos) === "\n";
-                if (isAtBlockBoundary) {
-                  targetWidget = w;
-                }
-              }
-            });
-            if (targetWidget) {
-              const w = targetWidget;
-              if (w.justEscapedForwardAfterEnteringFromEnd) {
-                w.justEscapedForwardAfterEnteringFromEnd = false;
-                return false;
-              }
-              w.justEscapedForwardAfterEnteringFromEnd = false;
-              const actualWidget = resolveActualWidget(view, w);
-              actualWidget.enterFromEnd(view);
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          key: "ArrowDown",
-          run: (view) => {
-            logDebugEvent("keydown", () => ({
-              key: "ArrowDown",
-              code: "ArrowDown",
-              targetTag: "contentDOM",
-              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
-              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
-              isFocused: Boolean(getActiveEquationState()?.isFocused),
-              cmSelectionBefore: {
-                anchor: view.state.selection.main.anchor,
-                head: view.state.selection.main.head,
-                empty: view.state.selection.main.empty
-              }
-            }));
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowDown", false, view);
-            }
-            const sel = view.state.selection.main;
-            if (!sel.empty)
-              return false;
-            const line = view.state.doc.lineAt(sel.head);
-            const nextPos = line.to + 1;
-            if (nextPos <= view.state.doc.length) {
-              const decorations = view.state.field(wordEquationStateField, false);
-              if (decorations) {
-                let targetWidget = null;
-                decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, to, dec) => {
-                  const w = dec.widget || dec.spec?.widget;
-                  if ((from === nextPos || from === nextPos + 1 || from === nextPos + 2) && (w instanceof WordEquationWidget || typeof w?.enterFromStart === "function")) {
-                    targetWidget = w;
-                  }
-                });
-                if (targetWidget) {
-                  const actualWidget = resolveActualWidget(view, targetWidget);
-                  actualWidget.enterFromStart(view, "ArrowDown");
-                  return true;
-                }
-              }
-            }
-            return false;
-          }
-        },
-        {
-          key: "ArrowUp",
-          run: (view) => {
-            logDebugEvent("keydown", () => ({
-              key: "ArrowUp",
-              code: "ArrowUp",
-              targetTag: "contentDOM",
-              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
-              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
-              isFocused: Boolean(getActiveEquationState()?.isFocused),
-              cmSelectionBefore: {
-                anchor: view.state.selection.main.anchor,
-                head: view.state.selection.main.head,
-                empty: view.state.selection.main.empty
-              }
-            }));
-            const activeWidget = getActiveWidget(view);
-            if (activeWidget) {
-              return activeWidget.handleArrowNavigation("ArrowUp", false, view);
-            }
-            const sel = view.state.selection.main;
-            if (!sel.empty)
-              return false;
-            const curLine = view.state.doc.lineAt(sel.head);
-            const prevPos = curLine.from - 1;
-            if (prevPos >= 0) {
-              const decorations = view.state.field(wordEquationStateField, false);
-              if (decorations) {
-                let targetWidget = null;
-                decorations.between(Math.max(0, prevPos - 4), prevPos, (from, to, dec) => {
-                  const w = dec.widget || dec.spec?.widget;
-                  if ((to === prevPos || to === prevPos - 1 || to === prevPos - 2) && (w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function")) {
-                    const blockLine = view.state.doc.lineAt(to);
-                    if (curLine.number === blockLine.number + 1) {
-                      targetWidget = w;
-                    }
-                  }
-                });
-                logDebugEvent("navigation", () => ({
-                  navType: "arrow_up_line_evaluation",
-                  currentPos: sel.head,
-                  currentLineNumber: curLine.number,
-                  candidateWidget: targetWidget ? { from: targetWidget.from, to: targetWidget.to } : null,
-                  blockLineNumber: targetWidget ? view.state.doc.lineAt(targetWidget.to).number : null,
-                  decision: targetWidget ? "enter_equation" : "skip_intermediate_line_or_none"
-                }));
-                if (targetWidget) {
-                  const actualWidget = resolveActualWidget(view, targetWidget);
-                  actualWidget.enterFromEnd(view, "ArrowUp");
-                  return true;
-                }
-              }
-            }
-            return false;
-          }
-        }
-      ])
-    ),
-    import_view3.EditorView.domEventHandlers({
-      pointerdown(event, view) {
-        const active = getActiveEquationState();
-        if (!active || !active.isFocused)
-          return false;
-        const target = event.target;
-        if (target && target.closest(".word-equation-block, .word-equation-inline")) {
-          return false;
-        }
-        const hadActiveSelection = Boolean(active.selection);
-        logDebugEvent("pointer", () => ({
-          eventCategory: "external_pointerdown",
-          hadActiveEquation: true,
-          activeEquationRange: { from: active.from, to: active.to },
-          hadActiveSelection,
-          actionTaken: "blur_equation_and_clear_selection"
-        }));
-        const decorations = view.state.field(wordEquationStateField, false);
-        if (decorations) {
-          decorations.between(active.from, active.to, (f, t, dec) => {
-            if (dec.spec?.widget instanceof WordEquationWidget) {
-              const w = dec.spec.widget;
-              w.isFocused = false;
-              w.selection = null;
-              w.highlightedSlotId = null;
-              w.updateCaretOnly();
-            }
-          });
-        }
-        clearActiveEquationState();
-        return false;
-      },
-      copy(event, view) {
-        if (!isDebugEnabled())
-          return false;
-        const active = getActiveEquationState();
-        if (active && active.isFocused) {
-          return false;
-        }
-        const sel = view.state.selection.main;
-        if (sel.empty)
-          return false;
-        const selectedText = view.state.sliceDoc(sel.from, sel.to);
-        const decorations = view.state.field(wordEquationStateField, false);
-        let spansEquation = false;
-        if (decorations) {
-          decorations.between(sel.from, sel.to, (f, t) => {
-            if (f < t) {
-              spansEquation = true;
-            }
-          });
-        }
-        const types = event.clipboardData ? Array.from(event.clipboardData.types) : ["text/plain"];
-        const snippet = selectedText.slice(0, 100);
-        logDebugEvent("clipboard", () => ({
-          action: "copy",
-          context: spansEquation ? "cross_boundary_selection" : "markdown_editor",
-          types,
-          characterCount: selectedText.length,
-          snippet,
-          selection: {
-            from: sel.from,
-            to: sel.to,
-            anchor: sel.anchor,
-            head: sel.head,
-            spansEquation
-          },
-          payload: {
-            types,
-            characterCount: selectedText.length,
-            snippet,
-            plainTextSnippet: snippet,
-            hasMathMarkup: /<math[\s>]|```math-word|\/weq_inline|\$weq/i.test(selectedText)
-          },
-          targetTag: event.target?.tagName?.toLowerCase(),
-          success: true
-        }));
-        return false;
-      },
-      paste(event, view) {
-        const active = getActiveEquationState();
-        if (active && active.isFocused) {
-          return false;
-        }
-        const clipboardText = event.clipboardData?.getData("application/mathml+xml")?.trim() || event.clipboardData?.getData("text/plain")?.trim();
-        if (!clipboardText)
-          return false;
-        const hasMarkdownFences = clipboardText.includes("```math-word") || clipboardText.includes("```weq") || clipboardText.includes("```") || clipboardText.includes("/weq_inline") || clipboardText.includes("$weq");
-        if (hasMarkdownFences) {
-          return false;
-        }
-        const isPureMathML = /^\s*(?:<\?xml[^>]*\?>\s*)?<math[\s>][\s\S]*<\/math>\s*$/i.test(clipboardText);
-        if (!isPureMathML) {
-          return false;
-        }
-        event.preventDefault();
-        let xml = clipboardText.replace(/^\s*<\?xml[^>]*\?>\s*/i, "").trim();
-        if (!xml.includes("xmlns=")) {
-          xml = xml.replace(/<math/i, '<math xmlns="http://www.w3.org/1998/Math/MathML"');
-        }
-        const sel = view.state.selection.main;
-        const line = view.state.doc.lineAt(sel.head);
-        const isInline = xml.includes('display="inline"') || line.text.trim().length > 0 && !xml.includes('display="block"');
-        let template;
-        if (isInline) {
-          template = `/weq_inline ${xml} /weq_inline`;
-        } else {
-          const prefix = sel.from > 0 && view.state.doc.sliceString(sel.from - 1, sel.from) !== "\n" ? "\n" : "";
-          const suffix = sel.to < view.state.doc.length && view.state.doc.sliceString(sel.to, sel.to + 1) !== "\n" ? "\n" : "";
-          template = `${prefix}\`\`\`math-word
-${xml}
-\`\`\`${suffix}`;
-        }
-        view.dispatch({
-          changes: { from: sel.from, to: sel.to, insert: template },
-          selection: { anchor: sel.from + template.length }
-        });
-        logDebugEvent("clipboard", () => ({
-          action: "paste",
-          context: "markdown_editor",
-          payload: {
-            types: event.clipboardData ? Array.from(event.clipboardData.types) : [],
-            plainTextSnippet: clipboardText.slice(0, 100),
-            mathmlSnippet: clipboardText.slice(0, 100),
-            isMathML: true,
-            characterCount: clipboardText.length
-          },
-          destination: {
-            cmPos: sel.from
-          },
-          success: true
-        }));
-        return true;
-      }
-    })
-  ];
-}
-
-// src/shortcuts/markdown-filter.ts
-var import_view4 = require("@codemirror/view");
-function createMarkdownShortcutExtension() {
-  return import_view4.keymap.of([
-    {
-      key: "Space",
-      run: (view) => {
-        const sel = view.state.selection.main;
-        if (!sel.empty)
-          return false;
-        const line = view.state.doc.lineAt(sel.head);
-        const textBefore = line.text.slice(0, sel.head - line.from);
-        const match = expandShortcutInMarkdown(textBefore);
-        if (match) {
-          const from = sel.head - match.triggerLength;
-          const to = sel.head;
-          view.dispatch({
-            changes: { from, to, insert: match.replacement },
-            selection: { anchor: from + match.replacement.length }
-          });
-          return true;
-        }
-        return false;
-      }
-    }
-  ]);
-}
-
-// src/post-processor/reading-view.ts
-function createReadingViewProcessor() {
-  const renderer = new DomRenderer();
-  return (source, el, ctx) => {
-    const trimmed = source.trim();
-    let ast;
-    try {
-      if (trimmed.startsWith("<math") || trimmed.includes("</math>") || trimmed.startsWith("<m")) {
-        ast = parseMathML(trimmed);
-      } else {
-        ast = parseLinearEquation(trimmed);
-      }
-      const rendered = renderer.render(ast, {
-        readOnly: true,
-        isFocused: false
-      });
-      const emptyEl = (element) => {
-        if (typeof element.empty === "function") {
-          element.empty();
-        } else {
-          element.innerHTML = "";
-        }
-      };
-      emptyEl(el);
-      el.appendChild(rendered);
-    } catch (err) {
-      if (typeof el.empty === "function") {
-        el.empty();
-      } else {
-        el.innerHTML = "";
-      }
-      const errEl = document.createElement("div");
-      errEl.className = "word-equation-error";
-      errEl.textContent = `[Equation Error: ${err.message || "Invalid equation"}]`;
-      el.appendChild(errEl);
-    }
-  };
-}
-
-// src/settings/settings-tab.ts
-var import_obsidian2 = require("obsidian");
-
-// src/settings/interactive-box.ts
-var InteractiveEquationBox = class {
-  ast;
-  caret;
-  isFocused = false;
-  dom;
-  selection = null;
-  highlightedSlotId = null;
-  renderer = new DomRenderer();
-  container;
-  onChange;
-  justExpandedShortcut = false;
-  undoStack = [];
-  redoStack = [];
-  lastClickTime = 0;
-  lastClickPos = null;
-  lastClickTarget = null;
-  lastClickCount = 0;
-  activeDragCleanup = null;
-  constructor(options) {
-    this.container = options.container;
-    this.onChange = options.onChange;
-    this.ast = this.parseContent(options.initialContent);
-    this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
-    this.dom = this.renderCurrentDom();
-    this.container.appendChild(this.dom);
-    this.syncNativeMathML();
-    this.attachEventListeners();
-  }
-  pushHistorySnapshot() {
-    this.undoStack.push({
-      ast: cloneSlot(this.ast, true),
-      caret: { ...this.caret }
-    });
-    if (this.undoStack.length > 50)
-      this.undoStack.shift();
-    this.redoStack = [];
-  }
-  undo() {
-    if (this.undoStack.length === 0)
-      return false;
-    this.redoStack.push({
-      ast: cloneSlot(this.ast, true),
-      caret: { ...this.caret }
-    });
-    const prev = this.undoStack.pop();
-    this.ast = prev.ast;
-    this.caret = prev.caret;
-    this.rerender();
-    this.emitChange();
-    return true;
-  }
-  redo() {
-    if (this.redoStack.length === 0)
-      return false;
-    this.undoStack.push({
-      ast: cloneSlot(this.ast, true),
-      caret: { ...this.caret }
-    });
-    const next = this.redoStack.pop();
-    this.ast = next.ast;
-    this.caret = next.caret;
-    this.rerender();
-    this.emitChange();
-    return true;
-  }
-  parseContent(content) {
-    const trimmed = (content || "").trim();
-    if (!trimmed) {
-      const root = createSlot("root", []);
-      updateParentPointers(root);
-      return root;
-    }
-    try {
-      let root;
-      if (trimmed.startsWith("<math") || trimmed.includes("</math>") || trimmed.startsWith("<m")) {
-        root = parseMathML(trimmed);
-      } else {
-        root = parseLinearEquation(trimmed);
-      }
-      updateParentPointers(root);
-      return root;
-    } catch {
-      try {
-        const root = parseLinearEquation(trimmed);
-        updateParentPointers(root);
-        return root;
-      } catch {
-        const root = createSlot("root", [createToken(trimmed, "mi")]);
-        updateParentPointers(root);
-        return root;
-      }
-    }
-  }
-  setContent(content) {
-    this.undoStack = [];
-    this.redoStack = [];
-    this.ast = this.parseContent(content);
-    this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
-    this.rerender();
-  }
-  renderCurrentDom() {
-    const rendered = this.renderer.render(this.ast, {
-      readOnly: false,
-      inline: true,
-      isFocused: this.isFocused,
-      caret: this.isFocused ? this.caret : null
-    });
-    const mathBox = rendered.querySelector(".word-equation-math") || rendered;
-    mathBox.setAttribute("tabindex", "0");
-    mathBox.classList.add("weq-settings-equation-box");
-    if (this.ast.children.length === 0) {
-      const ph = mathBox.querySelector(".eq-placeholder");
-      if (ph) {
-        ph.classList.add("weq-preview-empty");
-      }
-    }
-    return mathBox;
-  }
-  syncNativeMathML() {
-    const existing = this.container.querySelectorAll(".weq-native-mathml");
-    existing.forEach((n) => n.remove());
-    if (this.ast.children.length === 0)
-      return;
-    try {
-      const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
-      let cleanXml = xml.trim();
-      if (cleanXml.length > 0) {
-        if (!cleanXml.startsWith("<math") && !cleanXml.startsWith("<?xml")) {
-          cleanXml = `<math xmlns="${MATHML_NAMESPACE}">${cleanXml}</math>`;
-        }
-        const parser = new DOMParser();
-        let doc = parser.parseFromString(cleanXml, "text/html");
-        let mathNode = doc.querySelector("math");
-        if (!mathNode) {
-          doc = parser.parseFromString(cleanXml, "application/xml");
-          mathNode = doc.querySelector("math") || (doc.documentElement && doc.documentElement.localName?.toLowerCase() === "math" ? doc.documentElement : null) || doc.getElementsByTagName("math")[0] || doc.getElementsByTagNameNS("*", "math")[0] || null;
-        }
-        if (mathNode) {
-          const imported = document.importNode ? document.importNode(mathNode, true) : mathNode.cloneNode(true);
-          imported.classList.add("weq-native-mathml");
-          if (imported.style) {
-            imported.style.display = "none";
-          } else {
-            imported.setAttribute("style", "display: none;");
-          }
-          this.container.appendChild(imported);
-        }
-      }
-    } catch {
-    }
-  }
-  rerender() {
-    const newDom = this.renderCurrentDom();
-    this.dom.innerHTML = "";
-    while (newDom.firstChild) {
-      this.dom.appendChild(newDom.firstChild);
-    }
-    this.syncNativeMathML();
-    this.updateVisualState();
-  }
-  updateVisualState() {
-    if (this.isFocused) {
-      this.dom.classList.add("eq-active");
-      updateVisualCaretDom(this.dom, this.caret, true);
-    } else {
-      this.dom.classList.remove("eq-active");
-      updateVisualCaretDom(this.dom, this.caret, false);
-      this.selection = null;
-      this.highlightedSlotId = null;
-    }
-    const effectiveSelection = this.isFocused ? this.selection : null;
-    const effectiveHighlightSlot = this.isFocused ? this.highlightedSlotId : null;
-    updatePartialSelectionDom(this.dom, this.ast, effectiveSelection, effectiveHighlightSlot);
-  }
-  focus() {
-    this.isFocused = true;
-    this.dom.focus({ preventScroll: true });
-    this.updateVisualState();
-  }
-  emitChange() {
-    const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
-    this.onChange(xml);
-  }
-  handleCopyEvent(e, isCut = false) {
-    let xml = "";
-    if (this.highlightedSlotId) {
-      const slot = findSlotById(this.ast, this.highlightedSlotId);
-      if (slot) {
-        const tempSlot = createSlot("root", slot.children.map((c) => cloneNode(c, true)));
-        updateParentPointers(tempSlot);
-        xml = serializeMathML(tempSlot, { display: "inline", pretty: false });
-      }
-    } else if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
-      const subSlot = extractSelectionAST(this.ast, this.selection);
-      xml = serializeMathML(subSlot, { display: "inline", pretty: false });
-    }
-    if (!xml) {
-      xml = serializeMathML(this.ast, { display: "inline", pretty: false });
-    }
-    if (e?.clipboardData) {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        e.clipboardData.setData("application/mathml+xml", xml);
-        e.clipboardData.setData("text/plain", xml);
-      } catch {
-      }
-    }
-    if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(xml).catch(() => {
-      });
-    }
-    logDebugEvent("clipboard", () => ({
-      action: isCut ? "cut" : "copy",
-      context: "settings_box",
-      payload: {
-        types: e?.clipboardData ? Array.from(e.clipboardData.types) : ["application/mathml+xml", "text/plain"],
-        plainTextSnippet: xml.slice(0, 100),
-        mathmlSnippet: xml.slice(0, 100),
-        isMathML: /<math[\s>]|<math[\s\S]*<\/math>/i.test(xml),
-        characterCount: xml.length
-      },
-      destination: {
-        slotId: this.caret.slotId,
-        offset: this.caret.offset
-      },
-      success: true
-    }));
-    if (isCut) {
-      this.pushHistorySnapshot();
-      if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
-        const editRes = deleteSelection(this.ast, this.selection);
-        this.ast = editRes.root;
-        this.caret = editRes.caret;
-        this.selection = null;
-        this.highlightedSlotId = null;
-        this.rerender();
-        this.emitChange();
-      } else if (this.highlightedSlotId) {
-        const clonedRoot = cloneSlot(this.ast);
-        const slot = findSlotById(clonedRoot, this.highlightedSlotId);
-        if (slot) {
-          slot.children = [];
-          updateParentPointers(clonedRoot);
-          this.ast = clonedRoot;
-          this.caret = { slotId: slot.id, offset: 0 };
-          this.selection = null;
-          this.highlightedSlotId = null;
-          this.rerender();
-          this.emitChange();
-        }
-      } else {
-        const clonedRoot = cloneSlot(this.ast);
-        const slot = findSlotById(clonedRoot, this.caret.slotId);
-        if (slot) {
-          slot.children = [];
-          updateParentPointers(clonedRoot);
-          this.ast = clonedRoot;
-          this.caret = { slotId: slot.id, offset: 0 };
-          this.rerender();
-          this.emitChange();
-        }
-      }
-    }
-  }
-  handlePasteEvent(e) {
-    const text2 = e?.clipboardData?.getData("application/mathml+xml") || e?.clipboardData?.getData("text/plain") || "";
-    const trimmed = text2.trim();
-    if (trimmed) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      this.insertPastedContent(trimmed);
-    }
-  }
-  insertPastedContent(trimmed) {
-    if (!trimmed)
-      return;
-    this.pushHistorySnapshot();
-    if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
-      const editRes = deleteSelection(this.ast, this.selection);
-      this.ast = editRes.root;
-      this.caret = editRes.caret;
-      this.selection = null;
-      this.highlightedSlotId = null;
-    } else if (this.highlightedSlotId) {
-      const slot = findSlotById(this.ast, this.highlightedSlotId);
-      if (slot) {
-        slot.children = [];
-        this.caret = { slotId: slot.id, offset: 0 };
-        this.highlightedSlotId = null;
-      }
-    }
-    const clonedRoot = cloneSlot(this.ast);
-    const targetSlot = findSlotById(clonedRoot, this.caret.slotId);
-    if (!targetSlot)
-      return;
-    const isMathML = /<math[\s>]|<math[\s\S]*<\/math>/i.test(trimmed) || /<(?:mfrac|mroot|msqrt|msup|msub|msubsup|mrow|mi|mn|mo|mtext)/i.test(trimmed);
-    let nodesToInsert = [];
-    if (isMathML) {
-      let xml = trimmed;
-      if (!xml.startsWith("<math") && !xml.startsWith("<?xml")) {
-        xml = `<math xmlns="${MATHML_NAMESPACE}">
-  <mrow>${xml}</mrow>
-</math>`;
-      }
-      try {
-        const parsed = parseMathML(xml);
-        nodesToInsert = parsed.children.length > 0 ? parsed.children : [createToken(trimmed, "mtext")];
-      } catch {
-        nodesToInsert = [createToken(trimmed, "mtext")];
-      }
-    } else {
-      try {
-        const parsed = parseLinearEquation(trimmed);
-        nodesToInsert = parsed.children.length > 0 ? parsed.children : [createToken(trimmed, "mi")];
-      } catch {
-        nodesToInsert = [createToken(trimmed, "mi")];
-      }
-    }
-    for (const n of nodesToInsert) {
-      n.parentSlotId = targetSlot.id;
-    }
-    const insertOffset = Math.min(this.caret.offset, targetSlot.children.length);
-    targetSlot.children.splice(insertOffset, 0, ...nodesToInsert);
-    updateParentPointers(clonedRoot);
-    this.ast = clonedRoot;
-    this.caret = {
-      slotId: targetSlot.id,
-      offset: insertOffset + nodesToInsert.length
-    };
-    this.rerender();
-    this.emitChange();
-    logDebugEvent("clipboard", () => ({
-      action: "paste",
-      context: "settings_box",
-      payload: {
-        types: [],
-        plainTextSnippet: trimmed.slice(0, 100),
-        mathmlSnippet: isMathML ? trimmed.slice(0, 100) : void 0,
-        isMathML,
-        characterCount: trimmed.length
-      },
-      destination: {
-        slotId: targetSlot.id,
-        offset: insertOffset
-      },
-      success: true
-    }));
-  }
-  resolveClickCount(e) {
-    const now = Date.now();
-    const dt = now - this.lastClickTime;
-    let count = e.detail;
-    if (count === void 0 || count === 0) {
-      count = dt < 400 ? this.lastClickCount + 1 : 1;
-    }
-    this.lastClickTime = now;
-    this.lastClickCount = count;
-    return count;
-  }
-  attachEventListeners() {
-    this.dom.__interactiveBox = this;
-    this.container.__interactiveBox = this;
-    const handlePointerActivation = (e) => {
-      e.preventDefault();
-      this.isFocused = true;
-      this.dom.focus({ preventScroll: true });
-      const targetEl = e.target instanceof Element ? e.target : null;
-      const anchorPos = handleMouseClick(
-        this.ast,
-        this.dom,
-        e.clientX,
-        e.clientY,
-        targetEl
-      );
-      let clickCount = this.resolveClickCount(e);
-      if (e.type === "mousedown" && (!e.detail || e.detail < 2)) {
-        clickCount = 1;
-      } else if ((e.detail === void 0 || e.detail <= 1) && e.type !== "dblclick") {
-        const isSameTarget = !this.lastClickTarget || !e.target || this.lastClickTarget === e.target;
-        const isSamePos = this.lastClickPos && this.lastClickPos.slotId === anchorPos.slotId && this.lastClickPos.offset === anchorPos.offset;
-        if ((!isSameTarget || !isSamePos) && clickCount > 1) {
-          clickCount = 1;
-        }
-      }
-      this.lastClickPos = anchorPos;
-      this.lastClickTarget = e.target || null;
-      if (clickCount === 2) {
-        const targetSlot = findSlotById(this.ast, anchorPos.slotId) || this.ast;
-        if (targetSlot.children.length === 0) {
-          this.caret = { slotId: targetSlot.id, offset: 0 };
-          this.selection = null;
-          this.highlightedSlotId = targetSlot.id;
-        } else {
-          this.selection = {
-            anchor: { slotId: targetSlot.id, offset: 0 },
-            head: { slotId: targetSlot.id, offset: targetSlot.children.length }
-          };
-          this.caret = { slotId: targetSlot.id, offset: targetSlot.children.length };
-          this.highlightedSlotId = null;
-        }
-      } else if (clickCount >= 3) {
-        this.selection = {
-          anchor: { slotId: this.ast.id, offset: 0 },
-          head: { slotId: this.ast.id, offset: this.ast.children.length }
-        };
-        this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
-        this.highlightedSlotId = null;
-      } else {
-        this.caret = anchorPos;
-        this.selection = null;
-        this.highlightedSlotId = null;
-      }
-      this.updateVisualState();
-      const doc = this.dom.ownerDocument || document;
-      const win = doc.defaultView || (typeof window !== "undefined" ? window : null);
-      const startX = e.clientX;
-      const startY = e.clientY;
-      let isDragging = false;
-      let isCleanedUp = false;
-      const onSelectStart = (selEvt) => {
-        selEvt.preventDefault();
-      };
-      doc.addEventListener("selectstart", onSelectStart);
-      const cleanupDragListeners = () => {
-        if (isCleanedUp)
-          return;
-        isCleanedUp = true;
-        doc.removeEventListener("pointermove", onPointerMove, true);
-        doc.removeEventListener("pointerup", onPointerUp, true);
-        doc.removeEventListener("mousemove", onPointerMove, true);
-        doc.removeEventListener("mouseup", onPointerUp, true);
-        doc.removeEventListener("pointermove", onPointerMove, false);
-        doc.removeEventListener("pointerup", onPointerUp, false);
-        doc.removeEventListener("mousemove", onPointerMove, false);
-        doc.removeEventListener("mouseup", onPointerUp, false);
-        if (win) {
-          win.removeEventListener("pointermove", onPointerMove, true);
-          win.removeEventListener("pointerup", onPointerUp, true);
-          win.removeEventListener("mousemove", onPointerMove, true);
-          win.removeEventListener("mouseup", onPointerUp, true);
-          win.removeEventListener("pointermove", onPointerMove, false);
-          win.removeEventListener("pointerup", onPointerUp, false);
-          win.removeEventListener("mousemove", onPointerMove, false);
-          win.removeEventListener("mouseup", onPointerUp, false);
-        }
-        doc.removeEventListener("selectstart", onSelectStart);
-        if (this.activeDragCleanup === cleanupDragListeners) {
-          this.activeDragCleanup = null;
-        }
-      };
-      this.activeDragCleanup = cleanupDragListeners;
-      const onPointerMove = (moveEvt) => {
-        if ((moveEvt.buttons & 1) !== 1) {
-          this.lastClickCount = 0;
-          this.lastClickTime = 0;
-          this.lastClickPos = null;
-          this.lastClickTarget = null;
-          onPointerUp(moveEvt);
-          return;
-        }
-        const dx = moveEvt.clientX - startX;
-        const dy = moveEvt.clientY - startY;
-        const distance = Math.hypot(dx, dy);
-        const dragThreshold = clickCount >= 2 ? 10 : 3;
-        if (!isDragging && distance >= dragThreshold) {
-          isDragging = true;
-        }
-        if (isDragging) {
-          moveEvt.preventDefault();
-          moveEvt.stopPropagation();
-          const targetEl2 = moveEvt.target instanceof Element ? moveEvt.target : null;
-          const headPos = handleMouseClick(
-            this.ast,
-            this.dom,
-            moveEvt.clientX,
-            moveEvt.clientY,
-            targetEl2
-          );
-          if (headPos.slotId !== anchorPos.slotId || headPos.offset !== anchorPos.offset) {
-            const elevated = elevateSelectionForDrag(this.ast, anchorPos, headPos);
-            this.selection = elevated;
-            this.caret = elevated.head;
-          } else {
-            this.selection = null;
-            this.caret = headPos;
-          }
-          this.highlightedSlotId = null;
-          this.updateVisualState();
-        }
-      };
-      const onPointerUp = (upEvt) => {
-        cleanupDragListeners();
-        if (this.selection && this.selection.anchor.slotId === this.selection.head.slotId && this.selection.anchor.offset === this.selection.head.offset) {
-          this.selection = null;
-          this.updateVisualState();
-        }
-      };
-      doc.addEventListener("pointermove", onPointerMove, true);
-      doc.addEventListener("pointerup", onPointerUp, true);
-      doc.addEventListener("mousemove", onPointerMove, true);
-      doc.addEventListener("mouseup", onPointerUp, true);
-      if (win) {
-        win.addEventListener("pointermove", onPointerMove, true);
-        win.addEventListener("pointerup", onPointerUp, true);
-        win.addEventListener("mousemove", onPointerMove, true);
-        win.addEventListener("mouseup", onPointerUp, true);
-      }
-    };
-    this.dom.addEventListener("pointerdown", handlePointerActivation);
-    this.dom.addEventListener("mousedown", handlePointerActivation);
-    this.dom.addEventListener("click", handlePointerActivation);
-    this.dom.addEventListener("dblclick", handlePointerActivation);
-    const onDocPointerDown = (evt) => {
-      const isInside = evt.target instanceof Node && this.dom.contains(evt.target);
-      if (this.dom && !isInside) {
-        this.isFocused = false;
-        if (this.selection || this.highlightedSlotId) {
-          this.selection = null;
-          this.highlightedSlotId = null;
-          this.updateVisualState();
-        }
-      }
-    };
-    const ownerDoc = this.dom.ownerDocument || document;
-    ownerDoc.addEventListener("pointerdown", onDocPointerDown, true);
-    ownerDoc.addEventListener("mousedown", onDocPointerDown, true);
-    this.dom.addEventListener("focus", () => {
-      this.isFocused = true;
-      if (!this.caret) {
-        this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
-      }
-      this.updateVisualState();
-    });
-    this.dom.addEventListener("blur", () => {
-      this.isFocused = false;
-      this.updateVisualState();
-    });
-    this.dom.addEventListener("copy", (e) => this.handleCopyEvent(e, false));
-    this.dom.addEventListener("cut", (e) => this.handleCopyEvent(e, true));
-    this.dom.addEventListener("paste", (e) => this.handlePasteEvent(e));
-    this.dom.addEventListener("keydown", (e) => {
-      const isUndo = (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "z" || e.key === "Z") && !e.shiftKey;
-      const isRedo = (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "y" || e.key === "Y") || (e.ctrlKey || e.metaKey) && !e.altKey && e.shiftKey && (e.key === "z" || e.key === "Z");
-      if (isUndo) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.undo();
-        return;
-      }
-      if (isRedo) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.redo();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && !e.altKey) {
-        if (e.key === "c" || e.key === "C") {
-          e.preventDefault();
-          e.stopPropagation();
-          this.handleCopyEvent(void 0, false);
-          return;
-        }
-        if (e.key === "x" || e.key === "X") {
-          e.preventDefault();
-          e.stopPropagation();
-          this.handleCopyEvent(void 0, true);
-          return;
-        }
-        if (e.key === "v" || e.key === "V") {
-          e.preventDefault();
-          e.stopPropagation();
-          if (typeof navigator !== "undefined" && navigator?.clipboard?.readText) {
-            navigator.clipboard.readText().then((text2) => {
-              if (text2)
-                this.insertPastedContent(text2.trim());
-            }).catch(() => {
-            });
-          }
-          return;
-        }
-      }
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-        e.preventDefault();
-        e.stopPropagation();
-        const fromCaret = { ...this.caret };
-        if (e.shiftKey) {
-          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-            const step = handleSelectionStep(
-              this.ast,
-              this.selection,
-              this.caret,
-              e.key,
-              this.highlightedSlotId
-            );
-            if (step && step.handled) {
-              this.selection = step.selection;
-              this.caret = step.caret;
-              this.highlightedSlotId = step.highlightedSlotId ?? null;
-              this.updateVisualState();
-              logDebugEvent("navigation", () => ({
-                key: e.key,
-                shiftKey: true,
-                navType: "selection_step",
-                from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
-                to: { slotId: step.caret.slotId, offset: step.caret.offset },
-                equation: { from: 0, to: 0, isInline: true },
-                handled: true
-              }));
-              return;
-            }
-          }
-          return;
-        }
-        const hasActiveSelectionRange = this.selection && comparePositions(this.ast, this.selection.anchor, this.selection.head) !== 0;
-        const hasActivePlaceholderHighlight = Boolean(this.highlightedSlotId);
-        if (hasActiveSelectionRange || hasActivePlaceholderHighlight) {
-          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-            let targetCaret = null;
-            if (this.selection && hasActiveSelectionRange) {
-              const norm = normalizeSelection(this.ast, this.selection);
-              targetCaret = e.key === "ArrowLeft" ? { ...norm.start } : { ...norm.end };
-            } else if (this.highlightedSlotId) {
-              const targetSlot = findSlotById(this.ast, this.highlightedSlotId);
-              if (targetSlot) {
-                targetCaret = e.key === "ArrowLeft" ? { slotId: targetSlot.id, offset: 0 } : { slotId: targetSlot.id, offset: targetSlot.children.length };
-              }
-            }
-            if (targetCaret) {
-              this.caret = targetCaret;
-              this.selection = null;
-              this.highlightedSlotId = null;
-              this.updateVisualState();
-              return;
-            }
-          }
-          this.selection = null;
-          this.highlightedSlotId = null;
-          this.updateVisualState();
-        }
-        const nav = handleArrowKey(this.ast, this.caret, e.key);
-        if (nav.handled) {
-          this.caret = nav.caret;
-          this.updateVisualState();
-        }
-        logDebugEvent("navigation", () => ({
-          key: e.key,
-          shiftKey: false,
-          navType: "internal_jump",
-          from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
-          to: { slotId: this.caret.slotId, offset: this.caret.offset },
-          equation: { from: 0, to: 0, isInline: true },
-          handled: nav.handled
-        }));
-        return;
-      }
-      if (e.key === "Tab") {
-        e.preventDefault();
-        e.stopPropagation();
-        const fromCaret = { ...this.caret };
-        const nav = handleTabKey(this.ast, this.caret, e.shiftKey);
-        if (nav.handled) {
-          this.caret = nav.caret;
-          this.updateVisualState();
-        }
-        logDebugEvent("navigation", () => ({
-          key: "Tab",
-          shiftKey: e.shiftKey,
-          navType: "tab_jump",
-          from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
-          to: { slotId: this.caret.slotId, offset: this.caret.offset },
-          equation: { from: 0, to: 0, isInline: true },
-          handled: nav.handled
-        }));
-        return;
-      }
-      if (e.key === "Backspace") {
-        e.preventDefault();
-        e.stopPropagation();
-        this.pushHistorySnapshot();
-        const res = handleBackspace(this.ast, this.caret);
-        if (res.handled) {
-          this.ast = res.root;
-          this.caret = res.caret;
-          this.rerender();
-          this.emitChange();
-        } else {
-          this.undoStack.pop();
-        }
-        return;
-      }
-      if (e.key === "Delete") {
-        e.preventDefault();
-        e.stopPropagation();
-        this.pushHistorySnapshot();
-        const res = handleDelete(this.ast, this.caret);
-        if (res.handled) {
-          this.ast = res.root;
-          this.caret = res.caret;
-          this.rerender();
-          this.emitChange();
-        } else {
-          this.undoStack.pop();
-        }
-        return;
-      }
-      if (e.key === " ") {
-        if (this.justExpandedShortcut) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.justExpandedShortcut = false;
-          return;
-        }
-        const clonedRoot = cloneSlot(this.ast);
-        const targetSlot = findSlotById(clonedRoot, this.caret.slotId);
-        if (targetSlot) {
-          const expanded = expandShortcutInSlot(targetSlot, this.caret.offset, " ");
-          if (expanded.expanded && expanded.newSlot && expanded.newCaret) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.pushHistorySnapshot();
-            targetSlot.children = expanded.newSlot.children;
-            updateParentPointers(clonedRoot);
-            this.ast = clonedRoot;
-            this.caret = expanded.newCaret;
-            this.justExpandedShortcut = true;
-            this.rerender();
-            this.emitChange();
-            return;
-          }
-        }
-      }
-      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.pushHistorySnapshot();
-        const res = insertCharacter(this.ast, this.caret, e.key);
-        if (res.handled) {
-          this.ast = res.root;
-          this.caret = res.caret;
-          const targetSlot = findSlotById(this.ast, this.caret.slotId);
-          if (targetSlot) {
-            const expanded = expandShortcutInSlot(targetSlot, this.caret.offset, e.key);
-            if (expanded.expanded && expanded.newSlot && expanded.newCaret) {
-              targetSlot.children = expanded.newSlot.children;
-              updateParentPointers(this.ast);
-              this.caret = expanded.newCaret;
-              this.justExpandedShortcut = true;
-            }
-          }
-          this.rerender();
-          this.emitChange();
-        } else {
-          this.undoStack.pop();
-        }
-        return;
-      }
-    });
-  }
-  getXml() {
-    return serializeMathML(this.ast);
-  }
-  destroy() {
-    if (this.activeDragCleanup) {
-      this.activeDragCleanup();
-      this.activeDragCleanup = null;
-    }
-    this.dom.remove();
-  }
-};
-
-// src/settings/settings-tab.ts
-var WordEquationSettingTab = class extends import_obsidian2.PluginSettingTab {
-  plugin;
-  id;
-  constructor(app, plugin) {
-    super(app, plugin);
-    this.plugin = plugin;
-    this.id = "obsidian-word-equation";
-  }
-  display() {
-    const { containerEl } = this;
-    containerEl.empty();
-    containerEl.createEl("h2", { text: "Word-like Equation Settings" });
-    new import_obsidian2.Setting(containerEl).setName("Auto-expand shortcuts in Markdown").setDesc("Automatically expand shortcuts when typing trigger followed by Space").addToggle(
-      (toggle) => toggle.setValue(this.plugin.settings.autoExpandShortcuts).onChange(async (val) => {
-        this.plugin.settings.autoExpandShortcuts = val;
-        await this.plugin.saveSettings();
-      })
-    );
-    new import_obsidian2.Setting(containerEl).setName("Default codeblock fence identifier").setDesc("Preferred identifier for inserted equation blocks (math-word or weq)").addDropdown(
-      (dropdown) => dropdown.addOption("math-word", "math-word").addOption("weq", "weq").setValue(this.plugin.settings.defaultDelimiter).onChange(async (value) => {
-        this.plugin.settings.defaultDelimiter = value;
-        await this.plugin.saveSettings();
-      })
-    );
-    new import_obsidian2.Setting(containerEl).setName("Auto show gallery").setDesc("Automatically open the Equation Gallery sidebar when an equation becomes active").addToggle(
-      (toggle) => toggle.setValue(this.plugin.settings.autoShowGallery).onChange(async (val) => {
-        this.plugin.settings.autoShowGallery = val;
-        await this.plugin.saveSettings();
-      })
-    );
-    new import_obsidian2.Setting(containerEl).setName("Enable Debug Mode").setDesc("Record detailed state information (caret, selection, clipboard, navigation) to debug-log.json").addToggle(
-      (toggle) => toggle.setValue(this.plugin.settings.debugMode).onChange(async (val) => {
-        this.plugin.settings.debugMode = val;
-        await this.plugin.saveSettings();
-        getDebugLogger().setEnabled(val);
-      })
-    );
-    new import_obsidian2.Setting(containerEl).setName("Clear Debug Log").setDesc("Clear recorded debug events and reset debug-log.json").addButton(
-      (btn) => btn.setButtonText("Clear Log").setWarning().onClick(async () => {
-        await getDebugLogger().clear();
-        new import_obsidian2.Notice("Debug log cleared.");
-      })
-    );
-    containerEl.createEl("h3", { text: "Custom Math Shortcuts" });
-    containerEl.createEl("p", {
-      text: "Define custom shortcuts. Column 1 is the trigger shortcut. Column 2 is the MathML equivalent or expansion result. Works in Markdown and inside equation blocks.",
-      cls: "setting-item-description"
-    });
-    const tableWrapper = containerEl.createDiv({ cls: "weq-shortcuts-table-wrapper" });
-    const table = tableWrapper.createEl("table", { cls: "weq-shortcuts-table" });
-    table.style.width = "100%";
-    table.style.borderCollapse = "collapse";
-    const thead = table.createEl("thead");
-    const headerRow = thead.createEl("tr");
-    const thTrigger = headerRow.createEl("th", { text: "Trigger Shortcut" });
-    thTrigger.style.textAlign = "left";
-    thTrigger.style.width = "35%";
-    thTrigger.style.padding = "8px";
-    const thExpansion = headerRow.createEl("th", { text: "MathML / Expansion Result" });
-    thExpansion.style.textAlign = "left";
-    thExpansion.style.width = "50%";
-    thExpansion.style.padding = "8px";
-    const thActions = headerRow.createEl("th", { text: "Actions" });
-    thActions.style.textAlign = "center";
-    thActions.style.width = "15%";
-    thActions.style.padding = "8px";
-    const tbody = table.createEl("tbody");
-    const shortcuts = this.plugin.settings.customShortcuts;
-    for (let i = 0; i < shortcuts.length; i++) {
-      const item = shortcuts[i];
-      const row = tbody.createEl("tr");
-      row.style.borderBottom = "1px solid var(--background-modifier-border)";
-      const tdTrigger = row.createEl("td", { cls: "weq-col-trigger" });
-      tdTrigger.style.padding = "6px";
-      const inputTrigger = tdTrigger.createEl("input", {
-        type: "text",
-        value: item.trigger,
-        cls: "weq-input-trigger"
-      });
-      inputTrigger.style.width = "100%";
-      inputTrigger.placeholder = "\\trigger";
-      inputTrigger.addEventListener("input", async () => {
-        item.trigger = inputTrigger.value;
-        await this.plugin.saveSettings();
-        setCustomShortcuts(this.plugin.settings.customShortcuts);
-      });
-      const tdExp = row.createEl("td", { cls: "weq-col-expansion" });
-      tdExp.style.padding = "6px";
-      const previewEl = tdExp.createDiv({ cls: "weq-expansion-preview" });
-      const inputExp = tdExp.createEl("input", {
-        type: "text",
-        value: item.expansion,
-        cls: "weq-input-expansion"
-      });
-      inputExp.style.display = "none";
-      const interactiveBox = new InteractiveEquationBox({
-        container: previewEl,
-        initialContent: item.expansion,
-        onChange: async (newXml) => {
-          item.expansion = newXml;
-          inputExp.value = newXml;
-          await this.plugin.saveSettings();
-          setCustomShortcuts(this.plugin.settings.customShortcuts);
-        }
-      });
-      inputExp.addEventListener("input", async () => {
-        item.expansion = inputExp.value;
-        interactiveBox.setContent(item.expansion);
-        await this.plugin.saveSettings();
-        setCustomShortcuts(this.plugin.settings.customShortcuts);
-      });
-      previewEl.addEventListener("click", () => {
-        if (typeof inputExp.focus === "function") {
-          inputExp.focus();
-        }
-        interactiveBox.dom.focus({ preventScroll: true });
-      });
-      const tdAct = row.createEl("td", { cls: "weq-col-action" });
-      tdAct.style.padding = "6px";
-      tdAct.style.textAlign = "center";
-      const delBtn = tdAct.createEl("button", {
-        text: "Delete",
-        cls: "mod-warning weq-btn-delete"
-      });
-      delBtn.addEventListener("click", async () => {
-        this.plugin.settings.customShortcuts.splice(i, 1);
-        await this.plugin.saveSettings();
-        setCustomShortcuts(this.plugin.settings.customShortcuts);
-        this.display();
-      });
-    }
-    new import_obsidian2.Setting(containerEl).addButton(
-      (btn) => btn.setButtonText("Add Shortcut").setCta().onClick(async () => {
-        this.plugin.settings.customShortcuts.push({
-          trigger: "\\",
-          expansion: ""
-        });
-        await this.plugin.saveSettings();
-        setCustomShortcuts(this.plugin.settings.customShortcuts);
-        this.display();
-      })
-    );
-  }
-};
-
-// src/gallery/gallery-view.ts
-var import_obsidian3 = require("obsidian");
-var VIEW_TYPE_EQUATION_GALLERY = "word-equation-gallery-view";
-var EQUATION_GALLERY_VIEW_TYPE = VIEW_TYPE_EQUATION_GALLERY;
-var GALLERY_CATEGORIES = [
-  {
-    id: "fractions",
-    title: "Fractions",
-    items: [
-      {
-        id: "fraction",
-        name: "Stacked Fraction",
-        mathml: "<mfrac><mrow></mrow><mrow></mrow></mfrac>",
-        previewText: "\u2B1A/\u2B1A"
-      },
-      {
-        id: "linear-fraction",
-        name: "Linear Fraction",
-        mathml: "<mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac>",
-        previewText: "a/b"
-      },
-      {
-        id: "derivative",
-        name: "Derivative (dy/dx)",
-        mathml: "<mfrac><mrow><mi>d</mi><mi>y</mi></mrow><mrow><mi>d</mi><mi>x</mi></mrow></mfrac>",
-        previewText: "dy/dx"
-      },
-      {
-        id: "partial-derivative",
-        name: "Partial Derivative (\u2202y/\u2202x)",
-        mathml: "<mfrac><mrow><mo>\u2202</mo><mi>y</mi></mrow><mrow><mo>\u2202</mo><mi>x</mi></mrow></mfrac>",
-        previewText: "\u2202y/\u2202x"
-      },
-      {
-        id: "half",
-        name: "1/2 Fraction",
-        mathml: "<mfrac><mn>1</mn><mn>2</mn></mfrac>",
-        previewText: "\xBD"
-      }
-    ]
-  },
-  {
-    id: "radicals",
-    title: "Radicals & Roots",
-    items: [
-      {
-        id: "sqrt",
-        name: "Square Root",
-        mathml: "<msqrt><mrow></mrow></msqrt>",
-        previewText: "\u221A\u2B1A"
-      },
-      {
-        id: "root",
-        name: "N-th Root",
-        mathml: "<mroot><mrow></mrow><mrow></mrow></mroot>",
-        previewText: "\u207F\u221A\u2B1A"
-      },
-      {
-        id: "cube-root",
-        name: "Cube Root",
-        mathml: "<mroot><mrow></mrow><mrow><mn>3</mn></mrow></mroot>",
-        previewText: "\u221B\u2B1A"
-      }
-    ]
-  },
-  {
-    id: "scripts",
-    title: "Scripts",
-    items: [
-      {
-        id: "superscript",
-        name: "Superscript",
-        mathml: "<msup><mrow><mi>x</mi></mrow><mrow></mrow></msup>",
-        previewText: "x^{\u2B1A}"
-      },
-      {
-        id: "subscript",
-        name: "Subscript",
-        mathml: "<msub><mrow><mi>x</mi></mrow><mrow></mrow></msub>",
-        previewText: "x_{\u2B1A}"
-      },
-      {
-        id: "subsup",
-        name: "Sub-Superscript",
-        mathml: "<msubsup><mrow><mi>x</mi></mrow><mrow></mrow><mrow></mrow></msubsup>",
-        previewText: "x_{\u2B1A}^{\u2B1A}"
-      },
-      {
-        id: "empty-sup",
-        name: "Superscript Base",
-        mathml: "<msup><mrow></mrow><mrow></mrow></msup>",
-        previewText: "\u2B1A^{\u2B1A}"
-      },
-      {
-        id: "empty-sub",
-        name: "Subscript Base",
-        mathml: "<msub><mrow></mrow><mrow></mrow></msub>",
-        previewText: "\u2B1A_{\u2B1A}"
-      }
-    ]
-  },
-  {
-    id: "operators",
-    title: "Basic Math & Operators",
-    items: [
-      { id: "pm", name: "Plus-Minus", mathml: "<mo>\xB1</mo>", previewText: "\xB1" },
-      { id: "times", name: "Times", mathml: "<mo>\xD7</mo>", previewText: "\xD7" },
-      { id: "div", name: "Divide", mathml: "<mo>\xF7</mo>", previewText: "\xF7" },
-      { id: "ne", name: "Not Equal", mathml: "<mo>\u2260</mo>", previewText: "\u2260" },
-      { id: "le", name: "Less or Equal", mathml: "<mo>\u2264</mo>", previewText: "\u2264" },
-      { id: "ge", name: "Greater or Equal", mathml: "<mo>\u2265</mo>", previewText: "\u2265" },
-      { id: "infty", name: "Infinity", mathml: "<mi>\u221E</mi>", previewText: "\u221E" },
-      { id: "sum", name: "Summation", mathml: "<mo>\u2211</mo>", previewText: "\u2211" },
-      { id: "int", name: "Integral", mathml: "<mo>\u222B</mo>", previewText: "\u222B" },
-      { id: "plus", name: "Plus", mathml: "<mo>+</mo>", previewText: "+" },
-      { id: "minus", name: "Minus", mathml: "<mo>\u2212</mo>", previewText: "\u2212" },
-      { id: "cdot", name: "Center Dot", mathml: "<mo>\xB7</mo>", previewText: "\xB7" },
-      { id: "eq", name: "Equals", mathml: "<mo>=</mo>", previewText: "=" },
-      { id: "approx", name: "Approx", mathml: "<mo>\u2248</mo>", previewText: "\u2248" },
-      { id: "partial", name: "Partial", mathml: "<mo>\u2202</mo>", previewText: "\u2202" },
-      { id: "nabla", name: "Nabla", mathml: "<mo>\u2207</mo>", previewText: "\u2207" },
-      { id: "prod", name: "Product", mathml: "<mo>\u220F</mo>", previewText: "\u220F" }
-    ]
-  },
-  {
-    id: "greek",
-    title: "Greek Letters",
-    items: [
-      { id: "alpha", name: "alpha", mathml: "<mi>\u03B1</mi>", previewText: "\u03B1" },
-      { id: "beta", name: "beta", mathml: "<mi>\u03B2</mi>", previewText: "\u03B2" },
-      { id: "gamma", name: "gamma", mathml: "<mi>\u03B3</mi>", previewText: "\u03B3" },
-      { id: "delta", name: "delta", mathml: "<mi>\u03B4</mi>", previewText: "\u03B4" },
-      { id: "theta", name: "theta", mathml: "<mi>\u03B8</mi>", previewText: "\u03B8" },
-      { id: "lambda", name: "lambda", mathml: "<mi>\u03BB</mi>", previewText: "\u03BB" },
-      { id: "mu", name: "mu", mathml: "<mi>\u03BC</mi>", previewText: "\u03BC" },
-      { id: "pi", name: "pi", mathml: "<mi>\u03C0</mi>", previewText: "\u03C0" },
-      { id: "sigma", name: "sigma", mathml: "<mi>\u03C3</mi>", previewText: "\u03C3" },
-      { id: "omega", name: "omega", mathml: "<mi>\u03C9</mi>", previewText: "\u03C9" },
-      { id: "Delta", name: "Delta", mathml: "<mi>\u0394</mi>", previewText: "\u0394" },
-      { id: "Sigma", name: "Sigma", mathml: "<mi>\u03A3</mi>", previewText: "\u03A3" },
-      { id: "Omega", name: "Omega", mathml: "<mi>\u03A9</mi>", previewText: "\u03A9" },
-      { id: "Theta", name: "Theta", mathml: "<mi>\u0398</mi>", previewText: "\u0398" },
-      { id: "Gamma", name: "Gamma", mathml: "<mi>\u0393</mi>", previewText: "\u0393" }
-    ]
-  },
-  {
-    id: "matrices",
-    title: "Matrices & Parentheses",
-    items: [
-      {
-        id: "parens",
-        name: "Parentheses (\u2B1A)",
-        mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>',
-        previewText: "( \u2B1A )"
-      },
-      {
-        id: "brackets",
-        name: "Brackets [\u2B1A]",
-        mathml: '<mfenced open="[" close="]"><mrow></mrow></mfenced>',
-        previewText: "[ \u2B1A ]"
-      },
-      {
-        id: "braces",
-        name: "Braces {\u2B1A}",
-        mathml: '<mfenced open="{" close="}"><mrow></mrow></mfenced>',
-        previewText: "{ \u2B1A }"
-      },
-      {
-        id: "abs",
-        name: "Absolute Value |\u2B1A|",
-        mathml: '<mfenced open="|" close="|"><mrow></mrow></mfenced>',
-        previewText: "| \u2B1A |"
-      },
-      {
-        id: "matrix2x2",
-        name: "2x2 Matrix",
-        mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
-        previewText: "[ 2\xD72 ]"
-      },
-      {
-        id: "matrix1x2",
-        name: "1x2 Row Matrix",
-        mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
-        previewText: "[ 1\xD72 ]"
-      },
-      {
-        id: "matrix2x1",
-        name: "2x1 Col Matrix",
-        mathml: "<mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable>",
-        previewText: "[ 2\xD71 ]"
-      },
-      {
-        id: "matrix3x3",
-        name: "3x3 Matrix",
-        mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
-        previewText: "[ 3\xD73 ]"
-      }
-    ]
-  }
-];
-var EquationGalleryView = class extends import_obsidian3.ItemView {
-  plugin;
-  constructor(leaf, plugin) {
-    super(leaf);
-    this.plugin = plugin;
-  }
-  getViewType() {
-    return VIEW_TYPE_EQUATION_GALLERY;
-  }
-  getDisplayText() {
-    return "Equation Gallery";
-  }
-  getIcon() {
-    return "sigma";
-  }
-  async onOpen() {
-    const container = this.contentEl;
-    if (typeof container.empty === "function") {
-      container.empty();
-    } else {
-      container.innerHTML = "";
-    }
-    if (typeof container.addClass === "function") {
-      container.addClass("equation-gallery-container");
-    } else {
-      container.classList.add("equation-gallery-container");
-    }
-    container.createEl("h4", {
-      text: "Equation Gallery",
-      cls: "equation-gallery-title weq-gallery-title"
-    });
-    for (const cat of GALLERY_CATEGORIES) {
-      const catSection = container.createDiv({
-        cls: "equation-gallery-category weq-gallery-section"
-      });
-      catSection.setAttribute("data-category", cat.id);
-      catSection.createEl("div", {
-        text: cat.title,
-        cls: "equation-gallery-category-title weq-gallery-section-title"
-      });
-      const grid = catSection.createDiv({
-        cls: "equation-gallery-grid weq-gallery-grid"
-      });
-      for (const item of cat.items) {
-        const btn = grid.createEl("button", {
-          cls: `equation-gallery-btn weq-gallery-item weq-gallery-${item.id}`,
-          text: item.previewText || item.name,
-          attr: {
-            "data-item": item.id,
-            "data-category": cat.id,
-            "title": item.name,
-            "type": "button"
-          }
-        });
-        const preventBlur = (e) => {
-          e.preventDefault();
-        };
-        btn.addEventListener("pointerdown", preventBlur);
-        btn.addEventListener("mousedown", preventBlur);
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          this.insertItem(item);
-        });
-      }
-    }
-  }
-  insertItem(item) {
-    if (this.plugin?.insertMathFromGallery) {
-      this.plugin.insertMathFromGallery(item.mathml);
-    }
-  }
-  async onClose() {
   }
 };
 
@@ -16593,7 +15080,7 @@ var Img = class {
 function newDocumentFragment(children) {
   return new DocumentFragment(children);
 }
-var MathNode5 = class {
+var MathNode4 = class {
   constructor(type, children, classes, style) {
     this.type = type;
     this.attributes = {};
@@ -16710,7 +15197,7 @@ var wrapWithMstyle = (expression) => {
     node = expression.pop();
     node.type = "mstyle";
   } else {
-    node = new MathNode5("mstyle", expression);
+    node = new MathNode4("mstyle", expression);
   }
   return node;
 };
@@ -16806,7 +15293,7 @@ var stretchyCodePoint = {
 };
 var mathMLnode = function(label) {
   const child = new TextNode2(stretchyCodePoint[label.slice(1)]);
-  const node = new MathNode5("mo", [child]);
+  const node = new MathNode4("mo", [child]);
   node.setAttribute("stretchy", "true");
   return node;
 };
@@ -17830,13 +16317,13 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
     const node = expression[i];
     if (node.attributes && node.attributes.linebreak && node.attributes.linebreak === "newline") {
       if (block.length > 0) {
-        mrows.push(new MathNode5("mrow", block));
+        mrows.push(new MathNode4("mrow", block));
       }
       mrows.push(node);
       block = [];
-      const mtd = new MathNode5("mtd", mrows);
+      const mtd = new MathNode4("mtd", mrows);
       mtd.style.textAlign = "left";
-      mtrs.push(new MathNode5("mtr", [mtd]));
+      mtrs.push(new MathNode4("mtr", [mtd]));
       mrows = [];
       i += 1;
       continue;
@@ -17849,7 +16336,7 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
         numTopLevelEquals += 1;
         if (numTopLevelEquals > 1) {
           block.pop();
-          const element = new MathNode5("mrow", block);
+          const element = new MathNode4("mrow", block);
           mrows.push(element);
           block = [node];
         }
@@ -17871,7 +16358,7 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
           }
         }
         if (glueIsFreeOfNobreak) {
-          const element = new MathNode5("mrow", block);
+          const element = new MathNode4("mrow", block);
           mrows.push(element);
           block = [];
         }
@@ -17880,15 +16367,15 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
     i += 1;
   }
   if (block.length > 0) {
-    const element = new MathNode5("mrow", block);
+    const element = new MathNode4("mrow", block);
     mrows.push(element);
   }
   if (mtrs.length > 0) {
-    const mtd = new MathNode5("mtd", mrows);
+    const mtd = new MathNode4("mtd", mrows);
     mtd.style.textAlign = "left";
-    const mtr = new MathNode5("mtr", [mtd]);
+    const mtr = new MathNode4("mtr", [mtd]);
     mtrs.push(mtr);
-    const mtable = new MathNode5("mtable", mtrs);
+    const mtable = new MathNode4("mtable", mtrs);
     if (!isDisplayMode) {
       mtable.setAttribute("columnalign", "left");
       mtable.setAttribute("rowspacing", "0em");
@@ -17905,7 +16392,7 @@ var makeText = function(text2, mode, style) {
 };
 var copyChar = (newRow, child) => {
   if (newRow.children.length === 0 || newRow.children[newRow.children.length - 1].type !== "mtext") {
-    const mtext = new MathNode5(
+    const mtext = new MathNode4(
       "mtext",
       [new TextNode2(child.children[0].text)]
     );
@@ -17921,7 +16408,7 @@ var consolidateText = (mrow) => {
   if (mrow.children.length === 0) {
     return mrow;
   }
-  const newRow = new MathNode5("mrow");
+  const newRow = new MathNode4("mrow");
   for (let i = 0; i < mrow.children.length; i++) {
     const child = mrow.children[i];
     if (child.type === "mtext" && Object.keys(child.attributes).length === 0) {
@@ -17972,17 +16459,17 @@ var makeRow = function(body, semisimple = false) {
   if (body.length === 1 && !(body[0] instanceof DocumentFragment)) {
     return body[0];
   } else if (!semisimple) {
-    if (body[0] instanceof MathNode5 && body[0].type === "mo" && !body[0].attributes.fence) {
+    if (body[0] instanceof MathNode4 && body[0].type === "mo" && !body[0].attributes.fence) {
       body[0].attributes.lspace = "0em";
       body[0].attributes.rspace = "0em";
     }
     const end = body.length - 1;
-    if (body[end] instanceof MathNode5 && body[end].type === "mo" && !body[end].attributes.fence) {
+    if (body[end] instanceof MathNode4 && body[end].type === "mo" && !body[end].attributes.fence) {
       body[end].attributes.lspace = "0em";
       body[end].attributes.rspace = "0em";
     }
   }
-  return new MathNode5("mrow", body);
+  return new MathNode4("mrow", body);
 };
 function isNumberPunctuation(group) {
   if (!group) {
@@ -18013,7 +16500,7 @@ var isRel = (item) => {
 var buildExpression = function(expression, style, semisimple = false) {
   if (!semisimple && expression.length === 1) {
     const group = buildGroup$1(expression[0], style);
-    if (group instanceof MathNode5 && group.type === "mo") {
+    if (group instanceof MathNode4 && group.type === "mo") {
       group.setAttribute("lspace", "0em");
       group.setAttribute("rspace", "0em");
     }
@@ -18047,7 +16534,7 @@ var buildExpression = function(expression, style, semisimple = false) {
       groups.pop();
     } else if ((group.type === "msup" || group.type === "msub") && group.children.length >= 1 && lastGroup && (lastGroup.type === "mn" || isNumberPunctuation(lastGroup))) {
       const base = group.children[0];
-      if (base instanceof MathNode5 && base.type === "mn" && lastGroup) {
+      if (base instanceof MathNode4 && base.type === "mn" && lastGroup) {
         base.children = [...lastGroup.children, ...base.children];
         groups.pop();
       }
@@ -18062,7 +16549,7 @@ var buildExpressionRow = function(expression, style, semisimple = false) {
 };
 var buildGroup$1 = function(group, style) {
   if (!group) {
-    return new MathNode5("mrow");
+    return new MathNode4("mrow");
   }
   if (_mathmlGroupBuilders[group.type]) {
     const result = _mathmlGroupBuilders[group.type](group, style);
@@ -18072,7 +16559,7 @@ var buildGroup$1 = function(group, style) {
   }
 };
 var glue$1 = (_) => {
-  return new MathNode5("mtd", [], [], { padding: "0", width: "50%" });
+  return new MathNode4("mtd", [], [], { padding: "0", width: "50%" });
 };
 var labelContainers = ["mrow", "mtd", "mtable", "mtr"];
 var getLabel = (parent) => {
@@ -18100,14 +16587,14 @@ var taggedExpression = (expression, tag, style, leqno) => {
   tag = consolidateText(tag);
   tag.classes.push("tml-tag");
   const label = getLabel(expression);
-  expression = new MathNode5("mtd", [expression]);
+  expression = new MathNode4("mtd", [expression]);
   const rowArray = [glue$1(), expression, glue$1()];
   rowArray[leqno ? 0 : 2].children.push(tag);
-  const mtr = new MathNode5("mtr", rowArray, ["tml-tageqn"]);
+  const mtr = new MathNode4("mtr", rowArray, ["tml-tageqn"]);
   if (label) {
     mtr.setAttribute("id", label);
   }
-  const table = new MathNode5("mtable", [mtr]);
+  const table = new MathNode4("mtable", [mtr]);
   table.style.width = "100%";
   table.setAttribute("displaystyle", "true");
   return table;
@@ -18124,19 +16611,19 @@ function buildMathML(tree, texExpression, style, settings) {
   }
   const wrap = settings.displayMode || settings.annotate ? "none" : settings.wrap;
   const n1 = expression.length === 0 ? null : expression[0];
-  let wrapper = expression.length === 1 && tag === null && n1 instanceof MathNode5 ? expression[0] : setLineBreaks(expression, wrap, settings.displayMode);
+  let wrapper = expression.length === 1 && tag === null && n1 instanceof MathNode4 ? expression[0] : setLineBreaks(expression, wrap, settings.displayMode);
   if (tag) {
     wrapper = taggedExpression(wrapper, tag, style, settings.leqno);
   }
   if (settings.annotate) {
-    const annotation = new MathNode5(
+    const annotation = new MathNode4(
       "annotation",
       [new TextNode2(texExpression)]
     );
     annotation.setAttribute("encoding", "application/x-tex");
-    wrapper = new MathNode5("semantics", [wrapper, annotation]);
+    wrapper = new MathNode4("semantics", [wrapper, annotation]);
   }
-  const math2 = new MathNode5("math", [wrapper]);
+  const math2 = new MathNode4("math", [wrapper]);
   if (settings.xml) {
     math2.setAttribute("xmlns", "http://www.w3.org/1998/Math/MathML");
   }
@@ -18151,7 +16638,7 @@ var smallNudge = "DHKLUcegorsuvxyz\u03A0\u03A5\u03A8\u03B1\u03B4\u03B7\u03B9\u03
 var mediumNudge = "BCEGIMNOPQRSTXZlpqtw\u0393\u0398\u039E\u03A3\u03A6\u03A9\u03B2\u03B5\u03B6\u03B8\u03BE\u03C1\u03C2\u03C6\u03C8\u03D1\u03D5\u03F1";
 var largeNudge = "AFJdf\u0394\u039B";
 var mathmlBuilder$a = (group, style) => {
-  const accentNode$1 = group.isStretchy ? accentNode(group) : new MathNode5("mo", [makeText(group.label, group.mode)]);
+  const accentNode$1 = group.isStretchy ? accentNode(group) : new MathNode4("mo", [makeText(group.label, group.mode)]);
   if (!group.isStretchy) {
     accentNode$1.setAttribute("stretchy", "false");
   }
@@ -18185,7 +16672,7 @@ var mathmlBuilder$a = (group, style) => {
   } else if (needsWbkVertShift) {
     accentNode$1.classes.push("wbk-acc");
   }
-  const node = new MathNode5(tag, [buildGroup$1(group.base, style), accentNode$1]);
+  const node = new MathNode4(tag, [buildGroup$1(group.base, style), accentNode$1]);
   return node;
 };
 var nonStretchyAccents = /* @__PURE__ */ new Set([
@@ -18344,7 +16831,7 @@ defineFunction({
   mathmlBuilder: (group, style) => {
     const accentNode$1 = accentNode(group);
     accentNode$1.style["math-depth"] = 0;
-    const node = new MathNode5("munder", [
+    const node = new MathNode4("munder", [
       buildGroup$1(group.base, style),
       accentNode$1
     ]);
@@ -18451,7 +16938,7 @@ var calculateSize = function(sizeValue, style) {
   }
 };
 var padding = (width) => {
-  const node = new MathNode5("mspace");
+  const node = new MathNode4("mspace");
   node.setAttribute("width", width + "em");
   return node;
 };
@@ -18467,11 +16954,11 @@ var paddedNode = (group, lspace = 0.3, rspace = 0, mustSmash = false) => {
     row.push(padding(rspace));
   }
   if (mustSmash) {
-    const mpadded = new MathNode5("mpadded", row);
+    const mpadded = new MathNode4("mpadded", row);
     mpadded.setAttribute("height", "0.1px");
     return mpadded;
   } else {
-    return new MathNode5("mrow", row);
+    return new MathNode4("mrow", row);
   }
 };
 var labelSize = (size, scriptLevel2) => Number(size) / emScale(scriptLevel2);
@@ -18495,23 +16982,23 @@ var munderoverNode = (fName, body, below, style) => {
     let label = buildGroup$1(body, labelStyle);
     const mustSmash = fName === "\\\\cdrightarrow" || fName === "\\\\cdleftarrow";
     label = paddedNode(label, space, space, mustSmash);
-    upperNode = new MathNode5("mover", [label, dummyNode]);
+    upperNode = new MathNode4("mover", [label, dummyNode]);
   }
   const gotLower = below && below.body && (below.body.body || below.body.length > 0);
   if (gotLower) {
     let label = buildGroup$1(below, labelStyle);
     label = paddedNode(label, space, space);
-    lowerNode = new MathNode5("munder", [label, dummyNode]);
+    lowerNode = new MathNode4("munder", [label, dummyNode]);
   }
   let node;
   if (!gotUpper && !gotLower) {
-    node = new MathNode5("mover", [arrowNode, emptyLabel]);
+    node = new MathNode4("mover", [arrowNode, emptyLabel]);
   } else if (gotUpper && gotLower) {
-    node = new MathNode5("munderover", [arrowNode, lowerNode, upperNode]);
+    node = new MathNode4("munderover", [arrowNode, lowerNode, upperNode]);
   } else if (gotUpper) {
-    node = new MathNode5("mover", [arrowNode, upperNode]);
+    node = new MathNode4("mover", [arrowNode, upperNode]);
   } else {
-    node = new MathNode5("munder", [arrowNode, lowerNode]);
+    node = new MathNode4("munder", [arrowNode, lowerNode]);
   }
   if (minWidth === "3.0") {
     node.style.height = "1em";
@@ -18575,7 +17062,7 @@ defineFunction({
     const row = [node];
     row.unshift(padding(0.2778));
     row.push(padding(0.2778));
-    return new MathNode5("mrow", row);
+    return new MathNode4("mrow", row);
   }
 });
 var arrowComponent = {
@@ -18619,20 +17106,20 @@ defineFunction({
     const topArrow = munderoverNode(topLabel, group.body, group.upperArrowBelow, style);
     const botArrow = munderoverNode(botLabel, group.lowerArrowBody, group.below, style);
     let wrapper;
-    const raiseNode = new MathNode5("mpadded", [topArrow]);
+    const raiseNode = new MathNode4("mpadded", [topArrow]);
     raiseNode.setAttribute("voffset", "0.3em");
     raiseNode.setAttribute("height", "+0.3em");
     raiseNode.setAttribute("depth", "-0.3em");
     if (group.name === "\\equilibriumLeft") {
-      const botNode = new MathNode5("mpadded", [botArrow]);
+      const botNode = new MathNode4("mpadded", [botArrow]);
       botNode.setAttribute("width", "0.5em");
-      wrapper = new MathNode5(
+      wrapper = new MathNode4(
         "mpadded",
         [padding(0.2778), botNode, raiseNode, padding(0.2778)]
       );
     } else {
       raiseNode.setAttribute("width", group.name === "\\equilibriumRight" ? "0.5em" : "0");
-      wrapper = new MathNode5(
+      wrapper = new MathNode4(
         "mpadded",
         [padding(0.2778), raiseNode, botArrow, padding(0.2778)]
       );
@@ -18843,17 +17330,17 @@ defineFunction({
   },
   mathmlBuilder(group, style) {
     if (group.label.body.length === 0) {
-      return new MathNode5("mrow", style);
+      return new MathNode4("mrow", style);
     }
     const mrow = buildGroup$1(group.label, style);
     if (group.side === "left") {
       mrow.classes.push("tml-shift-left");
     }
-    const mtd = new MathNode5("mtd", [mrow]);
+    const mtd = new MathNode4("mtd", [mrow]);
     mtd.style.padding = "0";
-    const mtr = new MathNode5("mtr", [mtd]);
-    const mtable = new MathNode5("mtable", [mtr]);
-    const label = new MathNode5("mpadded", [mtable]);
+    const mtr = new MathNode4("mtr", [mtd]);
+    const mtable = new MathNode4("mtable", [mtr]);
+    const label = new MathNode4("mpadded", [mtable]);
     label.setAttribute("width", "0.1px");
     label.setAttribute("displaystyle", "false");
     label.setAttribute("scriptlevel", "1");
@@ -18874,7 +17361,7 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    return new MathNode5("mrow", [buildGroup$1(group.fragment, style)]);
+    return new MathNode4("mrow", [buildGroup$1(group.fragment, style)]);
   }
 });
 var ordGroup = (body) => {
@@ -21722,7 +20209,7 @@ var alignMap = {
   r: "right "
 };
 var glue = (group) => {
-  const glueNode = new MathNode5("mtd", []);
+  const glueNode = new MathNode4("mtd", []);
   glueNode.style = { padding: "0", width: "50%" };
   if (group.envClasses.includes("multline")) {
     glueNode.style.width = "7.5%";
@@ -21739,7 +20226,7 @@ var mathmlBuilder$9 = function(group, style) {
     const row = [];
     const cellLevel = group.scriptLevel === "text" ? StyleLevel.TEXT : group.scriptLevel === "script" ? StyleLevel.SCRIPT : StyleLevel.DISPLAY;
     for (let j = 0; j < rw.length; j++) {
-      const mtd = new MathNode5(
+      const mtd = new MathNode4(
         "mtd",
         [buildGroup$1(rw[j], style.withLevel(cellLevel))]
       );
@@ -21753,15 +20240,15 @@ var mathmlBuilder$9 = function(group, style) {
     }
     const numColumns = group.body[0].length;
     for (let k = 0; k < numColumns - rw.length; k++) {
-      row.push(new MathNode5("mtd", [], [], style));
+      row.push(new MathNode4("mtd", [], [], style));
     }
     if (tagIsPresent) {
       const tag = group.tags[i];
       let tagElement;
       if (tag === true) {
-        tagElement = new MathNode5("mtext", [new Span(["tml-eqn"])]);
+        tagElement = new MathNode4("mtext", [new Span(["tml-eqn"])]);
       } else if (tag === false) {
-        tagElement = new MathNode5("mtext", [], []);
+        tagElement = new MathNode4("mtext", [], []);
       } else {
         tagElement = buildExpressionRow(tag[0].body, style.withLevel(cellLevel), true);
         tagElement = consolidateText(tagElement);
@@ -21777,7 +20264,7 @@ var mathmlBuilder$9 = function(group, style) {
         }
       }
     }
-    const mtr = new MathNode5("mtr", row, []);
+    const mtr = new MathNode4("mtr", row, []);
     const label = group.labels.shift();
     if (label && group.tags && group.tags[i]) {
       mtr.setAttribute("id", label);
@@ -21903,7 +20390,7 @@ var mathmlBuilder$9 = function(group, style) {
       }
     }
   }
-  let table = new MathNode5("mtable", tbl);
+  let table = new MathNode4("mtable", tbl);
   if (group.envClasses.length > 0) {
     if (group.envClasses.includes("jot")) {
       table.classes.push("tml-jot");
@@ -21966,7 +20453,7 @@ var mathmlBuilder$9 = function(group, style) {
     }
   }
   if (group.envClasses.includes("small")) {
-    table = new MathNode5("mstyle", [table]);
+    table = new MathNode4("mstyle", [table]);
     table.setAttribute("scriptlevel", "1");
   }
   return table;
@@ -22388,49 +20875,49 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    const fromNode = new MathNode5(
+    const fromNode = new MathNode4(
       "mrow",
       [buildGroup$1(group.body, style)],
       ["ff-narrow"]
       // A zero-width mrow.
     );
-    const phantom2 = new MathNode5("mphantom", [buildGroup$1(group.body, style)]);
-    const arrow = new MathNode5("mrow", [phantom2], ["tml-cancelto"]);
+    const phantom2 = new MathNode4("mphantom", [buildGroup$1(group.body, style)]);
+    const arrow = new MathNode4("mrow", [phantom2], ["tml-cancelto"]);
     arrow.style.color = style.color;
     if (group.isCharacterBox && smalls.indexOf(group.body.body[0].text) > -1) {
       arrow.style.left = "0.1em";
       arrow.style.width = "90%";
     }
-    const node = new MathNode5("mrow", [fromNode, arrow], ["menclose"]);
+    const node = new MathNode4("mrow", [fromNode, arrow], ["menclose"]);
     if (!group.isCharacterBox || /[f∫∑]/.test(group.body.body[0].text)) {
       phantom2.style.paddingRight = "0.2em";
     } else {
       phantom2.style.padding = "0.5ex 0.1em 0 0";
-      const strut = new MathNode5("mspace", []);
+      const strut = new MathNode4("mspace", []);
       strut.setAttribute("height", "0.85em");
       fromNode.children.push(strut);
     }
     let dummyNode;
     if (group.isCharacterBox) {
-      dummyNode = new MathNode5("mspace", []);
+      dummyNode = new MathNode4("mspace", []);
       dummyNode.setAttribute("height", "1em");
     } else {
       const inner2 = buildGroup$1(group.body, style);
-      const zeroWidthNode = new MathNode5("mpadded", [inner2]);
+      const zeroWidthNode = new MathNode4("mpadded", [inner2]);
       zeroWidthNode.setAttribute("width", "0.1px");
-      dummyNode = new MathNode5("mphantom", [zeroWidthNode]);
+      dummyNode = new MathNode4("mphantom", [zeroWidthNode]);
     }
     const toNode2 = buildGroup$1(group.to, style);
     toNode2.style.color = style.color;
-    const zeroWidthToNode = new MathNode5("mpadded", [toNode2]);
+    const zeroWidthToNode = new MathNode4("mpadded", [toNode2]);
     if (!group.isCharacterBox || /[f∫∑]/.test(group.body.body[0].text)) {
-      const w = new MathNode5("mspace", []);
+      const w = new MathNode4("mspace", []);
       w.setAttribute("width", "0.2em");
       zeroWidthToNode.children.unshift(w);
     }
     zeroWidthToNode.setAttribute("width", "0.1px");
-    const mover = new MathNode5("mover", [dummyNode, zeroWidthToNode]);
-    const nudgeLeft = new MathNode5("mrow", [], ["ff-nudge-left"]);
+    const mover = new MathNode4("mover", [dummyNode, zeroWidthToNode]);
+    const nudgeLeft = new MathNode4("mrow", [], ["ff-nudge-left"]);
     return newDocumentFragment([makeRow([node, mover]), nudgeLeft]);
   }
 });
@@ -22608,7 +21095,7 @@ var validateColor = (color, macros2, token) => {
 var mathmlBuilder$8 = (group, style) => {
   let expr = buildExpression(group.body, style.withColor(group.color));
   if (expr.length === 0) {
-    expr.push(new MathNode5("mrow"));
+    expr.push(new MathNode4("mrow"));
   }
   expr = expr.map((e) => {
     e.style.color = group.color;
@@ -22719,7 +21206,7 @@ defineFunction({
   // The following builder is called only at the top level,
   // not within tabular/array environments.
   mathmlBuilder(group, style) {
-    const node = new MathNode5("mo");
+    const node = new MathNode4("mo");
     if (group.newLine) {
       node.setAttribute("linebreak", "newline");
       if (group.size) {
@@ -23098,7 +21585,7 @@ function checkDelimiter(delim, context) {
 var needExplicitStretch = /* @__PURE__ */ new Set(["/", "\\", "\\backslash", "\u2216", "\\vert", "|"]);
 var makeFenceMo = (delim, mode, form, isStretchy) => {
   const text2 = delim === "." ? "" : delim;
-  const node = new MathNode5("mo", [makeText(text2, mode)]);
+  const node = new MathNode4("mo", [makeText(text2, mode)]);
   node.setAttribute("fence", "true");
   node.setAttribute("form", form);
   node.setAttribute("stretchy", isStretchy ? "true" : "false");
@@ -23152,7 +21639,7 @@ defineFunction({
     const children = [];
     const delim = group.delim === "." ? "" : group.delim;
     children.push(makeText(delim, group.mode));
-    const node = new MathNode5("mo", children);
+    const node = new MathNode4("mo", children);
     if (group.mclass === "mopen" || group.mclass === "mclose") {
       node.setAttribute("fence", "true");
     } else {
@@ -23317,7 +21804,7 @@ defineFunction({
   },
   mathmlBuilder: (group) => {
     const textNode = makeText(group.delim, group.mode);
-    const middleNode = new MathNode5("mo", [textNode]);
+    const middleNode = new MathNode4("mo", [textNode]);
     middleNode.setAttribute("stretchy", "true");
     middleNode.setAttribute("form", "infix");
     if (textNode.text !== "/") {
@@ -23330,7 +21817,7 @@ defineFunction({
 var boxTags = ["\\boxed", "\\fcolorbox", "\\colorbox"];
 var mathmlBuilder$7 = (group, style) => {
   const tag = boxTags.includes(group.label) ? "mrow" : "menclose";
-  const node = new MathNode5(tag, [buildGroup$1(group.body, style)]);
+  const node = new MathNode4(tag, [buildGroup$1(group.body, style)]);
   switch (group.label) {
     case "\\overline":
       node.setAttribute("notation", "top");
@@ -23342,34 +21829,34 @@ var mathmlBuilder$7 = (group, style) => {
       break;
     case "\\cancel":
       node.setAttribute("notation", "updiagonalstrike");
-      node.children.push(new MathNode5("mrow", [], ["tml-cancel", "upstrike"]));
+      node.children.push(new MathNode4("mrow", [], ["tml-cancel", "upstrike"]));
       break;
     case "\\bcancel":
       node.setAttribute("notation", "downdiagonalstrike");
-      node.children.push(new MathNode5("mrow", [], ["tml-cancel", "downstrike"]));
+      node.children.push(new MathNode4("mrow", [], ["tml-cancel", "downstrike"]));
       break;
     case "\\sout":
       node.setAttribute("notation", "horizontalstrike");
-      node.children.push(new MathNode5("mrow", [], ["tml-cancel", "sout"]));
+      node.children.push(new MathNode4("mrow", [], ["tml-cancel", "sout"]));
       break;
     case "\\xcancel":
       node.setAttribute("notation", "updiagonalstrike downdiagonalstrike");
-      node.children.push(new MathNode5("mrow", [], ["tml-cancel", "tml-xcancel"]));
+      node.children.push(new MathNode4("mrow", [], ["tml-cancel", "tml-xcancel"]));
       break;
     case "\\longdiv":
       node.setAttribute("notation", "longdiv");
       node.classes.push("longdiv-top");
-      node.children.push(new MathNode5("mrow", [], ["longdiv-arc"]));
+      node.children.push(new MathNode4("mrow", [], ["longdiv-arc"]));
       break;
     case "\\phase":
       node.setAttribute("notation", "phasorangle");
       node.classes.push("phasor-bottom");
-      node.children.push(new MathNode5("mrow", [], ["phasor-angle"]));
+      node.children.push(new MathNode4("mrow", [], ["phasor-angle"]));
       break;
     case "\\textcircled":
       node.setAttribute("notation", "circle");
       node.classes.push("circle-pad");
-      node.children.push(new MathNode5("mrow", [], ["textcircle"]));
+      node.children.push(new MathNode4("mrow", [], ["textcircle"]));
       break;
     case "\\angl":
       node.setAttribute("notation", "actuarial");
@@ -23623,7 +22110,7 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    return new MathNode5("mrow");
+    return new MathNode4("mrow");
   }
 });
 defineFunction({
@@ -23639,7 +22126,7 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    return new MathNode5("mrow");
+    return new MathNode4("mrow");
   }
 });
 var script = Object.freeze({
@@ -24074,7 +22561,7 @@ var mathmlBuilder$6 = (group, style) => {
       mi2.children[0].text = mi2.children[0].text.split("").map((c) => variantChar(c, "italic")).join("");
       return mi2;
     }
-    const mpadded = new MathNode5("mpadded", [mi2]);
+    const mpadded = new MathNode4("mpadded", [mi2]);
     mpadded.setAttribute("lspace", "0");
     return mpadded;
   }
@@ -24099,8 +22586,8 @@ var mathmlBuilder$6 = (group, style) => {
     mi.children.push(mathGroup.children[i].children[0]);
   }
   if (mi.attributes.mathvariant && mi.attributes.mathvariant === "normal") {
-    const bogus = new MathNode5("mtext", new TextNode2("\u200B"));
-    return new MathNode5("mrow", [bogus, mi]);
+    const bogus = new MathNode4("mtext", new TextNode2("\u200B"));
+    return new MathNode4("mrow", [bogus, mi]);
   }
   return mi;
 };
@@ -24205,7 +22692,7 @@ var mathmlBuilder$5 = (group, style) => {
     denom.style.mathDepth = "2";
     denom.setAttribute("scriptlevel", "2");
   }
-  let node = new MathNode5("mfrac", [numer, denom]);
+  let node = new MathNode4("mfrac", [numer, denom]);
   if (!group.hasBarLine) {
     node.setAttribute("linethickness", "0px");
   } else if (group.barSize) {
@@ -24215,7 +22702,7 @@ var mathmlBuilder$5 = (group, style) => {
   if (group.leftDelim != null || group.rightDelim != null) {
     const withDelims = [];
     if (group.leftDelim != null) {
-      const leftOp = new MathNode5("mo", [
+      const leftOp = new MathNode4("mo", [
         new TextNode2(group.leftDelim.replace("\\", ""))
       ]);
       leftOp.setAttribute("fence", "true");
@@ -24223,7 +22710,7 @@ var mathmlBuilder$5 = (group, style) => {
     }
     withDelims.push(node);
     if (group.rightDelim != null) {
-      const rightOp = new MathNode5("mo", [
+      const rightOp = new MathNode4("mo", [
         new TextNode2(group.rightDelim.replace("\\", ""))
       ]);
       rightOp.setAttribute("fence", "true");
@@ -24232,7 +22719,7 @@ var mathmlBuilder$5 = (group, style) => {
     node = makeRow(withDelims);
   }
   if (group.scriptLevel !== "auto") {
-    node = new MathNode5("mstyle", [node]);
+    node = new MathNode4("mstyle", [node]);
     node.setAttribute("displaystyle", String(group.scriptLevel === "display"));
     node.setAttribute("scriptlevel", scriptLevel[group.scriptLevel]);
   }
@@ -24476,7 +22963,7 @@ defineFunction({
 var mathmlBuilder$4 = (group, style) => {
   const accentNode2 = mathMLnode(group.label);
   accentNode2.style["math-depth"] = 0;
-  return new MathNode5(group.isOver ? "mover" : "munder", [
+  return new MathNode4(group.isOver ? "mover" : "munder", [
     buildGroup$1(group.base, style),
     accentNode2
   ]);
@@ -24683,7 +23170,7 @@ defineFunction({
     const node = new Img(group.src, group.alt, graphicStyle);
     node.height = height;
     node.depth = depth;
-    return new MathNode5("mtext", [node]);
+    return new MathNode4("mtext", [node]);
   }
 });
 defineFunction({
@@ -24724,14 +23211,14 @@ defineFunction({
     const ch = dimension.number > 0 && dimension.unit === "em" ? spaceCharacter(dimension.number) : "";
     if (group.mode === "text" && ch.length > 0) {
       const character = new TextNode2(ch);
-      return new MathNode5("mtext", [character]);
+      return new MathNode4("mtext", [character]);
     } else {
       if (dimension.number >= 0) {
-        const node = new MathNode5("mspace");
+        const node = new MathNode4("mspace");
         node.setAttribute("width", dimension.number + dimension.unit);
         return node;
       } else {
-        const node = new MathNode5("mrow");
+        const node = new MathNode4("mrow");
         node.style.marginLeft = dimension.number + dimension.unit;
         return node;
       }
@@ -24767,7 +23254,7 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    const node = new MathNode5("mrow", [], ["tml-label"]);
+    const node = new MathNode4("mrow", [], ["tml-label"]);
     if (group.string.length > 0) {
       node.setLabel(group.string);
     }
@@ -24804,8 +23291,8 @@ defineFunction({
     let strut;
     if (group.alignment === "llap") {
       const phantomInner = buildExpression(ordargument(group.body), style);
-      const phantom2 = new MathNode5("mphantom", phantomInner);
-      strut = new MathNode5("mpadded", [phantom2]);
+      const phantom2 = new MathNode4("mphantom", phantomInner);
+      strut = new MathNode4("mpadded", [phantom2]);
       strut.setAttribute("width", "0.1px");
     }
     const inner2 = buildGroup$1(group.body, style);
@@ -24814,9 +23301,9 @@ defineFunction({
       inner2.style.position = "absolute";
       inner2.style.right = "0";
       inner2.style.bottom = `0`;
-      node = new MathNode5("mpadded", [strut, inner2]);
+      node = new MathNode4("mpadded", [strut, inner2]);
     } else {
-      node = new MathNode5("mpadded", [inner2]);
+      node = new MathNode4("mpadded", [inner2]);
     }
     if (group.alignment === "rlap") {
       if (group.body.body.length > 0 && group.body.body[0].type === "genfrac") {
@@ -24912,7 +23399,7 @@ function mathmlBuilder$3(group, style) {
   let node;
   const inner2 = buildExpression(group.body, style);
   if (group.mclass === "minner") {
-    node = new MathNode5("mpadded", inner2);
+    node = new MathNode4("mpadded", inner2);
   } else if (group.mclass === "mord") {
     if (group.isCharacterBox || inner2[0].type === "mathord") {
       node = inner2[0];
@@ -24921,10 +23408,10 @@ function mathmlBuilder$3(group, style) {
         node.setAttribute("mathvariant", "normal");
       }
     } else {
-      node = new MathNode5("mi", inner2);
+      node = new MathNode4("mi", inner2);
     }
   } else {
-    node = new MathNode5("mrow", inner2);
+    node = new MathNode4("mrow", inner2);
     if (group.mustPromote) {
       node = inner2[0];
       node.type = "mo";
@@ -24932,7 +23419,7 @@ function mathmlBuilder$3(group, style) {
         node.setAttribute("mathvariant", "italic");
       }
     } else {
-      node = new MathNode5("mrow", inner2);
+      node = new MathNode4("mrow", inner2);
     }
     const doSpacing = style.level < 2;
     if (node.type === "mrow") {
@@ -25151,8 +23638,8 @@ defineFunction({
   },
   mathmlBuilder(group, style) {
     const base = buildGroup$1(group.base, style);
-    const prescriptsNode = new MathNode5("mprescripts");
-    const noneNode = new MathNode5("none");
+    const prescriptsNode = new MathNode4("mprescripts");
+    const noneNode = new MathNode4("none");
     let children = [];
     const preSub = buildGroup(group.prescripts.sub, style, noneNode);
     const preSup = buildGroup(group.prescripts.sup, style, noneNode);
@@ -25167,7 +23654,7 @@ defineFunction({
     } else {
       children = [base, prescriptsNode, preSub, preSup];
     }
-    return new MathNode5("mmultiscripts", children);
+    return new MathNode4("mmultiscripts", children);
   }
 });
 defineFunction({
@@ -25218,7 +23705,7 @@ var setSpacing = (node) => {
 var mathmlBuilder$2 = (group, style) => {
   let node;
   if (group.symbol) {
-    node = new MathNode5("mo", [makeText(group.name, group.mode)]);
+    node = new MathNode4("mo", [makeText(group.name, group.mode)]);
     if (noSuccessor.includes(group.name)) {
       node.setAttribute("largeop", "false");
     } else {
@@ -25228,26 +23715,26 @@ var mathmlBuilder$2 = (group, style) => {
       setSpacing(node);
     }
   } else if (group.body) {
-    node = new MathNode5("mo", buildExpression(group.body, style));
+    node = new MathNode4("mo", buildExpression(group.body, style));
     if (group.fromMathOp) {
       setSpacing(node);
     }
   } else {
-    node = new MathNode5("mi", [new TextNode2(group.name.slice(1))]);
+    node = new MathNode4("mi", [new TextNode2(group.name.slice(1))]);
     if (!group.parentIsSupSub) {
-      const operator = new MathNode5("mo", [makeText("\u2061", "text")]);
+      const operator = new MathNode4("mo", [makeText("\u2061", "text")]);
       const row = [node, operator];
       if (group.needsLeadingSpace) {
-        const lead = new MathNode5("mspace");
+        const lead = new MathNode4("mspace");
         lead.setAttribute("width", "0.1667em");
         row.unshift(lead);
       }
       if (!group.isFollowedByDelimiter) {
-        const trail = new MathNode5("mspace");
+        const trail = new MathNode4("mspace");
         trail.setAttribute("width", "0.1667em");
         row.push(trail);
       }
-      node = new MathNode5("mrow", row);
+      node = new MathNode4("mrow", row);
     }
   }
   return node;
@@ -25530,10 +24017,10 @@ var mathmlBuilder$1 = (group, style) => {
   let isAllString = true;
   for (let i = 0; i < expression.length; i++) {
     let node = expression[i];
-    if (node instanceof MathNode5) {
-      if ((node.type === "mrow" || node.type === "mpadded") && node.children.length === 1 && node.children[0] instanceof MathNode5) {
+    if (node instanceof MathNode4) {
+      if ((node.type === "mrow" || node.type === "mpadded") && node.children.length === 1 && node.children[0] instanceof MathNode4) {
         node = node.children[0];
-      } else if (node.type === "mrow" && node.children.length === 2 && node.children[0] instanceof MathNode5 && node.children[1] instanceof MathNode5 && node.children[1].type === "mspace" && !node.children[1].attributes.width && node.children[1].children.length === 0) {
+      } else if (node.type === "mrow" && node.children.length === 2 && node.children[0] instanceof MathNode4 && node.children[1] instanceof MathNode4 && node.children[1].type === "mspace" && !node.children[1].attributes.width && node.children[1].children.length === 0) {
         node = node.children[0];
       }
       switch (node.type) {
@@ -25550,7 +24037,7 @@ var mathmlBuilder$1 = (group, style) => {
               if (ch === "") {
                 isAllString = false;
               } else {
-                expression[i] = new MathNode5("mtext", [new TextNode2(ch)]);
+                expression[i] = new MathNode4("mtext", [new TextNode2(ch)]);
               }
             }
           }
@@ -25577,31 +24064,31 @@ var mathmlBuilder$1 = (group, style) => {
   } else if (expression.length === 1 && ["mover", "munder"].includes(expression[0].type) && (expression[0].children[0].type === "mi" || expression[0].children[0].type === "mtext")) {
     expression[0].children[0].type = "mi";
     if (group.parentIsSupSub) {
-      return new MathNode5("mrow", expression);
+      return new MathNode4("mrow", expression);
     } else {
-      const operator = new MathNode5("mo", [makeText("\u2061", "text")]);
+      const operator = new MathNode4("mo", [makeText("\u2061", "text")]);
       return newDocumentFragment([expression[0], operator]);
     }
   }
   let wrapper;
   if (isAllString) {
-    wrapper = new MathNode5("mi", expression);
+    wrapper = new MathNode4("mi", expression);
     if (expression[0].text.length === 1) {
       wrapper.setAttribute("mathvariant", "normal");
     }
   } else {
-    wrapper = new MathNode5("mrow", expression);
+    wrapper = new MathNode4("mrow", expression);
   }
   if (!group.parentIsSupSub) {
-    const operator = new MathNode5("mo", [makeText("\u2061", "text")]);
+    const operator = new MathNode4("mo", [makeText("\u2061", "text")]);
     const fragment = [wrapper, operator];
     if (group.needsLeadingSpace) {
-      const space = new MathNode5("mspace");
+      const space = new MathNode4("mspace");
       space.setAttribute("width", "0.1667em");
       fragment.unshift(space);
     }
     if (!group.isFollowedByDelimiter) {
-      const trail = new MathNode5("mspace");
+      const trail = new MathNode4("mspace");
       trail.setAttribute("width", "0.1667em");
       fragment.push(trail);
     }
@@ -25660,7 +24147,7 @@ defineFunction({
   },
   mathmlBuilder: (group, style) => {
     const inner2 = buildExpression(group.body, style);
-    return new MathNode5("mphantom", inner2);
+    return new MathNode4("mphantom", inner2);
   }
 });
 defineFunction({
@@ -25680,8 +24167,8 @@ defineFunction({
   },
   mathmlBuilder: (group, style) => {
     const inner2 = buildExpression(ordargument(group.body), style);
-    const phantom2 = new MathNode5("mphantom", inner2);
-    const node = new MathNode5("mpadded", [phantom2]);
+    const phantom2 = new MathNode4("mphantom", inner2);
+    const node = new MathNode4("mpadded", [phantom2]);
     node.setAttribute("height", "0px");
     node.setAttribute("depth", "0px");
     return node;
@@ -25704,8 +24191,8 @@ defineFunction({
   },
   mathmlBuilder: (group, style) => {
     const inner2 = buildExpression(ordargument(group.body), style);
-    const phantom2 = new MathNode5("mphantom", inner2);
-    const node = new MathNode5("mpadded", [phantom2]);
+    const phantom2 = new MathNode4("mphantom", inner2);
+    const node = new MathNode4("mpadded", [phantom2]);
     node.setAttribute("width", "0.1px");
     return node;
   }
@@ -25733,7 +24220,7 @@ defineFunction({
 });
 var mathmlBuilder = (group, style) => {
   const newStyle = style.withLevel(StyleLevel.TEXT);
-  const node = new MathNode5("mpadded", [buildGroup$1(group.body, newStyle)]);
+  const node = new MathNode4("mpadded", [buildGroup$1(group.body, newStyle)]);
   const dy = calculateSize(group.dy, style);
   node.setAttribute("voffset", dy.number + dy.unit);
   if (dy.number > 0) {
@@ -25869,7 +24356,7 @@ defineFunction({
     const height = calculateSize(group.height, style);
     const shift = group.shift ? calculateSize(group.shift, style) : { number: 0, unit: "em" };
     const color = style.color && style.getColor() || "black";
-    const rule = new MathNode5("mspace");
+    const rule = new MathNode4("mspace");
     if (width.number > 0 && height.number > 0) {
       rule.setAttribute("mathbackground", color);
     }
@@ -25878,7 +24365,7 @@ defineFunction({
     if (shift.number === 0) {
       return rule;
     }
-    const wrapper = new MathNode5("mpadded", [rule]);
+    const wrapper = new MathNode4("mpadded", [rule]);
     if (shift.number >= 0) {
       wrapper.setAttribute("height", "+" + shift.number + shift.unit);
     } else {
@@ -25948,7 +24435,7 @@ defineFunction({
     const numerator = group.numerator.split("").map((c) => unicodeNumSups[c]).join("");
     const denominator = group.denominator.split("").map((c) => unicodeNumSubs[c]).join("");
     const text2 = new TextNode2(numerator + "\u2044" + denominator, group.mode, style);
-    return new MathNode5("mn", [text2], ["special-fraction"]);
+    return new MathNode4("mn", [text2], ["special-fraction"]);
   }
 });
 var sizeMap = {
@@ -26047,7 +24534,7 @@ defineFunction({
     };
   },
   mathmlBuilder: (group, style) => {
-    const node = new MathNode5("mpadded", [buildGroup$1(group.body, style)]);
+    const node = new MathNode4("mpadded", [buildGroup$1(group.body, style)]);
     if (group.smashHeight) {
       node.setAttribute("height", "0px");
     }
@@ -26121,10 +24608,10 @@ defineFunction({
   },
   mathmlBuilder(group, style) {
     const { body, index } = group;
-    return index ? new MathNode5("mroot", [
+    return index ? new MathNode4("mroot", [
       buildGroup$1(body, style),
       buildGroup$1(index, style.incrementLevel())
-    ]) : new MathNode5("msqrt", [buildGroup$1(body, style)]);
+    ]) : new MathNode4("msqrt", [buildGroup$1(body, style)]);
   }
 });
 var styleMap = {
@@ -26254,23 +24741,23 @@ defineFunctionBuilders({
         nodeType = "msubsup";
       }
     }
-    let node = new MathNode5(nodeType, children);
+    let node = new MathNode4(nodeType, children);
     if (appendApplyFunction) {
-      const operator = new MathNode5("mo", [makeText("\u2061", "text")]);
+      const operator = new MathNode4("mo", [makeText("\u2061", "text")]);
       if (needsLeadingSpace) {
-        const space = new MathNode5("mspace");
+        const space = new MathNode4("mspace");
         space.setAttribute("width", "0.1667em");
         node = newDocumentFragment([space, node, operator]);
       } else {
         node = newDocumentFragment([node, operator]);
       }
       if (appendSpace) {
-        const space = new MathNode5("mspace");
+        const space = new MathNode4("mspace");
         space.setAttribute("width", "0.1667em");
         node.children.push(space);
       }
     } else if (symbolRegEx.test(nodeType)) {
-      node = new MathNode5("mrow", [node]);
+      node = new MathNode4("mrow", [node]);
     }
     return node;
   }
@@ -26293,7 +24780,7 @@ var isArrow = (str) => {
 defineFunctionBuilders({
   type: "atom",
   mathmlBuilder(group, style) {
-    const node = new MathNode5("mo", [makeText(group.text, group.mode)]);
+    const node = new MathNode4("mo", [makeText(group.text, group.mode)]);
     if (group.family === "punct") {
       node.setAttribute("separator", "true");
     } else if (group.family === "open" || group.family === "close") {
@@ -26317,9 +24804,9 @@ defineFunctionBuilders({
       node.attributes.rspace = "0.2222em";
     } else if (group.needsSpacing) {
       if (group.family === "bin") {
-        return new MathNode5("mrow", [padding(0.222), node, padding(0.222)]);
+        return new MathNode4("mrow", [padding(0.222), node, padding(0.222)]);
       } else {
-        return new MathNode5("mrow", [padding(0.2778), node, padding(0.2778)]);
+        return new MathNode4("mrow", [padding(0.2778), node, padding(0.2778)]);
       }
     }
     return node;
@@ -26415,8 +24902,8 @@ var primes = /* @__PURE__ */ new Set([
   "\\backtrprime"
 ]);
 var italicNumber = (text2, variant, tag) => {
-  const mn = new MathNode5(tag, [text2]);
-  const wrapper = new MathNode5("mstyle", [mn]);
+  const mn = new MathNode4(tag, [text2]);
+  const wrapper = new MathNode4("mstyle", [mn]);
   wrapper.style["font-style"] = "italic";
   wrapper.style["font-family"] = "Cambria, 'Times New Roman', serif";
   if (variant === "bold-italic") {
@@ -26433,16 +24920,16 @@ defineFunctionBuilders({
     const variant = getVariant(group, style) || defaultVariant;
     if (variant === "script") {
       text2.text = variantChar(text2.text, variant);
-      return new MathNode5("mi", [text2], [style.font]);
+      return new MathNode4("mi", [text2], [style.font]);
     } else if (variant !== "italic") {
       text2.text = variantChar(text2.text, variant);
     }
-    let node = new MathNode5("mi", [text2]);
+    let node = new MathNode4("mi", [text2]);
     if (variant === "normal") {
       node.setAttribute("mathvariant", "normal");
       if (text2.text.length === 1) {
-        const mspace = new MathNode5("mspace", []);
-        node = new MathNode5("mrow", [node, mspace]);
+        const mspace = new MathNode4("mspace", []);
+        node = new MathNode4("mrow", [node, mspace]);
       }
     }
     return node;
@@ -26469,22 +24956,22 @@ defineFunctionBuilders({
         if (variant !== "normal") {
           text2.text = text2.text.split("").map((c) => variantChar(c, variant)).join("");
         }
-        node = new MathNode5(tag, [text2]);
+        node = new MathNode4(tag, [text2]);
       }
     } else if (group.mode === "text") {
       if (variant !== "normal") {
         text2.text = variantChar(text2.text, variant);
       }
-      node = new MathNode5("mtext", [text2]);
+      node = new MathNode4("mtext", [text2]);
     } else if (primes.has(group.text)) {
-      node = new MathNode5("mo", [text2]);
+      node = new MathNode4("mo", [text2]);
       node.classes.push("tml-prime");
     } else {
       const origText = text2.text;
       if (variant !== "italic") {
         text2.text = variantChar(text2.text, variant);
       }
-      node = new MathNode5("mi", [text2]);
+      node = new MathNode4("mi", [text2]);
       if (text2.text === origText && latinRegEx.test(origText)) {
         node.setAttribute("mathvariant", "italic");
       }
@@ -26512,9 +24999,9 @@ defineFunctionBuilders({
   mathmlBuilder(group, style) {
     let node;
     if (Object.prototype.hasOwnProperty.call(regularSpace, group.text)) {
-      node = new MathNode5("mtext", [new TextNode2("\xA0")]);
+      node = new MathNode4("mtext", [new TextNode2("\xA0")]);
     } else if (Object.prototype.hasOwnProperty.call(cssSpace, group.text)) {
-      node = new MathNode5("mo");
+      node = new MathNode4("mo");
       if (group.text === "\\nobreak") {
         node.setAttribute("linebreak", "nobreak");
       }
@@ -26612,10 +25099,10 @@ defineFunction({
     };
   },
   mathmlBuilder(group, style) {
-    const mtd = new MathNode5("mtd", [buildGroup$1(group.body, style)]);
+    const mtd = new MathNode4("mtd", [buildGroup$1(group.body, style)]);
     mtd.style.padding = "0";
-    const mtr = new MathNode5("mtr", [mtd]);
-    return new MathNode5("mtable", [mtr]);
+    const mtr = new MathNode4("mtr", [mtd]);
+    return new MathNode4("mtable", [mtr]);
   }
 });
 defineFunction({
@@ -26630,7 +25117,7 @@ defineFunction({
   },
   mathmlBuilder(group, style) {
     const text2 = new TextNode2(makeVerb(group));
-    const node = new MathNode5("mtext", [text2]);
+    const node = new MathNode4("mtext", [text2]);
     node.setAttribute("mathvariant", "monospace");
     return node;
   }
@@ -33674,6 +32161,5043 @@ function convertMathMLToLatex(mathml) {
   }
 }
 
+// src/editor/state-field.ts
+function isLivePreviewActive(state) {
+  try {
+    if (import_obsidian2.editorLivePreviewField) {
+      const val = state.field(import_obsidian2.editorLivePreviewField, false);
+      if (val !== void 0) {
+        return Boolean(val);
+      }
+    }
+  } catch {
+  }
+  return true;
+}
+function isTableRowLine(line) {
+  const lineText = line.text.trim();
+  if (lineText.length === 0)
+    return false;
+  return lineText.startsWith("|") || lineText.includes("|") && lineText.endsWith("|") || lineText.split("|").length >= 3;
+}
+function isInsideTableRow(doc, from, to) {
+  const line = doc.lineAt(from);
+  return isTableRowLine(line);
+}
+function buildEquationDecorations(input) {
+  if ("field" in input && typeof input.field === "function") {
+    if (!isLivePreviewActive(input)) {
+      return import_view2.Decoration.none;
+    }
+  }
+  const doc = "doc" in input ? input.doc : input;
+  const docText = doc.toString();
+  const ranges = [];
+  const blockRegex = /```(math-word|weq)(?:[ \t]*(?:<br\s*\/?>|\r?\n)\s*)([\s\S]*?)(?:(?:\r?\n|<br\s*\/?>)```|$)/g;
+  let match;
+  while ((match = blockRegex.exec(docText)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    const delimiter = match[1];
+    let code = match[2] || "";
+    if (code.includes("<br")) {
+      code = code.replace(/<br\s*\/?>/gi, "\n");
+    }
+    ranges.push({ from, to, code, inline: false, delimiter });
+  }
+  const fullPageRegex = /```(math-page|weq-page)(?:[ \t]*(?:<br\s*\/?>|\r?\n)\s*)([\s\S]*?)(?:(?:\r?\n|<br\s*\/?>)```|$)/g;
+  while ((match = fullPageRegex.exec(docText)) !== null) {
+    let from = match.index;
+    let to = from + match[0].length;
+    const delimiter = match[1];
+    let code = match[2] || "";
+    if (code.includes("<br")) {
+      code = code.replace(/<br\s*\/?>/gi, "\n");
+    }
+    const inTable = isInsideTableRow(doc, from, to);
+    if (inTable) {
+      const line = doc.lineAt(from);
+      const lineText = line.text;
+      const relFrom = from - line.from;
+      const relTo = to - line.from;
+      const prevPipe = lineText.lastIndexOf("|", relFrom - 1);
+      const nextPipe = lineText.indexOf("|", relTo);
+      const cellStart = prevPipe !== -1 ? line.from + prevPipe + 1 : line.from;
+      const cellEnd = nextPipe !== -1 ? line.from + nextPipe : line.to;
+      from = cellStart;
+      to = cellEnd;
+    } else {
+      const startLine = doc.lineAt(from);
+      const endLine = doc.lineAt(to);
+      from = startLine.from;
+      to = endLine.to;
+    }
+    ranges.push({ from, to, code, inline: false, delimiter, displayMode: "full-page" });
+  }
+  const tableUnfencedBlockRegex = /(math-word|weq|math-page|weq-page)(?:[ \t]*(?:<br\s*\/?>|\r?\n)\s*)(?:\$\$([\s\S]*?)\$\$|\$([^\$\n]+?)\$|(<math[\s\S]*?<\/math>)|([^<\r\n|]*?))(?:\s*<br\s*\/?>[ \t]*\r?\n|\s*<br\s*\/?>|\r?\n|$)/gi;
+  while ((match = tableUnfencedBlockRegex.exec(docText)) !== null) {
+    let from = match.index;
+    let to = from + match[0].length;
+    if (isInsideTableRow(doc, from, to)) {
+      const delimiter = match[1].toLowerCase();
+      const isFullPage = delimiter === "math-page" || delimiter === "weq-page";
+      const rawContent = match[2] ?? match[3] ?? match[4] ?? match[5] ?? "";
+      let code = rawContent.trim();
+      code = code.replace(/^\$\$([\s\S]*)\$\$$/, "$1").replace(/^\$([\s\S]*)\$$/, "$1").trim();
+      if (code.includes("<br")) {
+        code = code.replace(/<br\s*\/?>/gi, "\n");
+      }
+      if (!code) {
+        code = `<math xmlns="http://www.w3.org/1998/Math/MathML" display="${isFullPage ? "full-page" : "block"}"><mrow></mrow></math>`;
+      } else if (!code.startsWith("<math")) {
+        try {
+          code = convertLatexToMathML(code, false, { throwOnError: false }) || code;
+        } catch {
+        }
+      }
+      if (isFullPage) {
+        const line = doc.lineAt(from);
+        const lineText = line.text;
+        const relFrom = from - line.from;
+        const relTo = to - line.from;
+        const prevPipe = lineText.lastIndexOf("|", relFrom - 1);
+        const nextPipe = lineText.indexOf("|", relTo);
+        const cellStart = prevPipe !== -1 ? line.from + prevPipe + 1 : line.from;
+        const cellEnd = nextPipe !== -1 ? line.from + nextPipe : line.to;
+        from = cellStart;
+        to = cellEnd;
+        ranges.push({ from, to, code, inline: false, delimiter, displayMode: "full-page" });
+      } else {
+        ranges.push({ from, to, code, inline: false, delimiter });
+      }
+    }
+  }
+  const weqInlineRegex = /[/\\]weq_inline\s*([\s\S]*?)\s*[/\\]weq_inline/g;
+  while ((match = weqInlineRegex.exec(docText)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    let code = match[1] || "";
+    code = code.trim().replace(/^\$\$([\s\S]*)\$\$$/, "$1").replace(/^\$([\s\S]*)\$$/, "$1").trim();
+    if (!code.startsWith("<math")) {
+      try {
+        code = convertLatexToMathML(code, false, { throwOnError: false }) || code;
+      } catch {
+      }
+    }
+    ranges.push({ from, to, code, inline: true, delimiter: match[0].startsWith("\\") ? "\\weq_inline" : "/weq_inline" });
+  }
+  const dollarInlineRegex = /\$weq(?:_inline)?\s*([\s\S]*?)\s*\$weq(?:_inline)?/g;
+  while ((match = dollarInlineRegex.exec(docText)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    let code = match[1] || "";
+    code = code.trim().replace(/^\$\$([\s\S]*)\$\$$/, "$1").replace(/^\$([\s\S]*)\$$/, "$1").trim();
+    ranges.push({ from, to, code, inline: true, delimiter: "$weq" });
+  }
+  const rawMathRegex = /<math[\s\S]*?<\/math>/gi;
+  while ((match = rawMathRegex.exec(docText)) !== null) {
+    let from = match.index;
+    let to = from + match[0].length;
+    const inTable = isInsideTableRow(doc, from, to);
+    if (inTable) {
+      let code = match[0];
+      if (code.includes("<br")) {
+        code = code.replace(/<br\s*\/?>/gi, "\n");
+      }
+      const isFullPage = /display\s*=\s*["']full-page["']/i.test(code);
+      if (isFullPage) {
+        const line = doc.lineAt(from);
+        const lineText = line.text;
+        const relFrom = from - line.from;
+        const relTo = to - line.from;
+        const prevPipe = lineText.lastIndexOf("|", relFrom - 1);
+        const nextPipe = lineText.indexOf("|", relTo);
+        const cellStart = prevPipe !== -1 ? line.from + prevPipe + 1 : line.from;
+        const cellEnd = nextPipe !== -1 ? line.from + nextPipe : line.to;
+        ranges.push({ from: cellStart, to: cellEnd, code, inline: false, delimiter: "math-page", displayMode: "full-page" });
+      } else {
+        ranges.push({ from, to, code, inline: true, delimiter: "math" });
+      }
+    }
+  }
+  const dollarTableRegex = /(?:\$\$([\s\S]*?)\$\$|\$([^\$\n]+?)\$)/g;
+  while ((match = dollarTableRegex.exec(docText)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    const rawContent = match[1] ?? match[2] ?? "";
+    if (!rawContent.trim() || rawContent.startsWith("weq")) {
+      continue;
+    }
+    const inTable = isInsideTableRow(doc, from, to);
+    if (inTable) {
+      let code = rawContent.trim();
+      if (!code.startsWith("<math")) {
+        try {
+          code = convertLatexToMathML(code, false, { throwOnError: false });
+        } catch {
+        }
+      }
+      ranges.push({
+        from,
+        to,
+        code,
+        inline: true,
+        delimiter: match[0].startsWith("$$") ? "$$" : "$"
+      });
+    }
+  }
+  ranges.sort((a, b) => a.from - b.from || b.to - a.to);
+  const builder = new import_state.RangeSetBuilder();
+  let lastEnd = 0;
+  for (const r of ranges) {
+    if (r.from < lastEnd) {
+      continue;
+    }
+    lastEnd = r.to;
+    const inTable = isInsideTableRow(doc, r.from, r.to);
+    const isFullPage = r.displayMode === "full-page" || r.delimiter === "math-page" || r.delimiter === "weq-page";
+    const isBlockInTable = inTable && !r.inline && !isFullPage;
+    const isInlineInTable = inTable && Boolean(r.inline);
+    const isInlineDecoration = inTable || !isFullPage && r.inline;
+    const widget = new WordEquationWidget(
+      r.code,
+      r.from,
+      r.to,
+      r.inline,
+      r.delimiter,
+      isBlockInTable,
+      isFullPage ? "full-page" : r.inline ? "inline" : "block",
+      isInlineInTable
+    );
+    builder.add(
+      r.from,
+      r.to,
+      import_view2.Decoration.replace({
+        widget,
+        block: !isInlineDecoration
+      })
+    );
+  }
+  return builder.finish();
+}
+var wordEquationCollapsedGapField = import_state.StateField.define({
+  create(state) {
+    return buildCollapsedGapDecorations(state);
+  },
+  update(decorations, tr) {
+    const wasLP = isLivePreviewActive(tr.startState);
+    const isLP = isLivePreviewActive(tr.state);
+    if (tr.docChanged || wasLP !== isLP) {
+      return buildCollapsedGapDecorations(tr.state);
+    }
+    return decorations.map(tr.changes);
+  },
+  provide(field) {
+    return import_view2.EditorView.decorations.from(field);
+  }
+});
+function buildCollapsedGapDecorations(input) {
+  if ("field" in input && typeof input.field === "function") {
+    if (!isLivePreviewActive(input)) {
+      return import_view2.Decoration.none;
+    }
+  }
+  const doc = "doc" in input ? input.doc : input;
+  const docText = doc.toString();
+  const blockRegex = /```(math-word|weq|math-page|weq-page)(?:[ \t]*(?:\r?\n|<br\s*\/?>))([\s\S]*?)(?:(?:\r?\n|<br\s*\/?>)```|$)/g;
+  let match;
+  const blocks = [];
+  while ((match = blockRegex.exec(docText)) !== null) {
+    const from = match.index;
+    const to = from + match[0].length;
+    if (isInsideTableRow(doc, from, to)) {
+      continue;
+    }
+    const startLine = doc.lineAt(from).number;
+    const endLine = doc.lineAt(Math.min(doc.length, to)).number;
+    blocks.push({ startLine, endLine });
+  }
+  let inTable = false;
+  let tableStartLine = 0;
+  let tableEndLine = 0;
+  for (let lineNum = 1; lineNum <= doc.lines; lineNum++) {
+    const line = doc.line(lineNum);
+    const isTable = isTableRowLine(line);
+    if (isTable) {
+      if (!inTable) {
+        inTable = true;
+        tableStartLine = lineNum;
+        tableEndLine = lineNum;
+      } else {
+        tableEndLine = lineNum;
+      }
+    } else {
+      if (inTable) {
+        blocks.push({ startLine: tableStartLine, endLine: tableEndLine });
+        inTable = false;
+      }
+    }
+  }
+  if (inTable) {
+    blocks.push({ startLine: tableStartLine, endLine: tableEndLine });
+  }
+  if (blocks.length === 0) {
+    return import_view2.Decoration.none;
+  }
+  blocks.sort((a, b) => a.startLine - b.startLine);
+  const builder = new import_state.RangeSetBuilder();
+  if (blocks[0].startLine === 2) {
+    const firstLine = doc.line(1);
+    if (firstLine.length === 0) {
+      builder.add(
+        firstLine.from,
+        firstLine.from,
+        import_view2.Decoration.line({ class: "word-equation-collapsed-gap" })
+      );
+    }
+  }
+  for (let i = 0; i < blocks.length - 1; i++) {
+    const prevBlock = blocks[i];
+    const nextBlock = blocks[i + 1];
+    if (nextBlock.startLine === prevBlock.endLine + 2) {
+      const intermediateLine = doc.line(prevBlock.endLine + 1);
+      if (intermediateLine.length === 0) {
+        builder.add(
+          intermediateLine.from,
+          intermediateLine.from,
+          import_view2.Decoration.line({ class: "word-equation-collapsed-gap" })
+        );
+      }
+    }
+  }
+  return builder.finish();
+}
+var wordEquationStateField = import_state.StateField.define({
+  create(state) {
+    return buildEquationDecorations(state);
+  },
+  update(decorations, tr) {
+    const wasLP = isLivePreviewActive(tr.startState);
+    const isLP = isLivePreviewActive(tr.state);
+    if (tr.docChanged || wasLP !== isLP) {
+      return buildEquationDecorations(tr.state);
+    }
+    return decorations.map(tr.changes);
+  },
+  provide(field) {
+    return [
+      import_view2.EditorView.decorations.from(field),
+      wordEquationCollapsedGapField
+    ];
+  }
+});
+
+// src/editor/navigation-extension.ts
+var import_state2 = require("@codemirror/state");
+var import_view3 = require("@codemirror/view");
+function isInsideFullPageContainer(state, pos) {
+  const decorations = state.field(wordEquationStateField, false);
+  if (!decorations)
+    return { isFullPage: false };
+  let result = { isFullPage: false };
+  decorations.between(0, state.doc.length, (from, to, dec) => {
+    if (result.isFullPage)
+      return;
+    const w = dec.widget || dec.spec?.widget;
+    if (w instanceof WordEquationWidget && (w.displayMode === "full-page" || w.delimiter === "math-page" || w.delimiter === "weq-page")) {
+      const inTable = isInsideTableRow(state.doc, from, to);
+      if (inTable) {
+        if (pos !== void 0) {
+          const line = state.doc.lineAt(from);
+          const lineText = line.text;
+          const relFrom = from - line.from;
+          const relTo = to - line.from;
+          const prevPipe = lineText.lastIndexOf("|", relFrom - 1);
+          const nextPipe = lineText.indexOf("|", relTo);
+          const cellStart = prevPipe !== -1 ? line.from + prevPipe + 1 : line.from;
+          const cellEnd = nextPipe !== -1 ? line.from + nextPipe : line.to;
+          if (pos >= cellStart && pos <= cellEnd) {
+            result = { isFullPage: true, widget: w };
+          }
+        }
+      } else {
+        result = { isFullPage: true, widget: w };
+      }
+    }
+  });
+  return result;
+}
+function findFullPageWidget(view, target) {
+  const cell = target?.closest("td, th, .table-cell-wrapper");
+  if (cell) {
+    const fullPageEl = cell.querySelector('.word-equation-full-page, .eq-full-page, [data-display-mode="full-page"]');
+    if (fullPageEl) {
+      const candidate = fullPageEl.__widget || fullPageEl.querySelector?.(".word-equation-math")?.__widget;
+      if (candidate)
+        return candidate;
+    }
+  }
+  const decorations = view.state.field(wordEquationStateField, false);
+  if (decorations) {
+    let matched = null;
+    decorations.between(0, view.state.doc.length, (from, to, dec) => {
+      if (matched)
+        return;
+      const w = dec.widget || dec.spec?.widget;
+      if (w instanceof WordEquationWidget && (w.displayMode === "full-page" || w.delimiter === "math-page" || w.delimiter === "weq-page")) {
+        const inTable = isInsideTableRow(view.state.doc, from, to);
+        if (cell) {
+          if (inTable) {
+            matched = w;
+          }
+        } else if (!inTable) {
+          matched = w;
+        }
+      }
+    });
+    if (matched)
+      return matched;
+  }
+  const pageWidgetEl = view.dom.querySelector('.word-equation-full-page, .eq-full-page, [data-display-mode="full-page"]');
+  if (pageWidgetEl) {
+    const elCell = pageWidgetEl.closest("td, th, .table-cell-wrapper");
+    if (!elCell || cell) {
+      const candidate = pageWidgetEl.__widget || pageWidgetEl.querySelector?.(".word-equation-math")?.__widget;
+      if (candidate)
+        return candidate;
+    }
+  }
+  return null;
+}
+var equationTransactionFilterPlugin = import_state2.EditorState.transactionFilter.of((tr) => {
+  if (tr.docChanged) {
+    const headPos = tr.selection?.main.head ?? tr.startState.selection.main.head;
+    const fpInfo = isInsideFullPageContainer(tr.startState, headPos);
+    if (fpInfo.isFullPage) {
+      if (!isInternalEquationUpdating()) {
+        const userEvent = tr.annotation(import_state2.Transaction.userEvent);
+        if (userEvent?.startsWith("input") || userEvent?.startsWith("delete") || !userEvent) {
+          return [];
+        }
+      }
+    }
+  }
+  if (!isDebugEnabled())
+    return tr;
+  try {
+    const activeState = getActiveEquationState();
+    const userEvent = tr.annotation(import_state2.Transaction.userEvent);
+    const targetSel = tr.selection || tr.newSelection;
+    const selectionBefore = {
+      anchor: tr.startState.selection.main.anchor,
+      head: tr.startState.selection.main.head,
+      empty: tr.startState.selection.main.empty
+    };
+    const selectionAfter = {
+      anchor: targetSel.main.anchor,
+      head: targetSel.main.head,
+      empty: targetSel.main.empty
+    };
+    logDebugEvent("navigation", () => ({
+      eventCategory: "cm_transaction",
+      userEvent,
+      selectionChanged: !targetSel.eq(tr.startState.selection),
+      selectionBefore,
+      selectionAfter,
+      docChanged: tr.docChanged,
+      hasActiveEquation: Boolean(activeState?.isFocused),
+      activeEquationRange: activeState ? { from: activeState.from, to: activeState.to } : void 0
+    }));
+  } catch (err) {
+    console.error("[WordEquation] Telemetry error in transaction filter:", err);
+  }
+  return tr;
+});
+var equationSelectionHighlightPlugin = import_view3.ViewPlugin.fromClass(
+  class {
+    constructor(view) {
+      this.view = view;
+      this.syncSelection(view);
+    }
+    update(update) {
+      if (update.selectionSet && !getActiveEquationState()?.isFocused) {
+        const mainSel = update.state.selection.main;
+        if (mainSel.empty) {
+          const pos = mainSel.head;
+          const fpInfo = isInsideFullPageContainer(update.state, pos);
+          if (fpInfo.isFullPage && fpInfo.widget) {
+            const actual = resolveActualWidget(update.view, fpInfo.widget);
+            actual.enterFromStart(update.view);
+          } else {
+            const line = update.state.doc.lineAt(pos);
+            if (isTableRowLine(line)) {
+              const tableWidget = findTableBlockWidgetForPos(update.view, line, pos, "inside");
+              if (tableWidget && pos >= tableWidget.from && pos < tableWidget.to && !(tableWidget.justExitedForward && pos === tableWidget.lastForwardExitPos)) {
+                const actual = resolveActualWidget(update.view, tableWidget);
+                actual.enterFromStart(update.view);
+              }
+            }
+          }
+        }
+      }
+      if (update.selectionSet && isDebugEnabled()) {
+        const activeState = getActiveEquationState();
+        const mainSel = update.state.selection.main;
+        logDebugEvent("selection", () => ({
+          selectionType: "cm_selection_update",
+          codeMirrorSelection: {
+            anchor: mainSel.anchor,
+            head: mainSel.head,
+            empty: mainSel.empty,
+            from: mainSel.from,
+            to: mainSel.to
+          },
+          hasActiveEquation: Boolean(activeState?.isFocused),
+          activeEquationRange: activeState ? { from: activeState.from, to: activeState.to } : void 0
+        }));
+      }
+      if (update.selectionSet || update.docChanged || update.viewportChanged) {
+        this.syncSelection(update.view);
+      }
+    }
+    syncSelection(view) {
+      const ranges = view.state.selection.ranges.filter((r) => !r.empty);
+      const activeState = getActiveEquationState();
+      const equationEls = view.dom.querySelectorAll("[data-equation-from]");
+      equationEls.forEach((el) => {
+        const from = Number(el.getAttribute("data-equation-from"));
+        const to = Number(el.getAttribute("data-equation-to"));
+        if (Number.isNaN(from) || Number.isNaN(to))
+          return;
+        const isInternallyActive = Boolean(activeState?.isFocused && activeState.from === from);
+        const hasInternalSelection = Boolean(activeState?.from === from && activeState?.selection);
+        const isSelected = !isInternallyActive && !hasInternalSelection && ranges.some((r) => r.from < to && r.to > from);
+        updateEquationSelectionDom(el, isSelected);
+        if (isSelected) {
+          logDebugEvent("selection", () => ({
+            selectionType: "full",
+            equation: {
+              from,
+              to,
+              isInline: el.classList.contains("word-equation-inline")
+            },
+            codeMirrorSelection: ranges[0] ? {
+              from: ranges[0].from,
+              to: ranges[0].to,
+              head: ranges[0].head,
+              anchor: ranges[0].anchor
+            } : void 0
+          }));
+        }
+      });
+    }
+  }
+);
+function getActiveWidget(view) {
+  const active = getActiveEquationState();
+  if (!active || !active.isFocused)
+    return null;
+  const activeWidget = getActiveEquationWidget();
+  if (activeWidget instanceof WordEquationWidget && activeWidget.from === active.from) {
+    if (!activeWidget.isFocused) {
+      clearActiveEquationState();
+      return null;
+    }
+    const liveDocCode = view.state.doc.sliceString(activeWidget.from, activeWidget.to);
+    if (!liveDocCode.includes(activeWidget.code) && active.ast) {
+      activeWidget.ast = cloneSlot(active.ast, true);
+    } else if (active.ast) {
+      activeWidget.ast = active.ast;
+    }
+    return activeWidget;
+  }
+  const containerEl = view.dom.querySelector(`[data-equation-from="${active.from}"]`) || view.dom.querySelector(".word-equation-math.eq-active")?.closest("[data-equation-from]") || view.dom.querySelector(".word-equation-math.eq-active");
+  if (containerEl) {
+    const candidate = containerEl.__widget || containerEl.querySelector?.("[data-equation-from]")?.__widget;
+    if (candidate && (candidate instanceof WordEquationWidget || typeof candidate.handleArrowNavigation === "function") && candidate.from === active.from) {
+      candidate.isFocused = true;
+      if (active.ast)
+        candidate.ast = active.ast;
+      return candidate;
+    }
+  }
+  const decorations = view.state.field(wordEquationStateField, false);
+  if (!decorations)
+    return null;
+  let targetWidget = null;
+  decorations.between(active.from, active.to, (f, t, dec) => {
+    const w = dec.widget || dec.spec?.widget;
+    if (w && (w instanceof WordEquationWidget || typeof w.handleArrowNavigation === "function")) {
+      if (w.from === active.from) {
+        w.isFocused = true;
+        if (active.ast) {
+          w.ast = active.ast;
+        }
+        targetWidget = w;
+      }
+    }
+  });
+  if (!targetWidget) {
+    clearActiveEquationState();
+  }
+  return targetWidget;
+}
+function deleteEquationWidget(view, widget) {
+  const range = widget.getLiveRange ? widget.getLiveRange(view) : { from: widget.from, to: widget.to };
+  let deleteFrom = range.from;
+  let deleteTo = range.to;
+  if (!widget.isInline) {
+    if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 2) === "\r\n") {
+      deleteTo += 2;
+    } else if (deleteTo < view.state.doc.length && view.state.doc.sliceString(deleteTo, deleteTo + 1) === "\n") {
+      deleteTo += 1;
+    }
+  }
+  clearActiveEquationState();
+  view.dispatch({
+    changes: { from: deleteFrom, to: deleteTo },
+    selection: { anchor: deleteFrom }
+  });
+}
+function resolveActualWidget(view, targetWidget) {
+  const mountedEl = view.dom.querySelector(`[data-equation-from="${targetWidget.from}"]`) || view.dom.querySelector(".word-equation-math")?.parentElement;
+  const domWidget = mountedEl?.__widget;
+  const actualWidget = domWidget instanceof WordEquationWidget && domWidget.code === targetWidget.code ? domWidget : targetWidget;
+  actualWidget.from = targetWidget.from;
+  actualWidget.to = targetWidget.to;
+  return actualWidget;
+}
+function findTableBlockWidgetForPos(view, line, pos, direction) {
+  if (!isTableRowLine(line))
+    return null;
+  const decorations = view.state.field(wordEquationStateField, false);
+  if (!decorations)
+    return null;
+  let targetWidget = null;
+  decorations.between(line.from, line.to, (from, to, dec) => {
+    if (targetWidget)
+      return;
+    const w = dec.widget || dec.spec?.widget;
+    if (from < line.from || to > line.to)
+      return;
+    const isTableBlock = Boolean(w.isBlockInTable || !w.isInline && isInsideTableRow(view.state.doc, from, to));
+    if (!isTableBlock)
+      return;
+    const relFrom = from - line.from;
+    const lineBefore = line.text.slice(0, Math.max(0, relFrom));
+    const pipeBefore = lineBefore.lastIndexOf("|");
+    const cellStart = pipeBefore !== -1 ? line.from + pipeBefore : line.from;
+    const relTo = to - line.from;
+    const lineAfter = line.text.slice(Math.max(0, relTo));
+    const pipeAfter = lineAfter.indexOf("|");
+    const dividerPipe = pipeAfter !== -1 ? to + pipeAfter : line.to;
+    const cellEnd = dividerPipe;
+    if (direction === "right") {
+      if (pos >= cellStart && pos <= from) {
+        targetWidget = w;
+      }
+    } else if (direction === "left") {
+      if (pos >= to && pos <= cellEnd + 1) {
+        targetWidget = w;
+      }
+    } else {
+      if (pos >= cellStart && pos <= cellEnd) {
+        targetWidget = w;
+      }
+    }
+  });
+  return targetWidget;
+}
+var isWindowCaptureInterceptorInstalled = false;
+function registerWindowArrowCaptureInterceptor() {
+  if (typeof window === "undefined" || isWindowCaptureInterceptorInstalled)
+    return;
+  isWindowCaptureInterceptorInstalled = true;
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.ctrlKey || e.altKey || e.metaKey)
+        return;
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "ArrowDown" && e.key !== "ArrowUp") {
+        return;
+      }
+      const activeState = getActiveEquationState();
+      if (!activeState?.isFocused || document.activeElement !== document.body)
+        return;
+      const activeWidget = getActiveEquationWidget();
+      if (!activeWidget || typeof activeWidget.handleArrowNavigation !== "function")
+        return;
+      if (activeWidget.containerEl && !activeWidget.containerEl.isConnected) {
+        clearActiveEquationState();
+        return;
+      }
+      const mathEl = activeWidget.containerEl?.classList?.contains("word-equation-math") ? activeWidget.containerEl : activeWidget.containerEl?.querySelector(".word-equation-math");
+      if (mathEl && typeof mathEl.focus === "function") {
+        mathEl.focus({ preventScroll: true });
+      }
+      const handled = activeWidget.handleArrowNavigation(
+        e.key,
+        e.shiftKey,
+        activeWidget.currentView
+      );
+      if (handled) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    },
+    true
+  );
+}
+function createEquationNavigationExtension() {
+  registerWindowArrowCaptureInterceptor();
+  return [
+    equationTransactionFilterPlugin,
+    equationSelectionHighlightPlugin,
+    import_state2.Prec.highest(import_view3.EditorView.decorations.from(wordEquationStateField)),
+    import_state2.Prec.highest(
+      import_view3.keymap.of([
+        {
+          key: "Escape",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              logDebugEvent("keydown", () => ({
+                eventCategory: "cm_keymap_escape",
+                action: "deactivate_active_widget",
+                from: activeWidget.from,
+                to: activeWidget.to
+              }), true);
+              activeWidget.isFocused = false;
+              activeWidget.selection = null;
+              activeWidget.highlightedSlotId = null;
+              activeWidget.detachObserver();
+              clearActiveEquationState();
+              activeWidget.updateCaretOnly();
+              view.focus();
+              const targetPos = activeWidget.isInline ? activeWidget.from : Math.max(0, activeWidget.from - 1);
+              view.dispatch({
+                selection: { anchor: targetPos, head: targetPos },
+                scrollIntoView: true,
+                userEvent: "select"
+              });
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Mod-z",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              activeWidget.handleUndoRedo("undo", view);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Mod-y",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              activeWidget.handleUndoRedo("redo", view);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Mod-Shift-z",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              activeWidget.handleUndoRedo("redo", view);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Backspace",
+          run: (view) => {
+            const active = getActiveEquationState();
+            if (active && active.isFocused)
+              return false;
+            const sel = view.state.selection.main;
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            if (!sel.empty) {
+              let targetWidget2 = null;
+              decorations.between(sel.from, sel.to, (from, to, dec) => {
+                if (dec.spec?.widget instanceof WordEquationWidget) {
+                  const w = dec.spec.widget;
+                  if (w.from === sel.from && w.to === sel.to) {
+                    targetWidget2 = w;
+                  }
+                }
+              });
+              if (targetWidget2) {
+                deleteEquationWidget(view, targetWidget2);
+                return true;
+              }
+              return false;
+            }
+            const pos = sel.head;
+            let targetWidget = null;
+            let emptyLineDeleted = false;
+            decorations.between(Math.max(0, pos - 10), pos, (from, to, dec) => {
+              if (emptyLineDeleted)
+                return;
+              if (dec.spec?.widget instanceof WordEquationWidget) {
+                const w = dec.spec.widget;
+                const inTable = Boolean(w.isBlockInTable || isInsideTableRow(view.state.doc, w.from, w.to));
+                if (w.isInline) {
+                  if (to === pos) {
+                    targetWidget = w;
+                  }
+                } else {
+                  const blockLine = view.state.doc.lineAt(w.to);
+                  const curLine = view.state.doc.lineAt(pos);
+                  if (inTable) {
+                    return;
+                  }
+                  if (curLine.number === blockLine.number + 1 && curLine.from === pos) {
+                    if (curLine.length === 0) {
+                      const lineBreakLen = curLine.from >= 2 && view.state.doc.sliceString(curLine.from - 2, curLine.from) === "\r\n" ? 2 : 1;
+                      view.dispatch({
+                        changes: { from: curLine.from - lineBreakLen, to: curLine.to },
+                        selection: { anchor: curLine.from - lineBreakLen },
+                        userEvent: "delete.backward"
+                      });
+                      emptyLineDeleted = true;
+                      return;
+                    }
+                    return;
+                  }
+                  if (pos === w.to) {
+                    targetWidget = w;
+                  }
+                }
+              }
+            });
+            if (emptyLineDeleted) {
+              return true;
+            }
+            if (targetWidget) {
+              deleteEquationWidget(view, targetWidget);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Delete",
+          run: (view) => {
+            const active = getActiveEquationState();
+            if (active && active.isFocused)
+              return false;
+            const sel = view.state.selection.main;
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            if (!sel.empty) {
+              let targetWidget2 = null;
+              decorations.between(sel.from, sel.to, (from, to, dec) => {
+                if (dec.spec?.widget instanceof WordEquationWidget) {
+                  const w = dec.spec.widget;
+                  if (w.from === sel.from && w.to === sel.to) {
+                    targetWidget2 = w;
+                  }
+                }
+              });
+              if (targetWidget2) {
+                deleteEquationWidget(view, targetWidget2);
+                return true;
+              }
+              return false;
+            }
+            const pos = sel.head;
+            let targetWidget = null;
+            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
+              if (dec.spec?.widget instanceof WordEquationWidget) {
+                const w = dec.spec.widget;
+                const inTable = Boolean(w.isBlockInTable || isInsideTableRow(view.state.doc, w.from, w.to));
+                if (w.isInline) {
+                  if (from === pos) {
+                    targetWidget = w;
+                  }
+                } else {
+                  if (inTable) {
+                    return;
+                  }
+                  const blockLine = view.state.doc.lineAt(w.from);
+                  const curLine = view.state.doc.lineAt(pos);
+                  if (pos === w.from || pos === w.from - 1 || pos === w.from - 2 || curLine.number === blockLine.number - 1 && curLine.to === pos) {
+                    targetWidget = w;
+                  }
+                }
+              }
+            });
+            if (targetWidget) {
+              deleteEquationWidget(view, targetWidget);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "Shift-ArrowRight",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowRight", true, view);
+            }
+            const sel = view.state.selection.main;
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            const doc = view.state.doc;
+            const candidates = [];
+            decorations.between(
+              Math.max(0, sel.head - 4),
+              Math.min(doc.length, sel.head + 4),
+              (from, to, dec) => {
+                const w = dec.widget || dec.spec?.widget;
+                if (w instanceof WordEquationWidget || from < to) {
+                  if (!candidates.some((c) => c.from === from && c.to === to)) {
+                    candidates.push({
+                      from,
+                      to,
+                      isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
+                    });
+                  }
+                }
+              }
+            );
+            if (candidates.length === 0) {
+              decorations.between(
+                Math.max(0, sel.from),
+                Math.min(doc.length, sel.to + 1),
+                (from, to, dec) => {
+                  if (sel.head >= from && sel.head <= to) {
+                    const w = dec.widget || dec.spec?.widget;
+                    if (!candidates.some((c) => c.from === from && c.to === to)) {
+                      candidates.push({
+                        from,
+                        to,
+                        isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
+                      });
+                    }
+                  }
+                }
+              );
+            }
+            let candidateWidget = null;
+            if (candidates.length > 0) {
+              const atEntranceOrInside = candidates.find(
+                (c) => sel.head === c.from || sel.head > c.from && sel.head < c.to
+              );
+              if (atEntranceOrInside) {
+                candidateWidget = atEntranceOrInside;
+              } else {
+                const rightCandidates = candidates.filter((c) => c.to >= sel.head);
+                if (rightCandidates.length > 0) {
+                  candidateWidget = rightCandidates.reduce(
+                    (closest, curr) => curr.to < closest.to ? curr : closest
+                  );
+                } else {
+                  candidateWidget = candidates[0];
+                }
+              }
+            }
+            if (candidateWidget) {
+              const { from, to, isInline } = candidateWidget;
+              const exitPos = !isInline && to < doc.length && doc.sliceString(to, to + 1) === "\n" ? to + 1 : to;
+              if (sel.anchor <= from) {
+                if (sel.head < to) {
+                  if (sel.head === from || sel.head > from && sel.head < to) {
+                    logDebugEvent("selection", () => ({
+                      action: "external_shift_arrow",
+                      direction: "Shift-ArrowRight",
+                      step: "jump_across_equation",
+                      headBefore: sel.head,
+                      headAfter: exitPos,
+                      anchor: sel.anchor,
+                      equation: { from, to, isInline }
+                    }));
+                    view.dispatch({
+                      selection: { anchor: sel.anchor, head: exitPos },
+                      scrollIntoView: true,
+                      userEvent: "select.extend"
+                    });
+                    return true;
+                  }
+                } else if (sel.head >= to) {
+                  const nextPos = Math.min(doc.length, sel.head + 1);
+                  if (nextPos !== sel.head) {
+                    logDebugEvent("selection", () => ({
+                      action: "external_shift_arrow",
+                      direction: "Shift-ArrowRight",
+                      step: "extend_past_equation",
+                      headBefore: sel.head,
+                      headAfter: nextPos,
+                      anchor: sel.anchor,
+                      equation: { from, to, isInline }
+                    }));
+                    view.dispatch({
+                      selection: { anchor: sel.anchor, head: nextPos },
+                      scrollIntoView: true,
+                      userEvent: "select.extend"
+                    });
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          }
+        },
+        {
+          key: "Shift-ArrowLeft",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowLeft", true, view);
+            }
+            const sel = view.state.selection.main;
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            const doc = view.state.doc;
+            const candidates = [];
+            decorations.between(
+              Math.max(0, sel.head - 4),
+              Math.min(doc.length, sel.head + 4),
+              (from, to, dec) => {
+                const w = dec.widget || dec.spec?.widget;
+                if (w instanceof WordEquationWidget || from < to) {
+                  if (!candidates.some((c) => c.from === from && c.to === to)) {
+                    candidates.push({
+                      from,
+                      to,
+                      isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
+                    });
+                  }
+                }
+              }
+            );
+            if (candidates.length === 0) {
+              decorations.between(
+                Math.max(0, sel.from - 1),
+                Math.min(doc.length, sel.to),
+                (from, to, dec) => {
+                  if (sel.head >= from && sel.head <= to) {
+                    const w = dec.widget || dec.spec?.widget;
+                    if (!candidates.some((c) => c.from === from && c.to === to)) {
+                      candidates.push({
+                        from,
+                        to,
+                        isInline: Boolean(w?.isInline || dec.spec?.widget?.isInline)
+                      });
+                    }
+                  }
+                }
+              );
+            }
+            let candidateWidget = null;
+            if (candidates.length > 0) {
+              const atExitOrInside = candidates.find((c) => {
+                const exitPos = !c.isInline && c.to < doc.length && doc.sliceString(c.to, c.to + 1) === "\n" ? c.to + 1 : c.to;
+                return sel.head === exitPos || sel.head === c.to || sel.head < c.to && sel.head > c.from;
+              });
+              if (atExitOrInside) {
+                candidateWidget = atExitOrInside;
+              } else {
+                const leftCandidates = candidates.filter((c) => c.from <= sel.head);
+                if (leftCandidates.length > 0) {
+                  candidateWidget = leftCandidates.reduce(
+                    (closest, curr) => curr.from > closest.from ? curr : closest
+                  );
+                } else {
+                  candidateWidget = candidates[0];
+                }
+              }
+            }
+            if (candidateWidget) {
+              const { from, to, isInline } = candidateWidget;
+              const entrancePos = !isInline && from > 0 && doc.sliceString(from - 1, from) === "\n" ? from - 1 : from;
+              const exitPos = !isInline && to < doc.length && doc.sliceString(to, to + 1) === "\n" ? to + 1 : to;
+              if (sel.anchor >= to) {
+                if (sel.head > from) {
+                  if (sel.head === exitPos || sel.head === to || sel.head < to && sel.head > from) {
+                    logDebugEvent("selection", () => ({
+                      action: "external_shift_arrow",
+                      direction: "Shift-ArrowLeft",
+                      step: "jump_across_equation",
+                      headBefore: sel.head,
+                      headAfter: entrancePos,
+                      anchor: sel.anchor,
+                      equation: { from, to, isInline }
+                    }));
+                    view.dispatch({
+                      selection: { anchor: sel.anchor, head: entrancePos },
+                      scrollIntoView: true,
+                      userEvent: "select.extend"
+                    });
+                    return true;
+                  }
+                } else if (sel.head <= from) {
+                  const prevPos = Math.max(0, sel.head - 1);
+                  if (prevPos !== sel.head) {
+                    logDebugEvent("selection", () => ({
+                      action: "external_shift_arrow",
+                      direction: "Shift-ArrowLeft",
+                      step: "extend_past_equation",
+                      headBefore: sel.head,
+                      headAfter: prevPos,
+                      anchor: sel.anchor,
+                      equation: { from, to, isInline }
+                    }));
+                    view.dispatch({
+                      selection: { anchor: sel.anchor, head: prevPos },
+                      scrollIntoView: true,
+                      userEvent: "select.extend"
+                    });
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          }
+        },
+        {
+          key: "Shift-ArrowDown",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowDown", true, view);
+            }
+            return false;
+          }
+        },
+        {
+          key: "Shift-ArrowUp",
+          run: (view) => {
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowUp", true, view);
+            }
+            return false;
+          }
+        },
+        {
+          key: "ArrowRight",
+          run: (view) => {
+            logDebugEvent("keydown", () => ({
+              key: "ArrowRight",
+              code: "ArrowRight",
+              targetTag: "contentDOM",
+              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
+              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
+              isFocused: Boolean(getActiveEquationState()?.isFocused),
+              cmSelectionBefore: {
+                anchor: view.state.selection.main.anchor,
+                head: view.state.selection.main.head,
+                empty: view.state.selection.main.empty
+              }
+            }));
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowRight", false, view);
+            }
+            const sel = view.state.selection.main;
+            if (!sel.empty)
+              return false;
+            const pos = sel.head;
+            const curLine = view.state.doc.lineAt(pos);
+            if (isTableRowLine(curLine) && curLine.number < view.state.doc.lines) {
+              const nextLine = view.state.doc.line(curLine.number + 1);
+              if (isBlockEquationStart(view, nextLine)) {
+                if (pos === curLine.to) {
+                  view.dispatch({
+                    changes: { from: nextLine.from, insert: "\n" },
+                    selection: { anchor: nextLine.from }
+                  });
+                  return true;
+                }
+              } else if (nextLine.length === 0 && curLine.number + 2 <= view.state.doc.lines) {
+                const lineAfterEmpty = view.state.doc.line(curLine.number + 2);
+                if (isBlockEquationStart(view, lineAfterEmpty) && pos === curLine.to) {
+                  view.dispatch({ selection: { anchor: nextLine.from } });
+                  return true;
+                }
+              }
+            }
+            if (isTableRowLine(curLine)) {
+              const tableWidget = findTableBlockWidgetForPos(view, curLine, pos, "right");
+              if (tableWidget) {
+                const actualWidget = resolveActualWidget(view, tableWidget);
+                actualWidget.enterFromStart(view);
+                return true;
+              }
+            }
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            let targetWidget = null;
+            decorations.between(pos, Math.min(view.state.doc.length, pos + 4), (from, to, dec) => {
+              const w = dec.widget || dec.spec?.widget;
+              if (!(w instanceof WordEquationWidget || typeof w?.enterFromStart === "function"))
+                return;
+              if (w.displayMode === "full-page") {
+                if (pos === from || pos >= from && pos <= to || pos === from - 1 && view.state.doc.sliceString(pos, from) === "|") {
+                  targetWidget = w;
+                }
+              } else if (w.isInline) {
+                if (from === pos) {
+                  targetWidget = w;
+                }
+              } else {
+                const blockLine = view.state.doc.lineAt(from);
+                const curLine2 = view.state.doc.lineAt(pos);
+                const isAtBlockBoundary = from === pos || curLine2.number === blockLine.number - 1 && curLine2.to === pos || pos === from - 1 && view.state.doc.sliceString(pos, from) === "\n";
+                if (isAtBlockBoundary) {
+                  targetWidget = w;
+                }
+              }
+            });
+            if (targetWidget) {
+              const actualWidget = resolveActualWidget(view, targetWidget);
+              actualWidget.enterFromStart(view);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "ArrowLeft",
+          run: (view) => {
+            logDebugEvent("keydown", () => ({
+              key: "ArrowLeft",
+              code: "ArrowLeft",
+              targetTag: "contentDOM",
+              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
+              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
+              isFocused: Boolean(getActiveEquationState()?.isFocused),
+              cmSelectionBefore: {
+                anchor: view.state.selection.main.anchor,
+                head: view.state.selection.main.head,
+                empty: view.state.selection.main.empty
+              }
+            }));
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowLeft", false, view);
+            }
+            const sel = view.state.selection.main;
+            if (!sel.empty)
+              return false;
+            const pos = sel.head;
+            const curLine = view.state.doc.lineAt(pos);
+            if (isTableRowLine(curLine) && curLine.number > 1 && pos === curLine.from) {
+              const prevLine = view.state.doc.line(curLine.number - 1);
+              if (isBlockEquationEnd(view, prevLine)) {
+                view.dispatch({
+                  changes: { from: curLine.from, insert: "\n" },
+                  selection: { anchor: curLine.from }
+                });
+                return true;
+              } else if (prevLine.length === 0 && curLine.number > 2) {
+                const lineBeforeEmpty = view.state.doc.line(curLine.number - 2);
+                if (isBlockEquationEnd(view, lineBeforeEmpty)) {
+                  view.dispatch({ selection: { anchor: prevLine.from } });
+                  return true;
+                }
+              }
+            }
+            if (isTableRowLine(curLine)) {
+              const tableWidget = findTableBlockWidgetForPos(view, curLine, pos, "left");
+              if (tableWidget) {
+                const actualWidget = resolveActualWidget(view, tableWidget);
+                actualWidget.enterFromEnd(view);
+                return true;
+              }
+            }
+            const decorations = view.state.field(wordEquationStateField, false);
+            if (!decorations)
+              return false;
+            let targetWidget = null;
+            decorations.between(Math.max(0, pos - 4), pos, (from, to, dec) => {
+              const w = dec.widget || dec.spec?.widget;
+              if (!(w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function"))
+                return;
+              if (w.displayMode === "full-page") {
+                if (to === pos || pos >= from && pos <= to || pos === to + 1 && view.state.doc.sliceString(to, pos) === "|") {
+                  targetWidget = w;
+                }
+              } else if (w.isInline) {
+                if (to === pos) {
+                  targetWidget = w;
+                }
+              } else {
+                const blockLine = view.state.doc.lineAt(to);
+                const curLine2 = view.state.doc.lineAt(pos);
+                const isAtBlockBoundary = to === pos || curLine2.number === blockLine.number + 1 && curLine2.from === pos || pos === to + 1 && view.state.doc.sliceString(to, pos) === "\n";
+                if (isAtBlockBoundary) {
+                  targetWidget = w;
+                }
+              }
+            });
+            if (targetWidget) {
+              const w = targetWidget;
+              if (w.justEscapedForwardAfterEnteringFromEnd) {
+                w.justEscapedForwardAfterEnteringFromEnd = false;
+                return false;
+              }
+              w.justEscapedForwardAfterEnteringFromEnd = false;
+              const actualWidget = resolveActualWidget(view, w);
+              actualWidget.enterFromEnd(view);
+              return true;
+            }
+            return false;
+          }
+        },
+        {
+          key: "ArrowDown",
+          run: (view) => {
+            logDebugEvent("keydown", () => ({
+              key: "ArrowDown",
+              code: "ArrowDown",
+              targetTag: "contentDOM",
+              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
+              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
+              isFocused: Boolean(getActiveEquationState()?.isFocused),
+              cmSelectionBefore: {
+                anchor: view.state.selection.main.anchor,
+                head: view.state.selection.main.head,
+                empty: view.state.selection.main.empty
+              }
+            }));
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowDown", false, view);
+            }
+            const sel = view.state.selection.main;
+            if (!sel.empty)
+              return false;
+            const line = view.state.doc.lineAt(sel.head);
+            if (isTableRowLine(line) && line.number < view.state.doc.lines) {
+              const nextLine = view.state.doc.line(line.number + 1);
+              if (isBlockEquationStart(view, nextLine)) {
+                view.dispatch({
+                  changes: { from: nextLine.from, insert: "\n" },
+                  selection: { anchor: nextLine.from }
+                });
+                return true;
+              } else if (nextLine.length === 0 && line.number + 2 <= view.state.doc.lines) {
+                const lineAfterEmpty = view.state.doc.line(line.number + 2);
+                if (isBlockEquationStart(view, lineAfterEmpty)) {
+                  view.dispatch({ selection: { anchor: nextLine.from } });
+                  return true;
+                }
+              }
+            }
+            if (isTableRowLine(line)) {
+              const insideWidget = findTableBlockWidgetForPos(view, line, sel.head, "inside");
+              if (insideWidget) {
+                const actualWidget = resolveActualWidget(view, insideWidget);
+                actualWidget.enterFromStart(view, "ArrowDown");
+                return true;
+              }
+            }
+            if (line.number < view.state.doc.lines) {
+              const nextLine = view.state.doc.line(line.number + 1);
+              if (isTableRowLine(nextLine)) {
+                const curColPos = nextLine.from + Math.min(nextLine.length, sel.head - line.from);
+                const nextWidget = findTableBlockWidgetForPos(view, nextLine, curColPos, "inside");
+                if (nextWidget) {
+                  const actualWidget = resolveActualWidget(view, nextWidget);
+                  actualWidget.enterFromStart(view, "ArrowDown");
+                  return true;
+                }
+              }
+            }
+            const nextPos = line.to + 1;
+            if (nextPos <= view.state.doc.length) {
+              const decorations = view.state.field(wordEquationStateField, false);
+              if (decorations) {
+                let targetWidget = null;
+                decorations.between(nextPos, Math.min(view.state.doc.length, nextPos + 4), (from, to, dec) => {
+                  const w = dec.widget || dec.spec?.widget;
+                  if ((from === nextPos || from === nextPos + 1 || from === nextPos + 2) && (w instanceof WordEquationWidget || typeof w?.enterFromStart === "function")) {
+                    targetWidget = w;
+                  }
+                });
+                if (targetWidget) {
+                  const actualWidget = resolveActualWidget(view, targetWidget);
+                  actualWidget.enterFromStart(view, "ArrowDown");
+                  return true;
+                }
+              }
+            }
+            return false;
+          }
+        },
+        {
+          key: "ArrowUp",
+          run: (view) => {
+            logDebugEvent("keydown", () => ({
+              key: "ArrowUp",
+              code: "ArrowUp",
+              targetTag: "contentDOM",
+              activeElementTag: typeof document !== "undefined" ? document.activeElement?.tagName : void 0,
+              activeElementClass: typeof document !== "undefined" ? document.activeElement?.className : void 0,
+              isFocused: Boolean(getActiveEquationState()?.isFocused),
+              cmSelectionBefore: {
+                anchor: view.state.selection.main.anchor,
+                head: view.state.selection.main.head,
+                empty: view.state.selection.main.empty
+              }
+            }));
+            const activeWidget = getActiveWidget(view);
+            if (activeWidget) {
+              return activeWidget.handleArrowNavigation("ArrowUp", false, view);
+            }
+            const sel = view.state.selection.main;
+            if (!sel.empty)
+              return false;
+            const curLine = view.state.doc.lineAt(sel.head);
+            if (isTableRowLine(curLine) && curLine.number > 1) {
+              const prevLine = view.state.doc.line(curLine.number - 1);
+              if (isBlockEquationEnd(view, prevLine)) {
+                view.dispatch({
+                  changes: { from: curLine.from, insert: "\n" },
+                  selection: { anchor: curLine.from }
+                });
+                return true;
+              } else if (prevLine.length === 0 && curLine.number > 2) {
+                const lineBeforeEmpty = view.state.doc.line(curLine.number - 2);
+                if (isBlockEquationEnd(view, lineBeforeEmpty)) {
+                  view.dispatch({ selection: { anchor: prevLine.from } });
+                  return true;
+                }
+              }
+            }
+            if (isTableRowLine(curLine)) {
+              const insideWidget = findTableBlockWidgetForPos(view, curLine, sel.head, "inside");
+              if (insideWidget) {
+                const actualWidget = resolveActualWidget(view, insideWidget);
+                actualWidget.enterFromEnd(view, "ArrowUp");
+                return true;
+              }
+            }
+            if (curLine.number > 1) {
+              const prevLine = view.state.doc.line(curLine.number - 1);
+              if (isTableRowLine(prevLine)) {
+                const curColPos = prevLine.from + Math.min(prevLine.length, sel.head - curLine.from);
+                const prevWidget = findTableBlockWidgetForPos(view, prevLine, curColPos, "inside");
+                if (prevWidget) {
+                  const actualWidget = resolveActualWidget(view, prevWidget);
+                  actualWidget.enterFromEnd(view, "ArrowUp");
+                  return true;
+                }
+              }
+            }
+            const prevPos = curLine.from - 1;
+            if (prevPos >= 0) {
+              const decorations = view.state.field(wordEquationStateField, false);
+              if (decorations) {
+                let targetWidget = null;
+                decorations.between(Math.max(0, prevPos - 4), prevPos, (from, to, dec) => {
+                  const w = dec.widget || dec.spec?.widget;
+                  if ((to === prevPos || to === prevPos - 1 || to === prevPos - 2) && (w instanceof WordEquationWidget || typeof w?.enterFromEnd === "function")) {
+                    const blockLine = view.state.doc.lineAt(to);
+                    if (curLine.number === blockLine.number + 1) {
+                      targetWidget = w;
+                    }
+                  }
+                });
+                logDebugEvent("navigation", () => ({
+                  navType: "arrow_up_line_evaluation",
+                  currentPos: sel.head,
+                  currentLineNumber: curLine.number,
+                  candidateWidget: targetWidget ? { from: targetWidget.from, to: targetWidget.to } : null,
+                  blockLineNumber: targetWidget ? view.state.doc.lineAt(targetWidget.to).number : null,
+                  decision: targetWidget ? "enter_equation" : "skip_intermediate_line_or_none"
+                }));
+                if (targetWidget) {
+                  const actualWidget = resolveActualWidget(view, targetWidget);
+                  actualWidget.enterFromEnd(view, "ArrowUp");
+                  return true;
+                }
+              }
+            }
+            return false;
+          }
+        }
+      ])
+    ),
+    import_view3.EditorView.domEventHandlers({
+      pointerdown(event, view) {
+        const target = event.target;
+        const fullPageWidget = findFullPageWidget(view, target);
+        if (fullPageWidget) {
+          if (target && target.closest(".word-equation-math")) {
+            return false;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          const actual = resolveActualWidget(view, fullPageWidget);
+          actual.enterFromStart(view);
+          return true;
+        }
+        const cell = target?.closest("td, th, .table-cell-wrapper");
+        if (cell) {
+          const blockEq = cell.querySelector(".word-equation-block, .word-equation-table-block");
+          if (blockEq) {
+            const w = blockEq.__widget || blockEq.querySelector(".word-equation-math")?.__widget;
+            if (w && typeof w.enterFromStart === "function") {
+              if (target && target.closest(".word-equation-math")) {
+                return false;
+              }
+              event.preventDefault();
+              event.stopPropagation();
+              const actualWidget = resolveActualWidget(view, w);
+              actualWidget.enterFromStart(view);
+              return true;
+            }
+          }
+        }
+        const active = getActiveEquationState();
+        if (!active || !active.isFocused)
+          return false;
+        if (target && target.closest(".word-equation-block, .word-equation-inline")) {
+          return false;
+        }
+        const hadActiveSelection = Boolean(active.selection);
+        logDebugEvent("pointer", () => ({
+          eventCategory: "external_pointerdown",
+          hadActiveEquation: true,
+          activeEquationRange: { from: active.from, to: active.to },
+          hadActiveSelection,
+          actionTaken: "blur_equation_and_clear_selection"
+        }));
+        const decorations = view.state.field(wordEquationStateField, false);
+        if (decorations) {
+          decorations.between(active.from, active.to, (f, t, dec) => {
+            if (dec.spec?.widget instanceof WordEquationWidget) {
+              const w = dec.spec.widget;
+              w.isFocused = false;
+              w.selection = null;
+              w.highlightedSlotId = null;
+              w.updateCaretOnly();
+            }
+          });
+        }
+        clearActiveEquationState();
+        return false;
+      },
+      copy(event, view) {
+        if (!isDebugEnabled())
+          return false;
+        const active = getActiveEquationState();
+        if (active && active.isFocused) {
+          return false;
+        }
+        const sel = view.state.selection.main;
+        if (sel.empty)
+          return false;
+        const selectedText = view.state.sliceDoc(sel.from, sel.to);
+        const decorations = view.state.field(wordEquationStateField, false);
+        let spansEquation = false;
+        if (decorations) {
+          decorations.between(sel.from, sel.to, (f, t) => {
+            if (f < t) {
+              spansEquation = true;
+            }
+          });
+        }
+        const types = event.clipboardData ? Array.from(event.clipboardData.types) : ["text/plain"];
+        const snippet = selectedText.slice(0, 100);
+        logDebugEvent("clipboard", () => ({
+          action: "copy",
+          context: spansEquation ? "cross_boundary_selection" : "markdown_editor",
+          types,
+          characterCount: selectedText.length,
+          snippet,
+          selection: {
+            from: sel.from,
+            to: sel.to,
+            anchor: sel.anchor,
+            head: sel.head,
+            spansEquation
+          },
+          payload: {
+            types,
+            characterCount: selectedText.length,
+            snippet,
+            plainTextSnippet: snippet,
+            hasMathMarkup: /<math[\s>]|```math-word|\/weq_inline|\$weq/i.test(selectedText)
+          },
+          targetTag: event.target?.tagName?.toLowerCase(),
+          success: true
+        }));
+        return false;
+      },
+      paste(event, view) {
+        const active = getActiveEquationState();
+        if (active && active.isFocused) {
+          return false;
+        }
+        const clipboardText = event.clipboardData?.getData("application/mathml+xml")?.trim() || event.clipboardData?.getData("text/plain")?.trim();
+        if (!clipboardText)
+          return false;
+        const hasMarkdownFences = clipboardText.includes("```math-word") || clipboardText.includes("```weq") || clipboardText.includes("```") || clipboardText.includes("/weq_inline") || clipboardText.includes("$weq");
+        if (hasMarkdownFences) {
+          return false;
+        }
+        const isPureMathML = /^\s*(?:<\?xml[^>]*\?>\s*)?<math[\s>][\s\S]*<\/math>\s*$/i.test(clipboardText);
+        if (!isPureMathML) {
+          return false;
+        }
+        event.preventDefault();
+        let xml = clipboardText.replace(/^\s*<\?xml[^>]*\?>\s*/i, "").trim();
+        if (!xml.includes("xmlns=")) {
+          xml = xml.replace(/<math/i, '<math xmlns="http://www.w3.org/1998/Math/MathML"');
+        }
+        const sel = view.state.selection.main;
+        const line = view.state.doc.lineAt(sel.head);
+        const isInline = xml.includes('display="inline"') || line.text.trim().length > 0 && !xml.includes('display="block"');
+        let template;
+        if (isInline) {
+          template = `/weq_inline ${xml} /weq_inline`;
+        } else {
+          const prefix = sel.from > 0 && view.state.doc.sliceString(sel.from - 1, sel.from) !== "\n" ? "\n" : "";
+          const suffix = sel.to < view.state.doc.length && view.state.doc.sliceString(sel.to, sel.to + 1) !== "\n" ? "\n" : "";
+          template = `${prefix}\`\`\`math-word
+${xml}
+\`\`\`${suffix}`;
+        }
+        view.dispatch({
+          changes: { from: sel.from, to: sel.to, insert: template },
+          selection: { anchor: sel.from + template.length }
+        });
+        logDebugEvent("clipboard", () => ({
+          action: "paste",
+          context: "markdown_editor",
+          payload: {
+            types: event.clipboardData ? Array.from(event.clipboardData.types) : [],
+            plainTextSnippet: clipboardText.slice(0, 100),
+            mathmlSnippet: clipboardText.slice(0, 100),
+            isMathML: true,
+            characterCount: clipboardText.length
+          },
+          destination: {
+            cmPos: sel.from
+          },
+          success: true
+        }));
+        return true;
+      },
+      keydown(event, view) {
+        const headPos = view.state.selection.main.head;
+        const fpInfo = isInsideFullPageContainer(view.state, headPos);
+        if (fpInfo.isFullPage && fpInfo.widget) {
+          const active = getActiveEquationState();
+          if (!active || !active.isFocused) {
+            event.preventDefault();
+            event.stopPropagation();
+            const actual = resolveActualWidget(view, fpInfo.widget);
+            actual.enterFromStart(view);
+            return true;
+          }
+        }
+        return false;
+      }
+    })
+  ];
+}
+
+// src/shortcuts/markdown-filter.ts
+var import_view4 = require("@codemirror/view");
+function createMarkdownShortcutExtension() {
+  return import_view4.keymap.of([
+    {
+      key: "Space",
+      run: (view) => {
+        const sel = view.state.selection.main;
+        if (!sel.empty)
+          return false;
+        const line = view.state.doc.lineAt(sel.head);
+        const textBefore = line.text.slice(0, sel.head - line.from);
+        const match = expandShortcutInMarkdown(textBefore);
+        if (match) {
+          const from = sel.head - match.triggerLength;
+          const to = sel.head;
+          view.dispatch({
+            changes: { from, to, insert: match.replacement },
+            selection: { anchor: from + match.replacement.length }
+          });
+          return true;
+        }
+        return false;
+      }
+    }
+  ]);
+}
+
+// src/post-processor/reading-view.ts
+function createReadingViewProcessor() {
+  const renderer = new DomRenderer();
+  return (source, el, ctx) => {
+    const trimmed = source.trim();
+    let ast;
+    try {
+      if (trimmed.startsWith("<math") || trimmed.includes("</math>") || trimmed.startsWith("<m")) {
+        ast = parseMathML(trimmed);
+      } else {
+        ast = parseLinearEquation(trimmed);
+      }
+      const rendered = renderer.render(ast, {
+        readOnly: true,
+        isFocused: false
+      });
+      const emptyEl = (element) => {
+        if (typeof element.empty === "function") {
+          element.empty();
+        } else {
+          element.innerHTML = "";
+        }
+      };
+      emptyEl(el);
+      el.appendChild(rendered);
+    } catch (err) {
+      if (typeof el.empty === "function") {
+        el.empty();
+      } else {
+        el.innerHTML = "";
+      }
+      const errEl = document.createElement("div");
+      errEl.className = "word-equation-error";
+      errEl.textContent = `[Equation Error: ${err.message || "Invalid equation"}]`;
+      el.appendChild(errEl);
+    }
+  };
+}
+
+// src/post-processor/table-inline-processor.ts
+function createTableInlinePostProcessor() {
+  const renderer = new DomRenderer();
+  return (el, ctx) => {
+    if (!el)
+      return;
+    const targetElements = el.querySelectorAll("td, th, .table-cell-wrapper, p, li, blockquote");
+    const containers = targetElements.length > 0 ? Array.from(targetElements) : [el];
+    for (const container of containers) {
+      processContainer(container, renderer);
+    }
+    if (containers.indexOf(el) === -1) {
+      processContainer(el, renderer);
+    }
+  };
+}
+function processContainer(container, renderer) {
+  if (container.classList.contains("word-equation-math") || container.classList.contains("word-equation-inline")) {
+    return;
+  }
+  const mathElements = Array.from(container.querySelectorAll("math, .math, span.math-inline, span.math-block"));
+  for (const mathEl of mathElements) {
+    if (mathEl.closest(".word-equation-math"))
+      continue;
+    try {
+      const xml = mathEl.tagName.toLowerCase() === "math" ? mathEl.outerHTML : mathEl.getAttribute("data-math") || mathEl.textContent || "";
+      const ast = parseMathML(xml.startsWith("<math") ? xml : `<math xmlns="${MATHML_NAMESPACE}"><mrow>${xml}</mrow></math>`);
+      let isInlineDelimited = false;
+      let pCheck = mathEl.previousSibling;
+      while (pCheck) {
+        if (pCheck.nodeType === Node.TEXT_NODE) {
+          if (/(?:[/\\]weq_inline|\$weq(?:_inline)?)\s*$/i.test(pCheck.nodeValue || "")) {
+            isInlineDelimited = true;
+          }
+          break;
+        } else if (pCheck.tagName === "BR") {
+          pCheck = pCheck.previousSibling;
+          continue;
+        }
+        break;
+      }
+      if (!isInlineDelimited) {
+        let nCheck = mathEl.nextSibling;
+        while (nCheck) {
+          if (nCheck.nodeType === Node.TEXT_NODE) {
+            if (/^\s*(?:[/\\]weq_inline|\$weq(?:_inline)?)/i.test(nCheck.nodeValue || "")) {
+              isInlineDelimited = true;
+            }
+            break;
+          } else if (nCheck.tagName === "BR") {
+            nCheck = nCheck.nextSibling;
+            continue;
+          }
+          break;
+        }
+      }
+      if (mathEl.classList.contains("math-inline") || mathEl.getAttribute("display") === "inline") {
+        isInlineDelimited = true;
+      }
+      const isBlockMath = !isInlineDelimited && (mathEl.classList.contains("math-block") || mathEl.getAttribute("display") === "block");
+      const isFullPage = mathEl.getAttribute("display") === "full-page" || mathEl.getAttribute("data-display-mode") === "full-page";
+      const isInsideTable = Boolean(container.closest("table, tr, td, th") || container.matches("td, th, .table-cell-wrapper"));
+      const rendered = renderer.render(ast, { readOnly: true, isFocused: false, inline: !(isBlockMath && isInsideTable) && !isFullPage });
+      let prev = mathEl.previousSibling;
+      while (prev && (prev.nodeType === Node.TEXT_NODE || prev.tagName === "BR")) {
+        if (prev.nodeType === Node.TEXT_NODE) {
+          const prevText = prev.nodeValue || "";
+          const cleaned = prevText.replace(/(?:[/\\]weq_inline|\$weq(?:_inline)?|(?:```)?(?:math-word|weq|math-page|weq-page)(?:<br\s*\/?>|\s)*)\s*$/i, "");
+          if (cleaned !== prevText) {
+            prev.nodeValue = cleaned;
+          }
+          if (!prev.nodeValue?.trim()) {
+            const toRemove = prev;
+            prev = prev.previousSibling;
+            toRemove.parentNode?.removeChild(toRemove);
+            continue;
+          }
+          break;
+        } else if (prev.tagName === "BR") {
+          let candidate = prev.previousSibling;
+          while (candidate && (candidate.nodeType === Node.TEXT_NODE && !candidate.nodeValue?.trim() || candidate.tagName === "BR")) {
+            candidate = candidate.previousSibling;
+          }
+          if (candidate && candidate.nodeType === Node.TEXT_NODE && /(?:math-word|weq|math-page|weq-page|[/\\]weq_inline|\$weq(?:_inline)?)$/i.test(candidate.nodeValue?.trim() || "")) {
+            const toRemove = prev;
+            prev = prev.previousSibling;
+            toRemove.parentNode?.removeChild(toRemove);
+            continue;
+          }
+          break;
+        }
+      }
+      let next = mathEl.nextSibling;
+      while (next && (next.nodeType === Node.TEXT_NODE || next.tagName === "BR")) {
+        if (next.nodeType === Node.TEXT_NODE) {
+          const nextText = next.nodeValue || "";
+          let cleaned = nextText.replace(/^\s*(?:[/\\]weq_inline|\$weq(?:_inline)?|(?:<br\s*\/?>|\s)*(?:```)?)/i, "");
+          if (cleaned && !cleaned.startsWith(" ") && (nextText.includes(" ") || isInlineDelimited)) {
+            cleaned = " " + cleaned;
+          }
+          if (cleaned !== nextText) {
+            next.nodeValue = cleaned;
+          }
+          if (!next.nodeValue?.trim()) {
+            const toRemove = next;
+            next = next.nextSibling;
+            toRemove.parentNode?.removeChild(toRemove);
+            continue;
+          }
+          break;
+        } else if (next.tagName === "BR") {
+          let candidate = next.nextSibling;
+          while (candidate && (candidate.nodeType === Node.TEXT_NODE && !candidate.nodeValue?.trim() || candidate.tagName === "BR")) {
+            candidate = candidate.nextSibling;
+          }
+          if (candidate && candidate.nodeType === Node.TEXT_NODE && /^(?:```|[/\\]weq_inline|\$weq(?:_inline)?)/i.test(candidate.nodeValue?.trim() || "")) {
+            const toRemove = next;
+            next = next.nextSibling;
+            toRemove.parentNode?.removeChild(toRemove);
+            continue;
+          }
+          break;
+        }
+      }
+      if (isInsideTable && isFullPage) {
+        rendered.classList.add("word-equation-full-page");
+        rendered.style.width = "100%";
+        rendered.style.height = "100%";
+        rendered.style.minHeight = "100%";
+        rendered.style.display = "flex";
+        rendered.style.alignItems = "center";
+        rendered.style.justifyContent = "center";
+        const mathBox = rendered.querySelector(".word-equation-math");
+        if (mathBox) {
+          mathBox.classList.add("eq-full-page");
+          mathBox.style.width = "100%";
+          mathBox.style.height = "100%";
+          mathBox.style.minHeight = "100%";
+          mathBox.style.borderRadius = "0";
+        }
+        const cell = container.closest("td, th") || (container.matches("td, th") ? container : null);
+        if (cell) {
+          cell.classList.add("table-cell-has-fullpage-equation");
+          cell.style.padding = "0";
+          for (const child of Array.from(cell.childNodes)) {
+            if (child !== mathEl && child !== rendered) {
+              if (child.nodeType === Node.TEXT_NODE) {
+                child.nodeValue = "";
+              } else if (child.nodeType === Node.ELEMENT_NODE) {
+                child.style.display = "none";
+              }
+            }
+          }
+        }
+      } else if (isInsideTable && isBlockMath) {
+        rendered.classList.add("word-equation-table-block");
+        rendered.style.width = "100%";
+        rendered.style.display = "flex";
+        rendered.style.alignItems = "center";
+        rendered.style.justifyContent = "center";
+        const mathBox = rendered.querySelector(".word-equation-math");
+        if (mathBox) {
+          mathBox.style.display = "inline-flex";
+          mathBox.style.alignItems = "center";
+          mathBox.style.justifyContent = "center";
+          mathBox.style.borderRadius = "6px";
+          mathBox.style.padding = "6px 12px";
+          mathBox.style.minHeight = "2.2em";
+        }
+        const cell = container.closest("td, th") || (container.matches("td, th") ? container : null);
+        if (cell) {
+          cell.classList.add("table-cell-has-block-equation");
+        }
+      }
+      mathEl.parentNode?.replaceChild(rendered, mathEl);
+    } catch {
+    }
+  }
+  processTextNodesInElement(container, renderer);
+}
+function processTextNodesInElement(container, renderer) {
+  const isInsideTable = Boolean(container.closest("table, tr, td, th") || container.matches("td, th, .table-cell-wrapper"));
+  const textNodes = [];
+  const walk = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      textNodes.push(node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node;
+      if (el.classList.contains("word-equation-math") || el.classList.contains("word-equation-block") || el.classList.contains("word-equation-inline")) {
+        return;
+      }
+      for (let i = 0; i < el.childNodes.length; i++) {
+        walk(el.childNodes[i]);
+      }
+    }
+  };
+  walk(container);
+  for (const textNode of textNodes) {
+    if (!textNode.parentNode)
+      continue;
+    processSingleTextNode(textNode, renderer, isInsideTable);
+  }
+  if (isInsideTable) {
+    const remainingTextNodes = [];
+    const walkRemaining = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        remainingTextNodes.push(node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node;
+        if (!el.classList.contains("word-equation-math")) {
+          for (let i = 0; i < el.childNodes.length; i++) {
+            walkRemaining(el.childNodes[i]);
+          }
+        }
+      }
+    };
+    walkRemaining(container);
+    for (const tn of remainingTextNodes) {
+      if (tn.nodeValue) {
+        const cleaned = tn.nodeValue.replace(/[/\\]weq_inline/gi, "").replace(/```(?:math-word|weq|math-page|weq-page)(?:<br\s*\/?>)?/gi, "").replace(/```/g, "");
+        if (cleaned !== tn.nodeValue) {
+          tn.nodeValue = cleaned;
+          if (!cleaned.trim() && tn.parentNode) {
+            tn.parentNode.removeChild(tn);
+          }
+        }
+      }
+    }
+  }
+}
+var INLINE_WEQ_REGEX = /(?:[/\\]weq_inline|\$weq(?:_inline)?)\s*([\s\S]*?)\s*(?:[/\\]weq_inline|\$weq(?:_inline)?)/;
+var RAW_MATHML_REGEX = /<math[\s\S]*?<\/math>/i;
+var FENCED_BLOCK_IN_TABLE_REGEX = /```(?:math-word|weq|math-page|weq-page)(?:[ \t]*(?:<br\s*\/?>|\r?\n)\s*)([\s\S]*?)(?:(?:\r?\n|<br\s*\/?>)```(?:\r?\n|<br\s*\/?>)?|```(?:\r?\n|<br\s*\/?>)?|$)/;
+var TABLE_UNFENCED_BLOCK_REGEX = /(?:math-word|weq)(?:[ \t]*(?:<br\s*\/?>|\r?\n)\s*)(?:\$\$([\s\S]*?)\$\$|\$([^\$\n]+?)\$|(<math[\s\S]*?<\/math>)|([^<\r\n|]+?))(?:\s*<br\s*\/?>[ \t]*\r?\n|\s*<br\s*\/?>|\r?\n|$)/i;
+var TABLE_DOLLAR_DOUBLE_REGEX = /\$\$([\s\S]*?)\$\$/;
+var TABLE_DOLLAR_SINGLE_REGEX = /\$([^\$\n]+?)\$/;
+function processSingleTextNode(textNode, renderer, isInsideTable) {
+  const text2 = textNode.nodeValue || "";
+  if (!text2)
+    return;
+  let bestMatch = null;
+  const testRegex = (regex, type, isBlock2, codeExtractor) => {
+    const match2 = regex.exec(text2);
+    if (match2) {
+      const index = match2.index;
+      if (!bestMatch || index < bestMatch.index || index === bestMatch.index && match2[0].length > bestMatch.length) {
+        bestMatch = {
+          index,
+          length: match2[0].length,
+          code: codeExtractor(match2),
+          type,
+          isBlock: isBlock2
+        };
+      }
+    }
+  };
+  testRegex(INLINE_WEQ_REGEX, "mathml", false, (m) => m[1]);
+  testRegex(RAW_MATHML_REGEX, "mathml", false, (m) => m[0]);
+  if (isInsideTable) {
+    testRegex(FENCED_BLOCK_IN_TABLE_REGEX, "mathml", true, (m) => m[1]);
+    testRegex(TABLE_UNFENCED_BLOCK_REGEX, "mathml", true, (m) => m[1] || m[2] || m[3] || m[4] || m[0]);
+    testRegex(TABLE_DOLLAR_DOUBLE_REGEX, "latex", false, (m) => m[1]);
+    testRegex(TABLE_DOLLAR_SINGLE_REGEX, "latex", false, (m) => m[1]);
+  }
+  if (!bestMatch)
+    return;
+  const match = bestMatch;
+  let rawCode = match.code.trim();
+  rawCode = rawCode.replace(/^\$\$([\s\S]*)\$\$$/, "$1").replace(/^\$([\s\S]*)\$$/, "$1").trim();
+  rawCode = rawCode.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&#124;/g, "|").replace(/&quot;/g, '"');
+  rawCode = rawCode.replace(/<br\s*\/?>/gi, "\n");
+  let ast = null;
+  try {
+    if (match.type === "latex" || !rawCode.startsWith("<math") && !rawCode.includes("</math>") && !rawCode.startsWith("<m")) {
+      if (rawCode.startsWith("<math") || rawCode.includes("</math>")) {
+        ast = parseMathML(rawCode);
+      } else {
+        try {
+          const mathml = convertLatexToMathML(rawCode, false, { throwOnError: false });
+          if (mathml && (mathml.startsWith("<math") || mathml.startsWith("<m"))) {
+            ast = parseMathML(mathml);
+          } else {
+            ast = parseLinearEquation(rawCode);
+          }
+        } catch {
+          ast = parseLinearEquation(rawCode);
+        }
+      }
+    } else {
+      ast = parseMathML(rawCode);
+    }
+  } catch (err) {
+    try {
+      ast = parseLinearEquation(rawCode);
+    } catch {
+      return;
+    }
+  }
+  if (!ast)
+    return;
+  const isBlock = match.isBlock;
+  const rendered = renderer.render(ast, {
+    readOnly: true,
+    isFocused: false,
+    inline: !isBlock
+  });
+  if (isInsideTable && isBlock) {
+    rendered.classList.add("word-equation-table-block");
+    rendered.style.width = "100%";
+    rendered.style.display = "flex";
+    rendered.style.alignItems = "center";
+    rendered.style.justifyContent = "center";
+    const mathEl = rendered.querySelector(".word-equation-math");
+    if (mathEl) {
+      mathEl.style.display = "inline-flex";
+      mathEl.style.alignItems = "center";
+      mathEl.style.justifyContent = "center";
+      mathEl.style.borderRadius = "6px";
+      mathEl.style.padding = "6px 12px";
+      mathEl.style.minHeight = "2.2em";
+    }
+    const cell = textNode.parentElement?.closest("td, th") || (textNode.parentElement?.matches?.("td, th") ? textNode.parentElement : null);
+    if (cell) {
+      cell.classList.add("table-cell-has-block-equation");
+    }
+  }
+  const parent = textNode.parentNode;
+  if (!parent)
+    return;
+  const textBefore = text2.slice(0, match.index);
+  let textAfter = text2.slice(match.index + match.length);
+  if (!match.isBlock && textAfter.length > 0 && !textAfter.startsWith(" ")) {
+    textAfter = " " + textAfter;
+  }
+  if (textBefore.length > 0) {
+    parent.insertBefore(document.createTextNode(textBefore), textNode);
+  }
+  parent.insertBefore(rendered, textNode);
+  if (textAfter.length > 0) {
+    const remainingNode = document.createTextNode(textAfter);
+    parent.insertBefore(remainingNode, textNode);
+    processSingleTextNode(remainingNode, renderer, isInsideTable);
+  }
+  parent.removeChild(textNode);
+}
+
+// src/settings/settings-tab.ts
+var import_obsidian3 = require("obsidian");
+
+// src/settings/interactive-box.ts
+var InteractiveEquationBox = class {
+  ast;
+  caret;
+  isFocused = false;
+  dom;
+  selection = null;
+  highlightedSlotId = null;
+  renderer = new DomRenderer();
+  container;
+  onChange;
+  justExpandedShortcut = false;
+  undoStack = [];
+  redoStack = [];
+  lastClickTime = 0;
+  lastClickPos = null;
+  lastClickTarget = null;
+  lastClickCount = 0;
+  activeDragCleanup = null;
+  constructor(options) {
+    this.container = options.container;
+    this.onChange = options.onChange;
+    this.ast = this.parseContent(options.initialContent);
+    this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+    this.dom = this.renderCurrentDom();
+    this.container.appendChild(this.dom);
+    this.syncNativeMathML();
+    this.attachEventListeners();
+  }
+  pushHistorySnapshot() {
+    this.undoStack.push({
+      ast: cloneSlot(this.ast, true),
+      caret: { ...this.caret }
+    });
+    if (this.undoStack.length > 50)
+      this.undoStack.shift();
+    this.redoStack = [];
+  }
+  undo() {
+    if (this.undoStack.length === 0)
+      return false;
+    this.redoStack.push({
+      ast: cloneSlot(this.ast, true),
+      caret: { ...this.caret }
+    });
+    const prev = this.undoStack.pop();
+    this.ast = prev.ast;
+    this.caret = prev.caret;
+    this.rerender();
+    this.emitChange();
+    return true;
+  }
+  redo() {
+    if (this.redoStack.length === 0)
+      return false;
+    this.undoStack.push({
+      ast: cloneSlot(this.ast, true),
+      caret: { ...this.caret }
+    });
+    const next = this.redoStack.pop();
+    this.ast = next.ast;
+    this.caret = next.caret;
+    this.rerender();
+    this.emitChange();
+    return true;
+  }
+  parseContent(content) {
+    const trimmed = (content || "").trim();
+    if (!trimmed) {
+      const root = createSlot("root", []);
+      updateParentPointers(root);
+      return root;
+    }
+    try {
+      let root;
+      if (trimmed.startsWith("<math") || trimmed.includes("</math>") || trimmed.startsWith("<m")) {
+        root = parseMathML(trimmed);
+      } else {
+        root = parseLinearEquation(trimmed);
+      }
+      updateParentPointers(root);
+      return root;
+    } catch {
+      try {
+        const root = parseLinearEquation(trimmed);
+        updateParentPointers(root);
+        return root;
+      } catch {
+        const root = createSlot("root", [createToken(trimmed, "mi")]);
+        updateParentPointers(root);
+        return root;
+      }
+    }
+  }
+  setContent(content) {
+    this.undoStack = [];
+    this.redoStack = [];
+    this.ast = this.parseContent(content);
+    this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+    this.rerender();
+  }
+  renderCurrentDom() {
+    const rendered = this.renderer.render(this.ast, {
+      readOnly: false,
+      inline: true,
+      isFocused: this.isFocused,
+      caret: this.isFocused ? this.caret : null
+    });
+    const mathBox = rendered.querySelector(".word-equation-math") || rendered;
+    mathBox.setAttribute("tabindex", "0");
+    mathBox.classList.add("weq-settings-equation-box");
+    if (this.ast.children.length === 0) {
+      const ph = mathBox.querySelector(".eq-placeholder");
+      if (ph) {
+        ph.classList.add("weq-preview-empty");
+      }
+    }
+    return mathBox;
+  }
+  syncNativeMathML() {
+    const existing = this.container.querySelectorAll(".weq-native-mathml");
+    existing.forEach((n) => n.remove());
+    if (this.ast.children.length === 0)
+      return;
+    try {
+      const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
+      let cleanXml = xml.trim();
+      if (cleanXml.length > 0) {
+        if (!cleanXml.startsWith("<math") && !cleanXml.startsWith("<?xml")) {
+          cleanXml = `<math xmlns="${MATHML_NAMESPACE}">${cleanXml}</math>`;
+        }
+        const parser = new DOMParser();
+        let doc = parser.parseFromString(cleanXml, "text/html");
+        let mathNode = doc.querySelector("math");
+        if (!mathNode) {
+          doc = parser.parseFromString(cleanXml, "application/xml");
+          mathNode = doc.querySelector("math") || (doc.documentElement && doc.documentElement.localName?.toLowerCase() === "math" ? doc.documentElement : null) || doc.getElementsByTagName("math")[0] || doc.getElementsByTagNameNS("*", "math")[0] || null;
+        }
+        if (mathNode) {
+          const imported = document.importNode ? document.importNode(mathNode, true) : mathNode.cloneNode(true);
+          imported.classList.add("weq-native-mathml");
+          if (imported.style) {
+            imported.style.display = "none";
+          } else {
+            imported.setAttribute("style", "display: none;");
+          }
+          this.container.appendChild(imported);
+        }
+      }
+    } catch {
+    }
+  }
+  rerender() {
+    const newDom = this.renderCurrentDom();
+    this.dom.innerHTML = "";
+    while (newDom.firstChild) {
+      this.dom.appendChild(newDom.firstChild);
+    }
+    this.syncNativeMathML();
+    this.updateVisualState();
+  }
+  updateVisualState() {
+    if (this.isFocused) {
+      this.dom.classList.add("eq-active");
+      updateVisualCaretDom(this.dom, this.caret, true);
+    } else {
+      this.dom.classList.remove("eq-active");
+      updateVisualCaretDom(this.dom, this.caret, false);
+      this.selection = null;
+      this.highlightedSlotId = null;
+    }
+    const effectiveSelection = this.isFocused ? this.selection : null;
+    const effectiveHighlightSlot = this.isFocused ? this.highlightedSlotId : null;
+    updatePartialSelectionDom(this.dom, this.ast, effectiveSelection, effectiveHighlightSlot);
+  }
+  focus() {
+    this.isFocused = true;
+    this.dom.focus({ preventScroll: true });
+    this.updateVisualState();
+  }
+  emitChange() {
+    const xml = serializeMathML(this.ast, { display: "inline", pretty: false });
+    this.onChange(xml);
+  }
+  handleCopyEvent(e, isCut = false) {
+    let xml = "";
+    if (this.highlightedSlotId) {
+      const slot = findSlotById(this.ast, this.highlightedSlotId);
+      if (slot) {
+        const tempSlot = createSlot("root", slot.children.map((c) => cloneNode(c, true)));
+        updateParentPointers(tempSlot);
+        xml = serializeMathML(tempSlot, { display: "inline", pretty: false });
+      }
+    } else if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
+      const subSlot = extractSelectionAST(this.ast, this.selection);
+      xml = serializeMathML(subSlot, { display: "inline", pretty: false });
+    }
+    if (!xml) {
+      xml = serializeMathML(this.ast, { display: "inline", pretty: false });
+    }
+    if (e?.clipboardData) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        e.clipboardData.setData("application/mathml+xml", xml);
+        e.clipboardData.setData("text/plain", xml);
+      } catch {
+      }
+    }
+    if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(xml).catch(() => {
+      });
+    }
+    logDebugEvent("clipboard", () => ({
+      action: isCut ? "cut" : "copy",
+      context: "settings_box",
+      payload: {
+        types: e?.clipboardData ? Array.from(e.clipboardData.types) : ["application/mathml+xml", "text/plain"],
+        plainTextSnippet: xml.slice(0, 100),
+        mathmlSnippet: xml.slice(0, 100),
+        isMathML: /<math[\s>]|<math[\s\S]*<\/math>/i.test(xml),
+        characterCount: xml.length
+      },
+      destination: {
+        slotId: this.caret.slotId,
+        offset: this.caret.offset
+      },
+      success: true
+    }));
+    if (isCut) {
+      this.pushHistorySnapshot();
+      if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
+        const editRes = deleteSelection(this.ast, this.selection);
+        this.ast = editRes.root;
+        this.caret = editRes.caret;
+        this.selection = null;
+        this.highlightedSlotId = null;
+        this.rerender();
+        this.emitChange();
+      } else if (this.highlightedSlotId) {
+        const clonedRoot = cloneSlot(this.ast);
+        const slot = findSlotById(clonedRoot, this.highlightedSlotId);
+        if (slot) {
+          slot.children = [];
+          updateParentPointers(clonedRoot);
+          this.ast = clonedRoot;
+          this.caret = { slotId: slot.id, offset: 0 };
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.rerender();
+          this.emitChange();
+        }
+      } else {
+        const clonedRoot = cloneSlot(this.ast);
+        const slot = findSlotById(clonedRoot, this.caret.slotId);
+        if (slot) {
+          slot.children = [];
+          updateParentPointers(clonedRoot);
+          this.ast = clonedRoot;
+          this.caret = { slotId: slot.id, offset: 0 };
+          this.rerender();
+          this.emitChange();
+        }
+      }
+    }
+  }
+  handlePasteEvent(e) {
+    const text2 = e?.clipboardData?.getData("application/mathml+xml") || e?.clipboardData?.getData("text/plain") || "";
+    const trimmed = text2.trim();
+    if (trimmed) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      this.insertPastedContent(trimmed);
+    }
+  }
+  insertPastedContent(trimmed) {
+    if (!trimmed)
+      return;
+    this.pushHistorySnapshot();
+    if (this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset)) {
+      const editRes = deleteSelection(this.ast, this.selection);
+      this.ast = editRes.root;
+      this.caret = editRes.caret;
+      this.selection = null;
+      this.highlightedSlotId = null;
+    } else if (this.highlightedSlotId) {
+      const slot = findSlotById(this.ast, this.highlightedSlotId);
+      if (slot) {
+        slot.children = [];
+        this.caret = { slotId: slot.id, offset: 0 };
+        this.highlightedSlotId = null;
+      }
+    }
+    const clonedRoot = cloneSlot(this.ast);
+    const targetSlot = findSlotById(clonedRoot, this.caret.slotId);
+    if (!targetSlot)
+      return;
+    const isMathML = /<math[\s>]|<math[\s\S]*<\/math>/i.test(trimmed) || /<(?:mfrac|mroot|msqrt|msup|msub|msubsup|mrow|mi|mn|mo|mtext)/i.test(trimmed);
+    let nodesToInsert = [];
+    if (isMathML) {
+      let xml = trimmed;
+      if (!xml.startsWith("<math") && !xml.startsWith("<?xml")) {
+        xml = `<math xmlns="${MATHML_NAMESPACE}">
+  <mrow>${xml}</mrow>
+</math>`;
+      }
+      try {
+        const parsed = parseMathML(xml);
+        nodesToInsert = parsed.children.length > 0 ? parsed.children : [createToken(trimmed, "mtext")];
+      } catch {
+        nodesToInsert = [createToken(trimmed, "mtext")];
+      }
+    } else {
+      try {
+        const parsed = parseLinearEquation(trimmed);
+        nodesToInsert = parsed.children.length > 0 ? parsed.children : [createToken(trimmed, "mi")];
+      } catch {
+        nodesToInsert = [createToken(trimmed, "mi")];
+      }
+    }
+    for (const n of nodesToInsert) {
+      n.parentSlotId = targetSlot.id;
+    }
+    const insertOffset = Math.min(this.caret.offset, targetSlot.children.length);
+    targetSlot.children.splice(insertOffset, 0, ...nodesToInsert);
+    updateParentPointers(clonedRoot);
+    this.ast = clonedRoot;
+    this.caret = {
+      slotId: targetSlot.id,
+      offset: insertOffset + nodesToInsert.length
+    };
+    this.rerender();
+    this.emitChange();
+    logDebugEvent("clipboard", () => ({
+      action: "paste",
+      context: "settings_box",
+      payload: {
+        types: [],
+        plainTextSnippet: trimmed.slice(0, 100),
+        mathmlSnippet: isMathML ? trimmed.slice(0, 100) : void 0,
+        isMathML,
+        characterCount: trimmed.length
+      },
+      destination: {
+        slotId: targetSlot.id,
+        offset: insertOffset
+      },
+      success: true
+    }));
+  }
+  resolveClickCount(e) {
+    const now = Date.now();
+    const dt = now - this.lastClickTime;
+    let count = e.detail;
+    if (count === void 0 || count === 0) {
+      count = dt < 400 ? this.lastClickCount + 1 : 1;
+    }
+    this.lastClickTime = now;
+    this.lastClickCount = count;
+    return count;
+  }
+  attachEventListeners() {
+    this.dom.__interactiveBox = this;
+    this.container.__interactiveBox = this;
+    const handlePointerActivation = (e) => {
+      e.preventDefault();
+      this.isFocused = true;
+      this.dom.focus({ preventScroll: true });
+      const targetEl = e.target instanceof Element ? e.target : null;
+      const anchorPos = handleMouseClick(
+        this.ast,
+        this.dom,
+        e.clientX,
+        e.clientY,
+        targetEl
+      );
+      let clickCount = this.resolveClickCount(e);
+      if (e.type === "mousedown" && (!e.detail || e.detail < 2)) {
+        clickCount = 1;
+      } else if ((e.detail === void 0 || e.detail <= 1) && e.type !== "dblclick") {
+        const isSameTarget = !this.lastClickTarget || !e.target || this.lastClickTarget === e.target;
+        const isSamePos = this.lastClickPos && this.lastClickPos.slotId === anchorPos.slotId && this.lastClickPos.offset === anchorPos.offset;
+        if ((!isSameTarget || !isSamePos) && clickCount > 1) {
+          clickCount = 1;
+        }
+      }
+      this.lastClickPos = anchorPos;
+      this.lastClickTarget = e.target || null;
+      if (clickCount === 2) {
+        const targetSlot = findSlotById(this.ast, anchorPos.slotId) || this.ast;
+        if (targetSlot.children.length === 0) {
+          this.caret = { slotId: targetSlot.id, offset: 0 };
+          this.selection = null;
+          this.highlightedSlotId = targetSlot.id;
+        } else {
+          this.selection = {
+            anchor: { slotId: targetSlot.id, offset: 0 },
+            head: { slotId: targetSlot.id, offset: targetSlot.children.length }
+          };
+          this.caret = { slotId: targetSlot.id, offset: targetSlot.children.length };
+          this.highlightedSlotId = null;
+        }
+      } else if (clickCount >= 3) {
+        this.selection = {
+          anchor: { slotId: this.ast.id, offset: 0 },
+          head: { slotId: this.ast.id, offset: this.ast.children.length }
+        };
+        this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+        this.highlightedSlotId = null;
+      } else {
+        this.caret = anchorPos;
+        this.selection = null;
+        this.highlightedSlotId = null;
+      }
+      this.updateVisualState();
+      const doc = this.dom.ownerDocument || document;
+      const win = doc.defaultView || (typeof window !== "undefined" ? window : null);
+      const startX = e.clientX;
+      const startY = e.clientY;
+      let isDragging = false;
+      let isCleanedUp = false;
+      const onSelectStart = (selEvt) => {
+        selEvt.preventDefault();
+      };
+      doc.addEventListener("selectstart", onSelectStart);
+      const cleanupDragListeners = () => {
+        if (isCleanedUp)
+          return;
+        isCleanedUp = true;
+        doc.removeEventListener("pointermove", onPointerMove, true);
+        doc.removeEventListener("pointerup", onPointerUp, true);
+        doc.removeEventListener("mousemove", onPointerMove, true);
+        doc.removeEventListener("mouseup", onPointerUp, true);
+        doc.removeEventListener("pointermove", onPointerMove, false);
+        doc.removeEventListener("pointerup", onPointerUp, false);
+        doc.removeEventListener("mousemove", onPointerMove, false);
+        doc.removeEventListener("mouseup", onPointerUp, false);
+        if (win) {
+          win.removeEventListener("pointermove", onPointerMove, true);
+          win.removeEventListener("pointerup", onPointerUp, true);
+          win.removeEventListener("mousemove", onPointerMove, true);
+          win.removeEventListener("mouseup", onPointerUp, true);
+          win.removeEventListener("pointermove", onPointerMove, false);
+          win.removeEventListener("pointerup", onPointerUp, false);
+          win.removeEventListener("mousemove", onPointerMove, false);
+          win.removeEventListener("mouseup", onPointerUp, false);
+        }
+        doc.removeEventListener("selectstart", onSelectStart);
+        if (this.activeDragCleanup === cleanupDragListeners) {
+          this.activeDragCleanup = null;
+        }
+      };
+      this.activeDragCleanup = cleanupDragListeners;
+      const onPointerMove = (moveEvt) => {
+        if ((moveEvt.buttons & 1) !== 1) {
+          this.lastClickCount = 0;
+          this.lastClickTime = 0;
+          this.lastClickPos = null;
+          this.lastClickTarget = null;
+          onPointerUp(moveEvt);
+          return;
+        }
+        const dx = moveEvt.clientX - startX;
+        const dy = moveEvt.clientY - startY;
+        const distance = Math.hypot(dx, dy);
+        const dragThreshold = clickCount >= 2 ? 10 : 3;
+        if (!isDragging && distance >= dragThreshold) {
+          isDragging = true;
+        }
+        if (isDragging) {
+          moveEvt.preventDefault();
+          moveEvt.stopPropagation();
+          const targetEl2 = moveEvt.target instanceof Element ? moveEvt.target : null;
+          const headPos = handleMouseClick(
+            this.ast,
+            this.dom,
+            moveEvt.clientX,
+            moveEvt.clientY,
+            targetEl2
+          );
+          if (headPos.slotId !== anchorPos.slotId || headPos.offset !== anchorPos.offset) {
+            const elevated = elevateSelectionForDrag(this.ast, anchorPos, headPos);
+            this.selection = elevated;
+            this.caret = elevated.head;
+          } else {
+            this.selection = null;
+            this.caret = headPos;
+          }
+          this.highlightedSlotId = null;
+          this.updateVisualState();
+        }
+      };
+      const onPointerUp = (upEvt) => {
+        cleanupDragListeners();
+        if (this.selection && this.selection.anchor.slotId === this.selection.head.slotId && this.selection.anchor.offset === this.selection.head.offset) {
+          this.selection = null;
+          this.updateVisualState();
+        }
+      };
+      doc.addEventListener("pointermove", onPointerMove, true);
+      doc.addEventListener("pointerup", onPointerUp, true);
+      doc.addEventListener("mousemove", onPointerMove, true);
+      doc.addEventListener("mouseup", onPointerUp, true);
+      if (win) {
+        win.addEventListener("pointermove", onPointerMove, true);
+        win.addEventListener("pointerup", onPointerUp, true);
+        win.addEventListener("mousemove", onPointerMove, true);
+        win.addEventListener("mouseup", onPointerUp, true);
+      }
+    };
+    this.dom.addEventListener("pointerdown", handlePointerActivation);
+    this.dom.addEventListener("mousedown", handlePointerActivation);
+    this.dom.addEventListener("click", handlePointerActivation);
+    this.dom.addEventListener("dblclick", handlePointerActivation);
+    const onDocPointerDown = (evt) => {
+      const isInside = evt.target instanceof Node && this.dom.contains(evt.target);
+      if (this.dom && !isInside) {
+        this.isFocused = false;
+        if (this.selection || this.highlightedSlotId) {
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.updateVisualState();
+        }
+      }
+    };
+    const ownerDoc = this.dom.ownerDocument || document;
+    ownerDoc.addEventListener("pointerdown", onDocPointerDown, true);
+    ownerDoc.addEventListener("mousedown", onDocPointerDown, true);
+    this.dom.addEventListener("focus", () => {
+      this.isFocused = true;
+      if (!this.caret) {
+        this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+      }
+      this.updateVisualState();
+    });
+    this.dom.addEventListener("blur", () => {
+      this.isFocused = false;
+      this.updateVisualState();
+    });
+    this.dom.addEventListener("copy", (e) => this.handleCopyEvent(e, false));
+    this.dom.addEventListener("cut", (e) => this.handleCopyEvent(e, true));
+    this.dom.addEventListener("paste", (e) => this.handlePasteEvent(e));
+    this.dom.addEventListener("keydown", (e) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "z" || e.key === "Z") && !e.shiftKey;
+      const isRedo = (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "y" || e.key === "Y") || (e.ctrlKey || e.metaKey) && !e.altKey && e.shiftKey && (e.key === "z" || e.key === "Z");
+      if (isUndo) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.undo();
+        return;
+      }
+      if (isRedo) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.redo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+        if (e.key === "c" || e.key === "C") {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleCopyEvent(void 0, false);
+          return;
+        }
+        if (e.key === "x" || e.key === "X") {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleCopyEvent(void 0, true);
+          return;
+        }
+        if (e.key === "v" || e.key === "V") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof navigator !== "undefined" && navigator?.clipboard?.readText) {
+            navigator.clipboard.readText().then((text2) => {
+              if (text2)
+                this.insertPastedContent(text2.trim());
+            }).catch(() => {
+            });
+          }
+          return;
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "a" || e.key === "A")) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selection = {
+          anchor: { slotId: this.ast.id, offset: 0 },
+          head: { slotId: this.ast.id, offset: this.ast.children.length }
+        };
+        this.caret = { slotId: this.ast.id, offset: this.ast.children.length };
+        this.highlightedSlotId = null;
+        this.updateVisualState();
+        return;
+      }
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        const fromCaret = { ...this.caret };
+        if (e.shiftKey) {
+          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+            const step = handleSelectionStep(
+              this.ast,
+              this.selection,
+              this.caret,
+              e.key,
+              this.highlightedSlotId
+            );
+            if (step && step.handled) {
+              this.selection = step.selection;
+              this.caret = step.caret;
+              this.highlightedSlotId = step.highlightedSlotId ?? null;
+              this.updateVisualState();
+              logDebugEvent("navigation", () => ({
+                key: e.key,
+                shiftKey: true,
+                navType: "selection_step",
+                from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
+                to: { slotId: step.caret.slotId, offset: step.caret.offset },
+                equation: { from: 0, to: 0, isInline: true },
+                handled: true
+              }));
+              return;
+            }
+          }
+          return;
+        }
+        const hasActiveSelectionRange = this.selection && comparePositions(this.ast, this.selection.anchor, this.selection.head) !== 0;
+        const hasActivePlaceholderHighlight = Boolean(this.highlightedSlotId);
+        if (hasActiveSelectionRange || hasActivePlaceholderHighlight) {
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            let targetCaret = null;
+            if (this.selection && hasActiveSelectionRange) {
+              const norm = normalizeSelection(this.ast, this.selection);
+              targetCaret = e.key === "ArrowLeft" ? { ...norm.start } : { ...norm.end };
+            } else if (this.highlightedSlotId) {
+              const targetSlot = findSlotById(this.ast, this.highlightedSlotId);
+              if (targetSlot) {
+                targetCaret = e.key === "ArrowLeft" ? { slotId: targetSlot.id, offset: 0 } : { slotId: targetSlot.id, offset: targetSlot.children.length };
+              }
+            }
+            if (targetCaret) {
+              this.caret = targetCaret;
+              this.selection = null;
+              this.highlightedSlotId = null;
+              this.updateVisualState();
+              return;
+            }
+          }
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.updateVisualState();
+        }
+        const nav = handleArrowKey(this.ast, this.caret, e.key);
+        if (nav.handled) {
+          this.caret = nav.caret;
+          this.updateVisualState();
+        }
+        logDebugEvent("navigation", () => ({
+          key: e.key,
+          shiftKey: false,
+          navType: "internal_jump",
+          from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
+          to: { slotId: this.caret.slotId, offset: this.caret.offset },
+          equation: { from: 0, to: 0, isInline: true },
+          handled: nav.handled
+        }));
+        return;
+      }
+      if (e.key === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        const fromCaret = { ...this.caret };
+        const nav = handleTabKey(this.ast, this.caret, e.shiftKey);
+        if (nav.handled) {
+          this.caret = nav.caret;
+          this.updateVisualState();
+        }
+        logDebugEvent("navigation", () => ({
+          key: "Tab",
+          shiftKey: e.shiftKey,
+          navType: "tab_jump",
+          from: { slotId: fromCaret.slotId, offset: fromCaret.offset },
+          to: { slotId: this.caret.slotId, offset: this.caret.offset },
+          equation: { from: 0, to: 0, isInline: true },
+          handled: nav.handled
+        }));
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        const hasActiveSelection = this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset);
+        if (hasActiveSelection) {
+          this.pushHistorySnapshot();
+          const editRes = deleteSelection(this.ast, this.selection);
+          this.ast = editRes.root;
+          this.caret = editRes.caret;
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.rerender();
+          this.emitChange();
+          return;
+        }
+        if (this.highlightedSlotId) {
+          this.pushHistorySnapshot();
+          const clonedRoot = cloneSlot(this.ast);
+          const slot = findSlotById(clonedRoot, this.highlightedSlotId);
+          if (slot) {
+            slot.children = [];
+            updateParentPointers(clonedRoot);
+            this.ast = clonedRoot;
+            this.caret = { slotId: slot.id, offset: 0 };
+          }
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.rerender();
+          this.emitChange();
+          return;
+        }
+        this.pushHistorySnapshot();
+        const res = handleBackspace(this.ast, this.caret);
+        if (res.handled) {
+          this.ast = res.root;
+          this.caret = res.caret;
+          this.rerender();
+          this.emitChange();
+        } else {
+          this.undoStack.pop();
+        }
+        return;
+      }
+      if (e.key === "Delete") {
+        e.preventDefault();
+        e.stopPropagation();
+        const hasActiveSelection = this.selection && (this.selection.anchor.slotId !== this.selection.head.slotId || this.selection.anchor.offset !== this.selection.head.offset);
+        if (hasActiveSelection) {
+          this.pushHistorySnapshot();
+          const editRes = deleteSelection(this.ast, this.selection);
+          this.ast = editRes.root;
+          this.caret = editRes.caret;
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.rerender();
+          this.emitChange();
+          return;
+        }
+        if (this.highlightedSlotId) {
+          this.pushHistorySnapshot();
+          const clonedRoot = cloneSlot(this.ast);
+          const slot = findSlotById(clonedRoot, this.highlightedSlotId);
+          if (slot) {
+            slot.children = [];
+            updateParentPointers(clonedRoot);
+            this.ast = clonedRoot;
+            this.caret = { slotId: slot.id, offset: 0 };
+          }
+          this.selection = null;
+          this.highlightedSlotId = null;
+          this.rerender();
+          this.emitChange();
+          return;
+        }
+        this.pushHistorySnapshot();
+        const res = handleDelete(this.ast, this.caret);
+        if (res.handled) {
+          this.ast = res.root;
+          this.caret = res.caret;
+          this.rerender();
+          this.emitChange();
+        } else {
+          this.undoStack.pop();
+        }
+        return;
+      }
+      if (e.key === " ") {
+        if (this.justExpandedShortcut) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.justExpandedShortcut = false;
+          return;
+        }
+        const clonedRoot = cloneSlot(this.ast);
+        const targetSlot = findSlotById(clonedRoot, this.caret.slotId);
+        if (targetSlot) {
+          const expanded = expandShortcutInSlot(targetSlot, this.caret.offset, " ");
+          if (expanded.expanded && expanded.newSlot && expanded.newCaret) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.pushHistorySnapshot();
+            targetSlot.children = expanded.newSlot.children;
+            updateParentPointers(clonedRoot);
+            this.ast = clonedRoot;
+            this.caret = expanded.newCaret;
+            this.justExpandedShortcut = true;
+            this.rerender();
+            this.emitChange();
+            return;
+          }
+        }
+      }
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.pushHistorySnapshot();
+        const res = insertCharacter(this.ast, this.caret, e.key);
+        if (res.handled) {
+          this.ast = res.root;
+          this.caret = res.caret;
+          const targetSlot = findSlotById(this.ast, this.caret.slotId);
+          if (targetSlot) {
+            const expanded = expandShortcutInSlot(targetSlot, this.caret.offset, e.key);
+            if (expanded.expanded && expanded.newSlot && expanded.newCaret) {
+              targetSlot.children = expanded.newSlot.children;
+              updateParentPointers(this.ast);
+              this.caret = expanded.newCaret;
+              this.justExpandedShortcut = true;
+            }
+          }
+          this.rerender();
+          this.emitChange();
+        } else {
+          this.undoStack.pop();
+        }
+        return;
+      }
+    });
+  }
+  getXml() {
+    return serializeMathML(this.ast);
+  }
+  destroy() {
+    if (this.activeDragCleanup) {
+      this.activeDragCleanup();
+      this.activeDragCleanup = null;
+    }
+    this.dom.remove();
+  }
+};
+
+// src/settings/settings-tab.ts
+var WordEquationSettingTab = class extends import_obsidian3.PluginSettingTab {
+  plugin;
+  id;
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+    this.id = plugin?.manifest?.id || "word-equation";
+  }
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+    containerEl.createEl("h2", { text: "Word-like Equation Settings" });
+    new import_obsidian3.Setting(containerEl).setName("Auto-expand shortcuts in Markdown").setDesc("Automatically expand shortcuts when typing trigger followed by Space").addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.autoExpandShortcuts).onChange(async (val) => {
+        this.plugin.settings.autoExpandShortcuts = val;
+        await this.plugin.saveSettings();
+      })
+    );
+    new import_obsidian3.Setting(containerEl).setName("Default codeblock fence identifier").setDesc("Preferred identifier for inserted equation blocks (math-word or weq)").addDropdown(
+      (dropdown) => dropdown.addOption("math-word", "math-word").addOption("weq", "weq").setValue(this.plugin.settings.defaultDelimiter).onChange(async (value) => {
+        this.plugin.settings.defaultDelimiter = value;
+        await this.plugin.saveSettings();
+      })
+    );
+    new import_obsidian3.Setting(containerEl).setName("Auto show gallery").setDesc("Automatically open the Equation Gallery sidebar when an equation becomes active").addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.autoShowGallery).onChange(async (val) => {
+        this.plugin.settings.autoShowGallery = val;
+        await this.plugin.saveSettings();
+      })
+    );
+    new import_obsidian3.Setting(containerEl).setName("Enable Debug Mode").setDesc("Record detailed state information (caret, selection, clipboard, navigation) to debug-log.json").addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.debugMode).onChange(async (val) => {
+        this.plugin.settings.debugMode = val;
+        await this.plugin.saveSettings();
+        getDebugLogger().setEnabled(val);
+      })
+    );
+    new import_obsidian3.Setting(containerEl).setName("Clear Debug Log").setDesc("Clear recorded debug events and reset debug-log.json").addButton(
+      (btn) => btn.setButtonText("Clear Log").setWarning().onClick(async () => {
+        await getDebugLogger().clear();
+        new import_obsidian3.Notice("Debug log cleared.");
+      })
+    );
+    containerEl.createEl("h3", { text: "Custom Math Shortcuts" });
+    containerEl.createEl("p", {
+      text: "Define custom shortcuts. Column 1 is the trigger shortcut. Column 2 is the MathML equivalent or expansion result. Works in Markdown and inside equation blocks.",
+      cls: "setting-item-description"
+    });
+    const tableWrapper = containerEl.createDiv({ cls: "weq-shortcuts-table-wrapper" });
+    const table = tableWrapper.createEl("table", { cls: "weq-shortcuts-table" });
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    const thead = table.createEl("thead");
+    const headerRow = thead.createEl("tr");
+    const thTrigger = headerRow.createEl("th", { text: "Trigger Shortcut", cls: "weq-th-trigger" });
+    thTrigger.style.textAlign = "left";
+    thTrigger.style.width = "25%";
+    thTrigger.style.padding = "8px";
+    const thExpansion = headerRow.createEl("th", { text: "MathML / Expansion Result", cls: "weq-th-expansion" });
+    thExpansion.style.textAlign = "left";
+    thExpansion.style.width = "45%";
+    thExpansion.style.padding = "8px";
+    const thScope = headerRow.createEl("th", { text: "Expansion Mode", cls: "weq-th-mode weq-th-scope" });
+    thScope.style.textAlign = "center";
+    thScope.style.width = "15%";
+    thScope.style.padding = "8px";
+    const thActions = headerRow.createEl("th", { text: "Actions", cls: "weq-th-action" });
+    thActions.style.textAlign = "center";
+    thActions.style.width = "15%";
+    thActions.style.padding = "8px";
+    const tbody = table.createEl("tbody");
+    const shortcuts = this.plugin.settings.customShortcuts;
+    for (let i = 0; i < shortcuts.length; i++) {
+      const item = shortcuts[i];
+      const row = tbody.createEl("tr");
+      row.style.borderBottom = "1px solid var(--background-modifier-border)";
+      const tdTrigger = row.createEl("td", { cls: "weq-col-trigger" });
+      tdTrigger.style.padding = "6px";
+      const inputTrigger = tdTrigger.createEl("input", {
+        type: "text",
+        value: item.trigger,
+        cls: "weq-input-trigger"
+      });
+      inputTrigger.style.width = "100%";
+      inputTrigger.placeholder = "\\trigger";
+      inputTrigger.addEventListener("input", async () => {
+        item.trigger = inputTrigger.value;
+        await this.plugin.saveSettings();
+        setCustomShortcuts(this.plugin.settings.customShortcuts);
+      });
+      const tdExp = row.createEl("td", { cls: "weq-col-expansion" });
+      tdExp.style.padding = "6px";
+      const previewEl = tdExp.createDiv({ cls: "weq-expansion-preview" });
+      const inputExp = tdExp.createEl("input", {
+        type: "text",
+        value: item.expansion,
+        cls: "weq-input-expansion"
+      });
+      inputExp.style.display = "none";
+      const interactiveBox = new InteractiveEquationBox({
+        container: previewEl,
+        initialContent: item.expansion,
+        onChange: async (newXml) => {
+          item.expansion = newXml;
+          inputExp.value = newXml;
+          await this.plugin.saveSettings();
+          setCustomShortcuts(this.plugin.settings.customShortcuts);
+        }
+      });
+      inputExp.addEventListener("input", async () => {
+        item.expansion = inputExp.value;
+        interactiveBox.setContent(item.expansion);
+        await this.plugin.saveSettings();
+        setCustomShortcuts(this.plugin.settings.customShortcuts);
+      });
+      previewEl.addEventListener("click", () => {
+        if (typeof inputExp.focus === "function") {
+          inputExp.focus();
+        }
+        interactiveBox.dom.focus({ preventScroll: true });
+      });
+      const tdScope = row.createEl("td", { cls: "weq-col-scope weq-col-mode" });
+      tdScope.style.padding = "6px";
+      tdScope.style.textAlign = "center";
+      const selectScope = tdScope.createEl("select", { cls: "weq-select-scope weq-select-mode" });
+      selectScope.style.width = "100%";
+      selectScope.createEl("option", { value: "inline", text: "inline" });
+      selectScope.createEl("option", { value: "block", text: "block" });
+      selectScope.value = item.scope || "inline";
+      selectScope.addEventListener("change", async () => {
+        item.scope = selectScope.value;
+        await this.plugin.saveSettings();
+        setCustomShortcuts(this.plugin.settings.customShortcuts);
+      });
+      const tdAct = row.createEl("td", { cls: "weq-col-action" });
+      tdAct.style.padding = "6px";
+      tdAct.style.textAlign = "center";
+      const delBtn = tdAct.createEl("button", {
+        text: "Delete",
+        cls: "mod-warning weq-btn-delete"
+      });
+      delBtn.addEventListener("click", async () => {
+        this.plugin.settings.customShortcuts.splice(i, 1);
+        await this.plugin.saveSettings();
+        setCustomShortcuts(this.plugin.settings.customShortcuts);
+        this.display();
+      });
+    }
+    new import_obsidian3.Setting(containerEl).addButton(
+      (btn) => btn.setButtonText("Add Shortcut").setCta().onClick(async () => {
+        this.plugin.settings.customShortcuts.push({
+          trigger: "\\",
+          expansion: "",
+          scope: "inline"
+        });
+        await this.plugin.saveSettings();
+        setCustomShortcuts(this.plugin.settings.customShortcuts);
+        this.display();
+      })
+    );
+  }
+  focusShortcutTrigger(index) {
+    const inputs = this.containerEl.querySelectorAll(".weq-input-trigger");
+    const target = index !== void 0 && index >= 0 && index < inputs.length ? inputs[index] : inputs[inputs.length - 1];
+    if (target) {
+      target.focus();
+      target.select();
+      if (typeof target.scrollIntoView === "function") {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return true;
+    }
+    return false;
+  }
+};
+
+// src/gallery/gallery-view.ts
+var import_obsidian4 = require("obsidian");
+
+// src/gallery/gallery-presets.ts
+var PRESET_GALLERY_TABS = [
+  // ==========================================
+  // TAB 1: Letters & Alphabets
+  // ==========================================
+  {
+    id: "letters",
+    name: "Letters & Alphabets",
+    icon: "\u0391",
+    sections: [
+      {
+        id: "uppercase-greek",
+        name: "Uppercase Greek",
+        cells: [
+          { id: "gamma-upper", name: "Gamma", mathml: "<mi>\u0393</mi>", previewText: "\u0393" },
+          { id: "delta-upper", name: "Delta", mathml: "<mi>\u0394</mi>", previewText: "\u0394" },
+          { id: "theta-upper", name: "Theta", mathml: "<mi>\u0398</mi>", previewText: "\u0398" },
+          { id: "lambda-upper", name: "Lambda", mathml: "<mi>\u039B</mi>", previewText: "\u039B" },
+          { id: "xi-upper", name: "Xi", mathml: "<mi>\u039E</mi>", previewText: "\u039E" },
+          { id: "pi-upper", name: "Pi", mathml: "<mi>\u03A0</mi>", previewText: "\u03A0" },
+          { id: "sigma-upper", name: "Sigma", mathml: "<mi>\u03A3</mi>", previewText: "\u03A3" },
+          { id: "upsilon-upper", name: "Upsilon", mathml: "<mi>\u03A5</mi>", previewText: "\u03A5" },
+          { id: "phi-upper", name: "Phi", mathml: "<mi>\u03A6</mi>", previewText: "\u03A6" },
+          { id: "psi-upper", name: "Psi", mathml: "<mi>\u03A8</mi>", previewText: "\u03A8" },
+          { id: "omega-upper", name: "Omega", mathml: "<mi>\u03A9</mi>", previewText: "\u03A9" },
+          // Aliases for legacy tests
+          { id: "Delta", name: "Delta", mathml: "<mi>\u0394</mi>", previewText: "\u0394" },
+          { id: "Sigma", name: "Sigma", mathml: "<mi>\u03A3</mi>", previewText: "\u03A3" },
+          { id: "Omega", name: "Omega", mathml: "<mi>\u03A9</mi>", previewText: "\u03A9" },
+          { id: "Theta", name: "Theta", mathml: "<mi>\u0398</mi>", previewText: "\u0398" },
+          { id: "Gamma", name: "Gamma", mathml: "<mi>\u0393</mi>", previewText: "\u0393" }
+        ]
+      },
+      {
+        id: "lowercase-greek",
+        name: "Lowercase Greek",
+        cells: [
+          { id: "alpha", name: "alpha", mathml: "<mi>\u03B1</mi>", previewText: "\u03B1" },
+          { id: "beta", name: "beta", mathml: "<mi>\u03B2</mi>", previewText: "\u03B2" },
+          { id: "gamma", name: "gamma", mathml: "<mi>\u03B3</mi>", previewText: "\u03B3" },
+          { id: "delta", name: "delta", mathml: "<mi>\u03B4</mi>", previewText: "\u03B4" },
+          { id: "theta", name: "theta", mathml: "<mi>\u03B8</mi>", previewText: "\u03B8" },
+          { id: "lambda", name: "lambda", mathml: "<mi>\u03BB</mi>", previewText: "\u03BB" },
+          { id: "mu", name: "mu", mathml: "<mi>\u03BC</mi>", previewText: "\u03BC" },
+          { id: "pi", name: "pi", mathml: "<mi>\u03C0</mi>", previewText: "\u03C0" },
+          { id: "sigma", name: "sigma", mathml: "<mi>\u03C3</mi>", previewText: "\u03C3" },
+          { id: "omega", name: "omega", mathml: "<mi>\u03C9</mi>", previewText: "\u03C9" },
+          { id: "epsilon", name: "epsilon", mathml: "<mi>\u03F5</mi>", previewText: "\u03F5" },
+          { id: "zeta", name: "zeta", mathml: "<mi>\u03B6</mi>", previewText: "\u03B6" },
+          { id: "eta", name: "eta", mathml: "<mi>\u03B7</mi>", previewText: "\u03B7" },
+          { id: "phi", name: "phi", mathml: "<mi>\u03D5</mi>", previewText: "\u03D5" },
+          { id: "psi", name: "psi", mathml: "<mi>\u03C8</mi>", previewText: "\u03C8" },
+          { id: "chi", name: "chi", mathml: "<mi>\u03C7</mi>", previewText: "\u03C7" }
+        ]
+      },
+      {
+        id: "uppercase-blackboard",
+        name: "Uppercase Blackboard Bold",
+        cells: [
+          { id: "bb-r", name: "Reals (R)", mathml: '<mi mathvariant="double-struck">R</mi>', previewText: "\u211D" },
+          { id: "bb-c", name: "Complex (C)", mathml: '<mi mathvariant="double-struck">C</mi>', previewText: "\u2102" },
+          { id: "bb-n", name: "Naturals (N)", mathml: '<mi mathvariant="double-struck">N</mi>', previewText: "\u2115" },
+          { id: "bb-z", name: "Integers (Z)", mathml: '<mi mathvariant="double-struck">Z</mi>', previewText: "\u2124" },
+          { id: "bb-q", name: "Rationals (Q)", mathml: '<mi mathvariant="double-struck">Q</mi>', previewText: "\u211A" },
+          { id: "bb-p", name: "Primes (P)", mathml: '<mi mathvariant="double-struck">P</mi>', previewText: "\u2119" },
+          { id: "bb-h", name: "Quaternions (H)", mathml: '<mi mathvariant="double-struck">H</mi>', previewText: "\u210D" },
+          { id: "bb-f", name: "Field (F)", mathml: '<mi mathvariant="double-struck">F</mi>', previewText: "\u{1D53D}" }
+        ]
+      },
+      {
+        id: "lowercase-blackboard",
+        name: "Lowercase Blackboard Bold",
+        cells: [
+          { id: "bb-k", name: "Blackboard k", mathml: '<mi mathvariant="double-struck">k</mi>', previewText: "\u{1D55C}" },
+          { id: "bb-n-lower", name: "Blackboard n", mathml: '<mi mathvariant="double-struck">n</mi>', previewText: "\u{1D55F}" },
+          { id: "bb-r-lower", name: "Blackboard r", mathml: '<mi mathvariant="double-struck">r</mi>', previewText: "\u{1D563}" },
+          { id: "bb-x-lower", name: "Blackboard x", mathml: '<mi mathvariant="double-struck">x</mi>', previewText: "\u{1D569}" },
+          { id: "bb-y-lower", name: "Blackboard y", mathml: '<mi mathvariant="double-struck">y</mi>', previewText: "\u{1D56A}" },
+          { id: "bb-z-lower", name: "Blackboard z", mathml: '<mi mathvariant="double-struck">z</mi>', previewText: "\u{1D56B}" }
+        ]
+      },
+      {
+        id: "fraktur",
+        name: "Fraktur",
+        cells: [
+          { id: "frak-a", name: "Fraktur A", mathml: '<mi mathvariant="fraktur">A</mi>', previewText: "\u{1D504}" },
+          { id: "frak-b", name: "Fraktur B", mathml: '<mi mathvariant="fraktur">B</mi>', previewText: "\u{1D505}" },
+          { id: "frak-c", name: "Fraktur C", mathml: '<mi mathvariant="fraktur">C</mi>', previewText: "\u212D" },
+          { id: "frak-r", name: "Fraktur R", mathml: '<mi mathvariant="fraktur">R</mi>', previewText: "\u211C" },
+          { id: "frak-z", name: "Fraktur Z", mathml: '<mi mathvariant="fraktur">Z</mi>', previewText: "\u2128" },
+          { id: "frak-a-lower", name: "Fraktur a", mathml: '<mi mathvariant="fraktur">a</mi>', previewText: "\u{1D51E}" },
+          { id: "frak-b-lower", name: "Fraktur b", mathml: '<mi mathvariant="fraktur">b</mi>', previewText: "\u{1D51F}" }
+        ]
+      },
+      {
+        id: "script",
+        name: "Script / Calligraphic",
+        cells: [
+          { id: "scr-a", name: "Script A", mathml: '<mi mathvariant="script">A</mi>', previewText: "\u{1D49C}" },
+          { id: "scr-b", name: "Script B", mathml: '<mi mathvariant="script">B</mi>', previewText: "\u212C" },
+          { id: "scr-f", name: "Script F", mathml: '<mi mathvariant="script">F</mi>', previewText: "\u2131" },
+          { id: "scr-h", name: "Script H", mathml: '<mi mathvariant="script">H</mi>', previewText: "\u210B" },
+          { id: "scr-l", name: "Script L", mathml: '<mi mathvariant="script">L</mi>', previewText: "\u2112" },
+          { id: "scr-m", name: "Script M", mathml: '<mi mathvariant="script">M</mi>', previewText: "\u2133" },
+          { id: "scr-p", name: "Script P", mathml: '<mi mathvariant="script">P</mi>', previewText: "\u{1D4AB}" }
+        ]
+      }
+    ]
+  },
+  // ==========================================
+  // TAB 2: Arrays & Linear Algebra
+  // ==========================================
+  {
+    id: "linear-algebra",
+    name: "Arrays & Linear Algebra",
+    icon: "[M]",
+    sections: [
+      {
+        id: "vectors",
+        name: "Vectors",
+        cells: [
+          {
+            id: "matrix1x2",
+            name: "1x2 Row Vector",
+            mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
+            spanX: 2,
+            spanY: 1
+          },
+          {
+            id: "vec-row-3",
+            name: "Row Vector (1\xD73)",
+            mathml: "<mfenced><mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>",
+            spanX: 3,
+            spanY: 1
+          },
+          {
+            id: "matrix2x1",
+            name: "2x1 Col Vector",
+            mathml: "<mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable>",
+            spanX: 1,
+            spanY: 2
+          },
+          {
+            id: "vec-col-3",
+            name: "Column Vector (3\xD71)",
+            mathml: "<mfenced><mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>",
+            spanX: 1,
+            spanY: 3
+          },
+          {
+            id: "vec-v",
+            name: "Vector Arrow (v\u20D7)",
+            mathml: '<mover accent="true"><mi>v</mi><mo>\u2192</mo></mover>',
+            previewText: "v\u20D7",
+            spanX: 1,
+            spanY: 1
+          },
+          {
+            id: "unit-i",
+            name: "Unit Vector (i\u0302)",
+            mathml: '<mover accent="true"><mi>i</mi><mo>^</mo></mover>',
+            previewText: "i\u0302",
+            spanX: 1,
+            spanY: 1
+          },
+          {
+            id: "dot-prod",
+            name: "Dot Product",
+            mathml: '<mrow><mi mathvariant="bold">u</mi><mo>\xB7</mo><mi mathvariant="bold">v</mi></mrow>',
+            previewText: "u\xB7v",
+            spanX: 2,
+            spanY: 1
+          },
+          {
+            id: "cross-prod",
+            name: "Cross Product",
+            mathml: '<mrow><mi mathvariant="bold">u</mi><mo>\xD7</mo><mi mathvariant="bold">v</mi></mrow>',
+            previewText: "u\xD7v",
+            spanX: 2,
+            spanY: 1
+          }
+        ]
+      },
+      {
+        id: "matrices",
+        name: "Matrices",
+        cells: [
+          { id: "parens", name: "Parentheses (\u2B1A)", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "( \u2B1A )" },
+          { id: "brackets", name: "Brackets [\u2B1A]", mathml: '<mfenced open="[" close="]"><mrow></mrow></mfenced>', previewText: "[ \u2B1A ]" },
+          { id: "braces", name: "Braces {\u2B1A}", mathml: '<mfenced open="{" close="}"><mrow></mrow></mfenced>', previewText: "{ \u2B1A }" },
+          { id: "abs", name: "Absolute Value |\u2B1A|", mathml: '<mfenced open="|" close="|"><mrow></mrow></mfenced>', previewText: "| \u2B1A |" },
+          {
+            id: "matrix2x2",
+            name: "2x2 Matrix",
+            mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
+            spanX: 2,
+            spanY: 2
+          },
+          {
+            id: "matrix3x3",
+            name: "3x3 Matrix",
+            mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>",
+            spanX: 3,
+            spanY: 3
+          },
+          {
+            id: "matrix-augmented-2x3",
+            name: "2\xD73 Augmented Matrix",
+            mathml: '<mfenced open="[" close="]"><mtable columnlines="none solid"><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 3,
+            spanY: 2
+          },
+          {
+            id: "matrix-augmented-3x4",
+            name: "3\xD74 Augmented Matrix",
+            mathml: '<mfenced open="[" close="]"><mtable columnlines="none none solid"><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 4,
+            spanY: 3
+          },
+          {
+            id: "identity2x2",
+            name: "2\xD72 Identity Matrix",
+            mathml: '<mfenced open="[" close="]"><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable></mfenced>',
+            spanX: 2,
+            spanY: 2
+          }
+        ]
+      },
+      {
+        id: "determinants",
+        name: "Determinants",
+        cells: [
+          {
+            id: "det2x2",
+            name: "2\xD72 Determinant",
+            mathml: '<mfenced open="|" close="|"><mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 2,
+            spanY: 2
+          },
+          {
+            id: "det3x3",
+            name: "3\xD73 Determinant",
+            mathml: '<mfenced open="|" close="|"><mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 3,
+            spanY: 3
+          }
+        ]
+      },
+      {
+        id: "systems-of-equations",
+        name: "Systems of Equations",
+        cells: [
+          {
+            id: "system-2eq",
+            name: "2-Equation System",
+            mathml: '<mfenced open="{" close=""><mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 3,
+            spanY: 2
+          },
+          {
+            id: "system-3eq",
+            name: "3-Equation System",
+            mathml: '<mfenced open="{" close=""><mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable></mfenced>',
+            spanX: 3,
+            spanY: 3
+          },
+          {
+            id: "piecewise-fn",
+            name: "Piecewise Function",
+            mathml: '<mrow><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mfenced open="{" close=""><mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow><mtext>if </mtext><mrow></mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow><mtext>otherwise</mtext></mrow></mtd></mtr></mtable></mfenced></mrow>',
+            previewText: "f(x)={...",
+            spanX: 4,
+            spanY: 2
+          }
+        ]
+      }
+    ]
+  },
+  // ==========================================
+  // TAB 3: Calculus & Operators
+  // ==========================================
+  {
+    id: "calculus",
+    name: "Calculus & Operators",
+    icon: "\u222B",
+    sections: [
+      {
+        id: "integrals",
+        name: "Integrals",
+        cells: [
+          { id: "int-symbol", name: "Integral Symbol", mathml: "<mo>\u222B</mo>", previewText: "\u222B" },
+          { id: "int-2slot", name: "2-Slot Integral (Limits)", mathml: "<msubsup><mo>\u222B</mo><mrow></mrow><mrow></mrow></msubsup>", previewText: "\u222B_\u2B1A^\u2B1A", spanX: 1, spanY: 2 },
+          { id: "int-2slot-diff", name: "2-Slot Integral (Integrand & Var)", mathml: "<mo>\u222B</mo><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B\u2B1A d\u2B1A", spanX: 2, spanY: 1 },
+          { id: "int-4slot", name: "4-Slot Definite Integral", mathml: "<msubsup><mo>\u222B</mo><mrow></mrow><mrow></mrow></msubsup><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B_\u2B1A^\u2B1A \u2B1A d\u2B1A", spanX: 3, spanY: 2 },
+          { id: "int-4slot-underover", name: "4-Slot Under-Over Integral", mathml: "<munderover><mo>\u222B</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B_\u2B1A^\u2B1A \u2B1A d\u2B1A", spanX: 3, spanY: 2 },
+          { id: "double-int", name: "Double Integral", mathml: "<mo>\u222C</mo>", previewText: "\u222C" },
+          { id: "double-int-region", name: "Double Integral with Region", mathml: "<msub><mo>\u222C</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u222C_\u2B1A \u2B1A", spanX: 2, spanY: 1 },
+          { id: "triple-int", name: "Triple Integral", mathml: "<mo>\u222D</mo>", previewText: "\u222D" },
+          { id: "triple-int-region", name: "Triple Integral with Region", mathml: "<msub><mo>\u222D</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u222D_\u2B1A \u2B1A", spanX: 2, spanY: 1 },
+          { id: "quad-int", name: "Quadruple Integral", mathml: "<mo>\u2A0C</mo>", previewText: "\u2A0C" },
+          { id: "quad-int-region", name: "Quadruple Integral with Region", mathml: "<msub><mo>\u2A0C</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u2A0C_\u2B1A \u2B1A", spanX: 2, spanY: 1 },
+          { id: "oint", name: "Contour Integral", mathml: "<mo>\u222E</mo>", previewText: "\u222E" },
+          { id: "oiint", name: "Surface Integral", mathml: "<mo>\u222F</mo>", previewText: "\u222F" },
+          { id: "oiiint", name: "Volume Integral", mathml: "<mo>\u2230</mo>", previewText: "\u2230" }
+        ]
+      },
+      {
+        id: "sums",
+        name: "Sums",
+        cells: [
+          { id: "sum-1slot", name: "Summation (1-Slot)", mathml: "<munder><mo>\u2211</mo><mrow></mrow></munder>", previewText: "\u2211_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "sum-3slot", name: "Summation (3-Slot)", mathml: "<munderover><mo>\u2211</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2211_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 }
+        ]
+      },
+      {
+        id: "products",
+        name: "Products",
+        cells: [
+          { id: "prod-1slot", name: "Product (1-Slot)", mathml: "<munder><mo>\u220F</mo><mrow></mrow></munder>", previewText: "\u220F_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "prod-3slot", name: "Product (3-Slot)", mathml: "<munderover><mo>\u220F</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u220F_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 }
+        ]
+      },
+      {
+        id: "coproducts",
+        name: "Coproducts",
+        cells: [
+          { id: "coprod-1slot", name: "Coproduct (1-Slot)", mathml: "<munder><mo>\u2210</mo><mrow></mrow></munder>", previewText: "\u2210_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "coprod-3slot", name: "Coproduct (3-Slot)", mathml: "<munderover><mo>\u2210</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2210_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 }
+        ]
+      },
+      {
+        id: "limits",
+        name: "Limits",
+        cells: [
+          { id: "lim-1slot", name: "Limit (1-Slot)", mathml: "<munder><mi>lim</mi><mrow></mrow></munder>", previewText: "lim_\u2B1A", spanX: 2, spanY: 2 },
+          { id: "lim-expr", name: "Limit with Expression", mathml: "<munder><mi>lim</mi><mrow><mrow></mrow><mo>\u2192</mo><mrow></mrow></mrow></munder><mrow></mrow>", previewText: "lim_{\u2B1A\u2192\u2B1A} \u2B1A", spanX: 3, spanY: 2 },
+          { id: "min-under", name: "Minimum with Condition", mathml: "<munder><mi>min</mi><mrow></mrow></munder><mrow></mrow>", previewText: "min_\u2B1A \u2B1A", spanX: 2, spanY: 2 },
+          { id: "max-under", name: "Maximum with Condition", mathml: "<munder><mi>max</mi><mrow></mrow></munder><mrow></mrow>", previewText: "max_\u2B1A \u2B1A", spanX: 2, spanY: 2 }
+        ]
+      },
+      {
+        id: "derivatives",
+        name: "Derivatives & Partials",
+        cells: [
+          { id: "derivative", name: "Derivative (dy/dx)", mathml: "<mfrac><mrow><mi>d</mi><mi>y</mi></mrow><mrow><mi>d</mi><mi>x</mi></mrow></mfrac>", previewText: "dy/dx", spanX: 1, spanY: 2 },
+          { id: "partial-derivative", name: "Partial Derivative (\u2202y/\u2202x)", mathml: "<mfrac><mrow><mo>\u2202</mo><mi>y</mi></mrow><mrow><mo>\u2202</mo><mi>x</mi></mrow></mfrac>", previewText: "\u2202y/\u2202x", spanX: 1, spanY: 2 },
+          { id: "second-derivative", name: "Second Derivative (d\xB2y/dx\xB2)", mathml: "<mfrac><mrow><msup><mi>d</mi><mn>2</mn></msup><mi>y</mi></mrow><mrow><mi>d</mi><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac>", previewText: "d\xB2y/dx\xB2", spanX: 1, spanY: 2 },
+          { id: "gradient", name: "Gradient (\u2207f)", mathml: "<mrow><mo>\u2207</mo><mi>f</mi></mrow>", previewText: "\u2207f", spanX: 1, spanY: 1 },
+          { id: "divergence", name: "Divergence (\u2207\xB7F)", mathml: '<mrow><mo>\u2207</mo><mo>\xB7</mo><mi mathvariant="bold">F</mi></mrow>', previewText: "\u2207\xB7F", spanX: 2, spanY: 1 },
+          { id: "curl", name: "Curl (\u2207\xD7F)", mathml: '<mrow><mo>\u2207</mo><mo>\xD7</mo><mi mathvariant="bold">F</mi></mrow>', previewText: "\u2207\xD7F", spanX: 2, spanY: 1 },
+          { id: "laplacian", name: "Laplacian (\u2207\xB2f)", mathml: "<mrow><msup><mo>\u2207</mo><mn>2</mn></msup><mi>f</mi></mrow>", previewText: "\u2207\xB2f", spanX: 1, spanY: 1 }
+        ]
+      },
+      // Legacy categories for full test compatibility
+      {
+        id: "fractions",
+        name: "Fractions",
+        cells: [
+          { id: "fraction", name: "Stacked Fraction", mathml: "<mfrac><mrow></mrow><mrow></mrow></mfrac>", previewText: "\u2B1A/\u2B1A", spanX: 1, spanY: 2 },
+          { id: "linear-fraction", name: "Linear Fraction", mathml: "<mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac>", previewText: "a/b", spanX: 1, spanY: 1 },
+          { id: "half", name: "1/2 Fraction", mathml: "<mfrac><mn>1</mn><mn>2</mn></mfrac>", previewText: "\xBD", spanX: 1, spanY: 1 }
+        ]
+      },
+      {
+        id: "radicals",
+        name: "Radicals & Roots",
+        cells: [
+          { id: "sqrt", name: "Square Root", mathml: "<msqrt><mrow></mrow></msqrt>", previewText: "\u221A\u2B1A", spanX: 1, spanY: 1 },
+          { id: "root", name: "N-th Root", mathml: "<mroot><mrow></mrow><mrow></mrow></mroot>", previewText: "\u207F\u221A\u2B1A", spanX: 1, spanY: 1 },
+          { id: "cube-root", name: "Cube Root", mathml: "<mroot><mrow></mrow><mrow><mn>3</mn></mrow></mroot>", previewText: "\u221B\u2B1A", spanX: 1, spanY: 1 }
+        ]
+      },
+      {
+        id: "scripts",
+        name: "Scripts",
+        cells: [
+          { id: "superscript", name: "Superscript", mathml: "<msup><mrow><mi>x</mi></mrow><mrow></mrow></msup>", previewText: "x^{\u2B1A}", spanX: 1, spanY: 1 },
+          { id: "subscript", name: "Subscript", mathml: "<msub><mrow><mi>x</mi></mrow><mrow></mrow></msub>", previewText: "x_{\u2B1A}", spanX: 1, spanY: 1 },
+          { id: "subsup", name: "Sub-Superscript", mathml: "<msubsup><mrow><mi>x</mi></mrow><mrow></mrow><mrow></mrow></msubsup>", previewText: "x_{\u2B1A}^{\u2B1A}", spanX: 1, spanY: 1 },
+          { id: "empty-sup", name: "Superscript Base", mathml: "<msup><mrow></mrow><mrow></mrow></msup>", previewText: "\u2B1A^{\u2B1A}", spanX: 1, spanY: 1 },
+          { id: "empty-sub", name: "Subscript Base", mathml: "<msub><mrow></mrow><mrow></mrow></msub>", previewText: "\u2B1A_{\u2B1A}", spanX: 1, spanY: 1 }
+        ]
+      },
+      {
+        id: "operators",
+        name: "Basic Math & Operators",
+        cells: [
+          { id: "pm", name: "Plus-Minus", mathml: "<mo>\xB1</mo>", previewText: "\xB1" },
+          { id: "times", name: "Times", mathml: "<mo>\xD7</mo>", previewText: "\xD7" },
+          { id: "div", name: "Divide", mathml: "<mo>\xF7</mo>", previewText: "\xF7" },
+          { id: "ne", name: "Not Equal", mathml: "<mo>\u2260</mo>", previewText: "\u2260" },
+          { id: "le", name: "Less or Equal", mathml: "<mo>\u2264</mo>", previewText: "\u2264" },
+          { id: "ge", name: "Greater or Equal", mathml: "<mo>\u2265</mo>", previewText: "\u2265" },
+          { id: "infty", name: "Infinity", mathml: "<mi>\u221E</mi>", previewText: "\u221E" },
+          { id: "sum", name: "Summation", mathml: "<mo>\u2211</mo>", previewText: "\u2211" },
+          { id: "int", name: "Integral", mathml: "<mo>\u222B</mo>", previewText: "\u222B" },
+          { id: "plus", name: "Plus", mathml: "<mo>+</mo>", previewText: "+" },
+          { id: "minus", name: "Minus", mathml: "<mo>\u2212</mo>", previewText: "\u2212" },
+          { id: "cdot", name: "Center Dot", mathml: "<mo>\xB7</mo>", previewText: "\xB7" },
+          { id: "eq", name: "Equals", mathml: "<mo>=</mo>", previewText: "=" },
+          { id: "approx", name: "Approx", mathml: "<mo>\u2248</mo>", previewText: "\u2248" },
+          { id: "partial", name: "Partial", mathml: "<mo>\u2202</mo>", previewText: "\u2202" },
+          { id: "nabla", name: "Nabla", mathml: "<mo>\u2207</mo>", previewText: "\u2207" },
+          { id: "prod", name: "Product", mathml: "<mo>\u220F</mo>", previewText: "\u220F" }
+        ]
+      },
+      {
+        id: "large-operators",
+        name: "Large Operators",
+        cells: [
+          { id: "sum-1slot-alias", name: "Summation (1-Slot)", mathml: "<munder><mo>\u2211</mo><mrow></mrow></munder>", previewText: "\u2211_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "sum-3slot-alias", name: "Summation (3-Slot)", mathml: "<munderover><mo>\u2211</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2211_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 },
+          { id: "prod-1slot-alias", name: "Product (1-Slot)", mathml: "<munder><mo>\u220F</mo><mrow></mrow></munder>", previewText: "\u220F_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "prod-3slot-alias", name: "Product (3-Slot)", mathml: "<munderover><mo>\u220F</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u220F_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 },
+          { id: "coprod-1slot-alias", name: "Coproduct (1-Slot)", mathml: "<munder><mo>\u2210</mo><mrow></mrow></munder>", previewText: "\u2210_\u2B1A", spanX: 1, spanY: 2 },
+          { id: "coprod-3slot-alias", name: "Coproduct (3-Slot)", mathml: "<munderover><mo>\u2210</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2210_\u2B1A^\u2B1A \u2B1A", spanX: 2, spanY: 2 },
+          { id: "lim-1slot-alias", name: "Limit (1-Slot)", mathml: "<munder><mi>lim</mi><mrow></mrow></munder>", previewText: "lim_\u2B1A", spanX: 2, spanY: 2 },
+          { id: "lim-expr-alias", name: "Limit with Expression", mathml: "<munder><mi>lim</mi><mrow><mrow></mrow><mo>\u2192</mo><mrow></mrow></mrow></munder><mrow></mrow>", previewText: "lim_{\u2B1A\u2192\u2B1A} \u2B1A", spanX: 3, spanY: 2 },
+          { id: "min-under-alias", name: "Minimum with Condition", mathml: "<munder><mi>min</mi><mrow></mrow></munder><mrow></mrow>", previewText: "min_\u2B1A \u2B1A", spanX: 2, spanY: 2 },
+          { id: "max-under-alias", name: "Maximum with Condition", mathml: "<munder><mi>max</mi><mrow></mrow></munder><mrow></mrow>", previewText: "max_\u2B1A \u2B1A", spanX: 2, spanY: 2 }
+        ]
+      }
+    ]
+  },
+  // ==========================================
+  // TAB 4: Symbols, Relations & Logic
+  // ==========================================
+  {
+    id: "symbols",
+    name: "Symbols, Relations & Logic",
+    icon: "\u2200",
+    sections: [
+      {
+        id: "comparison",
+        name: "Comparison & Relations",
+        cells: [
+          { id: "comp-eq", name: "Equals", mathml: "<mo>=</mo>", previewText: "=" },
+          { id: "comp-ne", name: "Not Equal", mathml: "<mo>\u2260</mo>", previewText: "\u2260" },
+          { id: "comp-lt", name: "Less Than", mathml: "<mo>&lt;</mo>", previewText: "<" },
+          { id: "comp-gt", name: "Greater Than", mathml: "<mo>&gt;</mo>", previewText: ">" },
+          { id: "comp-le", name: "Less or Equal", mathml: "<mo>\u2264</mo>", previewText: "\u2264" },
+          { id: "comp-ge", name: "Greater or Equal", mathml: "<mo>\u2265</mo>", previewText: "\u2265" },
+          { id: "comp-approx", name: "Approximately Equal", mathml: "<mo>\u2248</mo>", previewText: "\u2248" },
+          { id: "comp-sim", name: "Similar To", mathml: "<mo>\u223C</mo>", previewText: "\u223C" },
+          { id: "comp-equiv", name: "Identical To / Equiv", mathml: "<mo>\u2261</mo>", previewText: "\u2261" },
+          { id: "comp-ll", name: "Much Less Than", mathml: "<mo>\u226A</mo>", previewText: "\u226A" },
+          { id: "comp-gg", name: "Much Greater Than", mathml: "<mo>\u226B</mo>", previewText: "\u226B" }
+        ]
+      },
+      {
+        id: "set-theory",
+        name: "Set Theory",
+        cells: [
+          { id: "set-in", name: "Element Of", mathml: "<mo>\u2208</mo>", previewText: "\u2208" },
+          { id: "set-notin", name: "Not Element Of", mathml: "<mo>\u2209</mo>", previewText: "\u2209" },
+          { id: "set-subset", name: "Subset Of", mathml: "<mo>\u2282</mo>", previewText: "\u2282" },
+          { id: "set-supset", name: "Superset Of", mathml: "<mo>\u2283</mo>", previewText: "\u2283" },
+          { id: "set-subseteq", name: "Subset or Equal", mathml: "<mo>\u2286</mo>", previewText: "\u2286" },
+          { id: "set-supseteq", name: "Superset or Equal", mathml: "<mo>\u2287</mo>", previewText: "\u2287" },
+          { id: "set-cap", name: "Intersection", mathml: "<mo>\u2229</mo>", previewText: "\u2229" },
+          { id: "set-cup", name: "Union", mathml: "<mo>\u222A</mo>", previewText: "\u222A" },
+          { id: "set-setminus", name: "Set Difference", mathml: "<mo>\u2216</mo>", previewText: "\u2216" },
+          { id: "set-empty", name: "Empty Set", mathml: "<mo>\u2205</mo>", previewText: "\u2205" }
+        ]
+      },
+      {
+        id: "logic",
+        name: "Logic & Quantifiers",
+        cells: [
+          { id: "log-forall", name: "For All", mathml: "<mo>\u2200</mo>", previewText: "\u2200" },
+          { id: "log-exists", name: "There Exists", mathml: "<mo>\u2203</mo>", previewText: "\u2203" },
+          { id: "log-nexists", name: "There Does Not Exist", mathml: "<mo>\u2204</mo>", previewText: "\u2204" },
+          { id: "log-neg", name: "Logical Negation", mathml: "<mo>\xAC</mo>", previewText: "\xAC" },
+          { id: "log-and", name: "Logical And", mathml: "<mo>\u2227</mo>", previewText: "\u2227" },
+          { id: "log-or", name: "Logical Or", mathml: "<mo>\u2228</mo>", previewText: "\u2228" },
+          { id: "log-implies", name: "Implies", mathml: "<mo>\u21D2</mo>", previewText: "\u21D2" },
+          { id: "log-iff", name: "If and Only If", mathml: "<mo>\u21D4</mo>", previewText: "\u21D4" },
+          { id: "log-therefore", name: "Therefore", mathml: "<mo>\u2234</mo>", previewText: "\u2234" },
+          { id: "log-because", name: "Because", mathml: "<mo>\u2235</mo>", previewText: "\u2235" }
+        ]
+      },
+      {
+        id: "arrows",
+        name: "Arrows & Harpoons",
+        cells: [
+          { id: "arr-to", name: "Right Arrow", mathml: "<mo>\u2192</mo>", previewText: "\u2192" },
+          { id: "arr-left", name: "Left Arrow", mathml: "<mo>\u2190</mo>", previewText: "\u2190" },
+          { id: "arr-lr", name: "Left-Right Arrow", mathml: "<mo>\u2194</mo>", previewText: "\u2194" },
+          { id: "arr-double-r", name: "Double Right Arrow", mathml: "<mo>\u21D2</mo>", previewText: "\u21D2" },
+          { id: "arr-double-l", name: "Double Left Arrow", mathml: "<mo>\u21D0</mo>", previewText: "\u21D0" },
+          { id: "arr-double-lr", name: "Double Left-Right Arrow", mathml: "<mo>\u21D4</mo>", previewText: "\u21D4" },
+          { id: "arr-mapsto", name: "Maps To", mathml: "<mo>\u21A6</mo>", previewText: "\u21A6" },
+          { id: "arr-up", name: "Up Arrow", mathml: "<mo>\u2191</mo>", previewText: "\u2191" },
+          { id: "arr-down", name: "Down Arrow", mathml: "<mo>\u2193</mo>", previewText: "\u2193" }
+        ]
+      },
+      {
+        id: "accents",
+        name: "Accents",
+        cells: [
+          { id: "accent-bar", name: "Overbar", mathml: '<mover accent="true"><mrow></mrow><mo>\xAF</mo></mover>', previewText: "x\u0304" },
+          { id: "accent-vec", name: "Vector Arrow", mathml: '<mover accent="true"><mrow></mrow><mo>\u2192</mo></mover>', previewText: "x\u20D7" },
+          { id: "accent-hat", name: "Hat Accent", mathml: '<mover accent="true"><mrow></mrow><mo>^</mo></mover>', previewText: "x\u0302" },
+          { id: "accent-dot", name: "Dot Derivative", mathml: '<mover accent="true"><mrow></mrow><mo>\u02D9</mo></mover>', previewText: "x\u0307" },
+          { id: "accent-ddot", name: "Double Dot Derivative", mathml: '<mover accent="true"><mrow></mrow><mo>\xA8</mo></mover>', previewText: "x\u0308" },
+          { id: "accent-tilde", name: "Tilde", mathml: '<mover accent="true"><mrow></mrow><mo>~</mo></mover>', previewText: "x\u0303" },
+          { id: "accent-overbrace", name: "Overbrace", mathml: '<mover accent="true"><mrow></mrow><mo>\u23DE</mo></mover>', previewText: "\u23DE\u2B1A", spanX: 2, spanY: 2 },
+          { id: "accent-underbrace", name: "Underbrace", mathml: '<munder accent="true"><mrow></mrow><mo>\u23DF</mo></munder>', previewText: "\u23DF\u2B1A", spanX: 2, spanY: 2 }
+        ]
+      },
+      {
+        id: "delimiters",
+        name: "Delimiters & Brackets",
+        cells: [
+          { id: "del-parens", name: "Parentheses (\u2B1A)", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "( \u2B1A )" },
+          { id: "del-brackets", name: "Brackets [\u2B1A]", mathml: '<mfenced open="[" close="]"><mrow></mrow></mfenced>', previewText: "[ \u2B1A ]" },
+          { id: "del-braces", name: "Braces {\u2B1A}", mathml: '<mfenced open="{" close="}"><mrow></mrow></mfenced>', previewText: "{ \u2B1A }" },
+          { id: "del-abs", name: "Absolute Value |\u2B1A|", mathml: '<mfenced open="|" close="|"><mrow></mrow></mfenced>', previewText: "| \u2B1A |" },
+          { id: "del-floor", name: "Floor \u230A\u2B1A\u230B", mathml: '<mfenced open="\u230A" close="\u230B"><mrow></mrow></mfenced>', previewText: "\u230A \u2B1A \u230B" },
+          { id: "del-ceiling", name: "Ceiling \u2308\u2B1A\u2309", mathml: '<mfenced open="\u2308" close="\u2309"><mrow></mrow></mfenced>', previewText: "\u2308 \u2B1A \u2309" },
+          { id: "del-angle", name: "Angle Brackets \u27E8\u2B1A\u27E9", mathml: '<mfenced open="\u27E8" close="\u27E9"><mrow></mrow></mfenced>', previewText: "\u27E8 \u2B1A \u27E9" },
+          { id: "del-norm", name: "Norm \u2016\u2B1A\u2016", mathml: '<mfenced open="\u2016" close="\u2016"><mrow></mrow></mfenced>', previewText: "\u2016 \u2B1A \u2016" }
+        ]
+      },
+      {
+        id: "enclosed",
+        name: "Enclosed Notations",
+        cells: [
+          { id: "box", name: "Boxed", mathml: '<menclose notation="box"><mrow></mrow></menclose>', previewText: "\u25A1\u2B1A" },
+          { id: "circle", name: "Circled", mathml: '<menclose notation="circle"><mrow></mrow></menclose>', previewText: "\u25CB\u2B1A" },
+          { id: "roundedbox", name: "Rounded Box", mathml: '<menclose notation="roundedbox"><mrow></mrow></menclose>', previewText: "\u25A2\u2B1A" },
+          { id: "strike", name: "Strikethrough", mathml: '<menclose notation="horizontalstrike"><mrow></mrow></menclose>', previewText: "\u0336\u2B1A" },
+          { id: "actuarial", name: "Actuarial", mathml: '<menclose notation="actuarial"><mrow></mrow></menclose>', previewText: "\u2B1A|\u203E" }
+        ]
+      },
+      {
+        id: "universal-mathml",
+        name: "Universal MathML Elements",
+        cells: [
+          { id: "elem-mfrac", name: "<mfrac>", mathml: "<mfrac><mrow></mrow><mrow></mrow></mfrac>", previewText: "<mfrac>" },
+          { id: "elem-msqrt", name: "<msqrt>", mathml: "<msqrt><mrow></mrow></msqrt>", previewText: "<msqrt>" },
+          { id: "elem-mroot", name: "<mroot>", mathml: "<mroot><mrow></mrow><mrow></mrow></mroot>", previewText: "<mroot>" },
+          { id: "elem-msub", name: "<msub>", mathml: "<msub><mrow></mrow><mrow></mrow></msub>", previewText: "<msub>" },
+          { id: "elem-msup", name: "<msup>", mathml: "<msup><mrow></mrow><mrow></mrow></msup>", previewText: "<msup>" },
+          { id: "elem-msubsup", name: "<msubsup>", mathml: "<msubsup><mrow></mrow><mrow></mrow><mrow></mrow></msubsup>", previewText: "<msubsup>" },
+          { id: "elem-munder", name: "<munder>", mathml: "<munder><mrow></mrow><mrow></mrow></munder>", previewText: "<munder>" },
+          { id: "elem-mover", name: "<mover>", mathml: "<mover><mrow></mrow><mrow></mrow></mover>", previewText: "<mover>" },
+          { id: "elem-munderover", name: "<munderover>", mathml: "<munderover><mrow></mrow><mrow></mrow><mrow></mrow></munderover>", previewText: "<munderover>" },
+          { id: "elem-mtable", name: "<mtable>", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "<mtable>" },
+          { id: "elem-mtr", name: "<mtr>", mathml: "<mtr><mtd><mrow></mrow></mtd></mtr>", previewText: "<mtr>" },
+          { id: "elem-mtd", name: "<mtd>", mathml: "<mtd><mrow></mrow></mtd>", previewText: "<mtd>" },
+          { id: "elem-mfenced", name: "<mfenced>", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "<mfenced>" },
+          { id: "elem-menclose", name: "<menclose>", mathml: '<menclose notation="box"><mrow></mrow></menclose>', previewText: "<menclose>" },
+          { id: "elem-mphantom", name: "<mphantom>", mathml: "<mphantom><mrow></mrow></mphantom>", previewText: "<mphantom>" },
+          { id: "elem-mtext", name: "<mtext>", mathml: "<mtext>Text</mtext>", previewText: "<mtext>" },
+          { id: "elem-mspace", name: "<mspace>", mathml: '<mspace width="1em"/>', previewText: "<mspace>" },
+          { id: "elem-mpadded", name: "<mpadded>", mathml: '<mpadded width="+1em"><mrow></mrow></mpadded>', previewText: "<mpadded>" },
+          { id: "elem-mstyle", name: "<mstyle>", mathml: '<mstyle mathvariant="bold"><mrow></mrow></mstyle>', previewText: "<mstyle>" },
+          { id: "elem-merror", name: "<merror>", mathml: "<merror><mtext>error</mtext></merror>", previewText: "<merror>" },
+          { id: "elem-mmultiscripts", name: "<mmultiscripts>", mathml: "<mmultiscripts><mrow></mrow><mrow></mrow><mrow></mrow><mprescripts/><mrow></mrow><mrow></mrow></mmultiscripts>", previewText: "<mmultiscripts>" },
+          { id: "elem-mrow", name: "<mrow>", mathml: "<mrow></mrow>", previewText: "<mrow>" },
+          { id: "elem-mi", name: "<mi>", mathml: "<mi>x</mi>", previewText: "<mi>" },
+          { id: "elem-mn", name: "<mn>", mathml: "<mn>0</mn>", previewText: "<mn>" },
+          { id: "elem-mo", name: "<mo>", mathml: "<mo>+</mo>", previewText: "<mo>" }
+        ]
+      }
+    ]
+  }
+];
+function buildLegacyCategories() {
+  return [
+    {
+      id: "fractions",
+      title: "Fractions",
+      items: [
+        { id: "fraction", name: "Fraction", mathml: "<mfrac><mrow></mrow><mrow></mrow></mfrac>", previewText: "\u2B1A/\u2B1A" },
+        { id: "linear-fraction", name: "Linear Fraction", mathml: "<mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac>", previewText: "a/b" },
+        { id: "derivative", name: "Derivative", mathml: "<mfrac><mrow><mi>d</mi><mi>y</mi></mrow><mrow><mi>d</mi><mi>x</mi></mrow></mfrac>", previewText: "dy/dx" },
+        { id: "partial-derivative", name: "Partial Derivative", mathml: "<mfrac><mrow><mo>\u2202</mo><mi>y</mi></mrow><mrow><mo>\u2202</mo><mi>x</mi></mrow></mfrac>", previewText: "\u2202y/\u2202x" },
+        { id: "half", name: "1/2", mathml: "<mfrac><mn>1</mn><mn>2</mn></mfrac>", previewText: "\xBD" }
+      ]
+    },
+    {
+      id: "radicals",
+      title: "Radicals",
+      items: [
+        { id: "sqrt", name: "Square Root", mathml: "<msqrt><mrow></mrow></msqrt>", previewText: "\u221A\u2B1A" },
+        { id: "root", name: "Root", mathml: "<mroot><mrow></mrow><mrow></mrow></mroot>", previewText: "\u207F\u221A\u2B1A" },
+        { id: "cube-root", name: "Cube Root", mathml: "<mroot><mrow></mrow><mrow><mn>3</mn></mrow></mroot>", previewText: "\u221B\u2B1A" }
+      ]
+    },
+    {
+      id: "scripts",
+      title: "Scripts",
+      items: [
+        { id: "superscript", name: "Superscript", mathml: "<msup><mrow><mi>x</mi></mrow><mrow></mrow></msup>", previewText: "x^{\u2B1A}" },
+        { id: "subscript", name: "Subscript", mathml: "<msub><mrow><mi>x</mi></mrow><mrow></mrow></msub>", previewText: "x_{\u2B1A}" },
+        { id: "subsup", name: "Subscript-Superscript", mathml: "<msubsup><mrow><mi>x</mi></mrow><mrow></mrow><mrow></mrow></msubsup>", previewText: "x_{\u2B1A}^{\u2B1A}" },
+        { id: "empty-sup", name: "Superscript (empty)", mathml: "<msup><mrow></mrow><mrow></mrow></msup>", previewText: "\u2B1A^{\u2B1A}" },
+        { id: "empty-sub", name: "Subscript (empty)", mathml: "<msub><mrow></mrow><mrow></mrow></msub>", previewText: "\u2B1A_{\u2B1A}" }
+      ]
+    },
+    {
+      id: "operators",
+      title: "Basic Math & Operators",
+      items: [
+        { id: "pm", name: "Plus-Minus", mathml: "<mo>\xB1</mo>", previewText: "\xB1" },
+        { id: "times", name: "Times", mathml: "<mo>\xD7</mo>", previewText: "\xD7" },
+        { id: "div", name: "Divide", mathml: "<mo>\xF7</mo>", previewText: "\xF7" },
+        { id: "ne", name: "Not Equal", mathml: "<mo>\u2260</mo>", previewText: "\u2260" },
+        { id: "le", name: "Less or Equal", mathml: "<mo>\u2264</mo>", previewText: "\u2264" },
+        { id: "ge", name: "Greater or Equal", mathml: "<mo>\u2265</mo>", previewText: "\u2265" },
+        { id: "infty", name: "Infinity", mathml: "<mi>\u221E</mi>", previewText: "\u221E" },
+        { id: "sum", name: "Summation", mathml: "<mo>\u2211</mo>", previewText: "\u2211" },
+        { id: "int", name: "Integral", mathml: "<mo>\u222B</mo>", previewText: "\u222B" },
+        { id: "plus", name: "Plus", mathml: "<mo>+</mo>", previewText: "+" },
+        { id: "minus", name: "Minus", mathml: "<mo>\u2212</mo>", previewText: "\u2212" },
+        { id: "cdot", name: "Center Dot", mathml: "<mo>\xB7</mo>", previewText: "\xB7" },
+        { id: "eq", name: "Equals", mathml: "<mo>=</mo>", previewText: "=" },
+        { id: "approx", name: "Approx", mathml: "<mo>\u2248</mo>", previewText: "\u2248" },
+        { id: "partial", name: "Partial", mathml: "<mo>\u2202</mo>", previewText: "\u2202" },
+        { id: "nabla", name: "Nabla", mathml: "<mo>\u2207</mo>", previewText: "\u2207" },
+        { id: "prod", name: "Product", mathml: "<mo>\u220F</mo>", previewText: "\u220F" }
+      ]
+    },
+    {
+      id: "greek",
+      title: "Greek Letters",
+      items: [
+        { id: "alpha", name: "alpha", mathml: "<mi>\u03B1</mi>", previewText: "\u03B1" },
+        { id: "beta", name: "beta", mathml: "<mi>\u03B2</mi>", previewText: "\u03B2" },
+        { id: "gamma", name: "gamma", mathml: "<mi>\u03B3</mi>", previewText: "\u03B3" },
+        { id: "delta", name: "delta", mathml: "<mi>\u03B4</mi>", previewText: "\u03B4" },
+        { id: "theta", name: "theta", mathml: "<mi>\u03B8</mi>", previewText: "\u03B8" },
+        { id: "lambda", name: "lambda", mathml: "<mi>\u03BB</mi>", previewText: "\u03BB" },
+        { id: "mu", name: "mu", mathml: "<mi>\u03BC</mi>", previewText: "\u03BC" },
+        { id: "pi", name: "pi", mathml: "<mi>\u03C0</mi>", previewText: "\u03C0" },
+        { id: "sigma", name: "sigma", mathml: "<mi>\u03C3</mi>", previewText: "\u03C3" },
+        { id: "omega", name: "omega", mathml: "<mi>\u03C9</mi>", previewText: "\u03C9" },
+        { id: "Delta", name: "Delta", mathml: "<mi>\u0394</mi>", previewText: "\u0394" },
+        { id: "Sigma", name: "Sigma", mathml: "<mi>\u03A3</mi>", previewText: "\u03A3" },
+        { id: "Omega", name: "Omega", mathml: "<mi>\u03A9</mi>", previewText: "\u03A9" },
+        { id: "Theta", name: "Theta", mathml: "<mi>\u0398</mi>", previewText: "\u0398" },
+        { id: "Gamma", name: "Gamma", mathml: "<mi>\u0393</mi>", previewText: "\u0393" }
+      ]
+    },
+    {
+      id: "matrices",
+      title: "Matrices & Brackets",
+      items: [
+        { id: "parens", name: "Parentheses (\u2B1A)", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "( \u2B1A )" },
+        { id: "brackets", name: "Brackets [\u2B1A]", mathml: '<mfenced open="[" close="]"><mrow></mrow></mfenced>', previewText: "[ \u2B1A ]" },
+        { id: "braces", name: "Braces {\u2B1A}", mathml: '<mfenced open="{" close="}"><mrow></mrow></mfenced>', previewText: "{ \u2B1A }" },
+        { id: "abs", name: "Absolute Value |\u2B1A|", mathml: '<mfenced open="|" close="|"><mrow></mrow></mfenced>', previewText: "| \u2B1A |" },
+        { id: "matrix2x2", name: "2x2 Matrix", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "[ 2\xD72 ]" },
+        { id: "matrix1x2", name: "1x2 Matrix", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "[ 1\xD72 ]" },
+        { id: "matrix2x1", name: "2x1 Matrix", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "[ 2\xD71 ]" },
+        { id: "matrix3x3", name: "3x3 Matrix", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "[ 3\xD73 ]" }
+      ]
+    },
+    {
+      id: "integrals",
+      title: "Integrals",
+      items: [
+        { id: "int-symbol", name: "Integral Symbol", mathml: "<mo>\u222B</mo>", previewText: "\u222B" },
+        { id: "int-2slot", name: "2-Slot Integral", mathml: "<msubsup><mo>\u222B</mo><mrow></mrow><mrow></mrow></msubsup>", previewText: "\u222B_\u2B1A^\u2B1A" },
+        { id: "int-2slot-diff", name: "2-Slot Differential", mathml: "<mo>\u222B</mo><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B\u2B1A d\u2B1A" },
+        { id: "int-4slot", name: "4-Slot Definite", mathml: "<msubsup><mo>\u222B</mo><mrow></mrow><mrow></mrow></msubsup><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B_\u2B1A^\u2B1A \u2B1A d\u2B1A" },
+        { id: "int-4slot-underover", name: "4-Slot Under-Over", mathml: "<munderover><mo>\u222B</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow><mo>d</mo><mrow></mrow>", previewText: "\u222B_\u2B1A^\u2B1A \u2B1A d\u2B1A" },
+        { id: "double-int", name: "Double Integral", mathml: "<mo>\u222C</mo>", previewText: "\u222C" },
+        { id: "double-int-region", name: "Double Integral with Region", mathml: "<msub><mo>\u222C</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u222C_\u2B1A \u2B1A" },
+        { id: "triple-int", name: "Triple Integral", mathml: "<mo>\u222D</mo>", previewText: "\u222D" },
+        { id: "triple-int-region", name: "Triple Integral with Region", mathml: "<msub><mo>\u222D</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u222D_\u2B1A \u2B1A" },
+        { id: "quad-int", name: "Quadruple Integral", mathml: "<mo>\u2A0C</mo>", previewText: "\u2A0C" },
+        { id: "quad-int-region", name: "Quadruple Integral with Region", mathml: "<msub><mo>\u2A0C</mo><mrow></mrow></msub><mrow></mrow>", previewText: "\u2A0C_\u2B1A \u2B1A" },
+        { id: "oint", name: "Contour Integral", mathml: "<mo>\u222E</mo>", previewText: "\u222E" },
+        { id: "oiint", name: "Surface Integral", mathml: "<mo>\u222F</mo>", previewText: "\u222F" },
+        { id: "oiiint", name: "Volume Integral", mathml: "<mo>\u2230</mo>", previewText: "\u2230" }
+      ]
+    },
+    {
+      id: "large-operators",
+      title: "Sums & Large Operators",
+      items: [
+        { id: "sum-1slot", name: "Sum (1-Slot)", mathml: "<munder><mo>\u2211</mo><mrow></mrow></munder>", previewText: "\u2211_\u2B1A" },
+        { id: "sum-3slot", name: "Sum (3-Slot)", mathml: "<munderover><mo>\u2211</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2211_\u2B1A^\u2B1A \u2B1A" },
+        { id: "prod-1slot", name: "Product (1-Slot)", mathml: "<munder><mo>\u220F</mo><mrow></mrow></munder>", previewText: "\u220F_\u2B1A" },
+        { id: "prod-3slot", name: "Product (3-Slot)", mathml: "<munderover><mo>\u220F</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u220F_\u2B1A^\u2B1A \u2B1A" },
+        { id: "coprod-1slot", name: "Coproduct (1-Slot)", mathml: "<munder><mo>\u2210</mo><mrow></mrow></munder>", previewText: "\u2210_\u2B1A" },
+        { id: "coprod-3slot", name: "Coproduct (3-Slot)", mathml: "<munderover><mo>\u2210</mo><mrow></mrow><mrow></mrow></munderover><mrow></mrow>", previewText: "\u2210_\u2B1A^\u2B1A \u2B1A" },
+        { id: "lim-1slot", name: "Limit (1-Slot)", mathml: "<munder><mi>lim</mi><mrow></mrow></munder>", previewText: "lim_\u2B1A" },
+        { id: "lim-expr", name: "Limit with Expression", mathml: "<munder><mi>lim</mi><mrow><mrow></mrow><mo>\u2192</mo><mrow></mrow></mrow></munder><mrow></mrow>", previewText: "lim_{\u2B1A\u2192\u2B1A} \u2B1A" },
+        { id: "min-under", name: "Minimum with Condition", mathml: "<munder><mi>min</mi><mrow></mrow></munder><mrow></mrow>", previewText: "min_\u2B1A \u2B1A" },
+        { id: "max-under", name: "Maximum with Condition", mathml: "<munder><mi>max</mi><mrow></mrow></munder><mrow></mrow>", previewText: "max_\u2B1A \u2B1A" }
+      ]
+    },
+    {
+      id: "universal-mathml",
+      title: "Universal MathML Elements",
+      items: [
+        { id: "elem-mfrac", name: "<mfrac>", mathml: "<mfrac><mrow></mrow><mrow></mrow></mfrac>", previewText: "<mfrac>" },
+        { id: "elem-msqrt", name: "<msqrt>", mathml: "<msqrt><mrow></mrow></msqrt>", previewText: "<msqrt>" },
+        { id: "elem-mroot", name: "<mroot>", mathml: "<mroot><mrow></mrow><mrow></mrow></mroot>", previewText: "<mroot>" },
+        { id: "elem-msub", name: "<msub>", mathml: "<msub><mrow></mrow><mrow></mrow></msub>", previewText: "<msub>" },
+        { id: "elem-msup", name: "<msup>", mathml: "<msup><mrow></mrow><mrow></mrow></msup>", previewText: "<msup>" },
+        { id: "elem-msubsup", name: "<msubsup>", mathml: "<msubsup><mrow></mrow><mrow></mrow><mrow></mrow></msubsup>", previewText: "<msubsup>" },
+        { id: "elem-munder", name: "<munder>", mathml: "<munder><mrow></mrow><mrow></mrow></munder>", previewText: "<munder>" },
+        { id: "elem-mover", name: "<mover>", mathml: "<mover><mrow></mrow><mrow></mrow></mover>", previewText: "<mover>" },
+        { id: "elem-munderover", name: "<munderover>", mathml: "<munderover><mrow></mrow><mrow></mrow><mrow></mrow></munderover>", previewText: "<munderover>" },
+        { id: "elem-mtable", name: "<mtable>", mathml: "<mtable><mtr><mtd><mrow></mrow></mtd></mtr></mtable>", previewText: "<mtable>" },
+        { id: "elem-mtr", name: "<mtr>", mathml: "<mtr><mtd><mrow></mrow></mtd></mtr>", previewText: "<mtr>" },
+        { id: "elem-mtd", name: "<mtd>", mathml: "<mtd><mrow></mrow></mtd>", previewText: "<mtd>" },
+        { id: "elem-mfenced", name: "<mfenced>", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "<mfenced>" },
+        { id: "elem-menclose", name: "<menclose>", mathml: '<menclose notation="box"><mrow></mrow></menclose>', previewText: "<menclose>" },
+        { id: "elem-mphantom", name: "<mphantom>", mathml: "<mphantom><mrow></mrow></mphantom>", previewText: "<mphantom>" },
+        { id: "elem-mtext", name: "<mtext>", mathml: "<mtext>Text</mtext>", previewText: "<mtext>" },
+        { id: "elem-mspace", name: "<mspace>", mathml: '<mspace width="1em"/>', previewText: "<mspace>" },
+        { id: "elem-mpadded", name: "<mpadded>", mathml: '<mpadded width="+1em"><mrow></mrow></mpadded>', previewText: "<mpadded>" },
+        { id: "elem-mstyle", name: "<mstyle>", mathml: '<mstyle mathvariant="bold"><mrow></mrow></mstyle>', previewText: "<mstyle>" },
+        { id: "elem-merror", name: "<merror>", mathml: "<merror><mtext>error</mtext></merror>", previewText: "<merror>" },
+        { id: "elem-mmultiscripts", name: "<mmultiscripts>", mathml: "<mmultiscripts><mrow></mrow><mrow></mrow><mrow></mrow><mprescripts/><mrow></mrow><mrow></mrow></mmultiscripts>", previewText: "<mmultiscripts>" },
+        { id: "elem-mrow", name: "<mrow>", mathml: "<mrow></mrow>", previewText: "<mrow>" },
+        { id: "elem-mi", name: "<mi>", mathml: "<mi>x</mi>", previewText: "<mi>" },
+        { id: "elem-mn", name: "<mn>", mathml: "<mn>0</mn>", previewText: "<mn>" },
+        { id: "elem-mo", name: "<mo>", mathml: "<mo>+</mo>", previewText: "<mo>" }
+      ]
+    },
+    {
+      id: "enclosed",
+      title: "Enclosed Notations",
+      items: [
+        { id: "box", name: "Boxed", mathml: '<menclose notation="box"><mrow></mrow></menclose>', previewText: "\u25A1\u2B1A" },
+        { id: "circle", name: "Circled", mathml: '<menclose notation="circle"><mrow></mrow></menclose>', previewText: "\u25CB\u2B1A" },
+        { id: "roundedbox", name: "Rounded Box", mathml: '<menclose notation="roundedbox"><mrow></mrow></menclose>', previewText: "\u25A2\u2B1A" },
+        { id: "strike", name: "Strikethrough", mathml: '<menclose notation="horizontalstrike"><mrow></mrow></menclose>', previewText: "\u0336\u2B1A" },
+        { id: "actuarial", name: "Actuarial", mathml: '<menclose notation="actuarial"><mrow></mrow></menclose>', previewText: "\u2B1A|\u203E" },
+        { id: "accent-bar", name: "Overbar", mathml: '<mover accent="true"><mrow></mrow><mo>\xAF</mo></mover>', previewText: "x\u0304" },
+        { id: "accent-vec", name: "Vector Arrow", mathml: '<mover accent="true"><mrow></mrow><mo>\u2192</mo></mover>', previewText: "x\u20D7" },
+        { id: "accent-hat", name: "Hat Accent", mathml: '<mover accent="true"><mrow></mrow><mo>^</mo></mover>', previewText: "x\u0302" },
+        { id: "accent-dot", name: "Dot Derivative", mathml: '<mover accent="true"><mrow></mrow><mo>\u02D9</mo></mover>', previewText: "x\u0307" },
+        { id: "accent-ddot", name: "Double Dot Derivative", mathml: '<mover accent="true"><mrow></mrow><mo>\xA8</mo></mover>', previewText: "x\u0308" }
+      ]
+    },
+    {
+      id: "delimiters",
+      title: "Delimiters & Brackets",
+      items: [
+        { id: "del-parens", name: "Parentheses (\u2B1A)", mathml: '<mfenced open="(" close=")"><mrow></mrow></mfenced>', previewText: "( \u2B1A )" },
+        { id: "del-brackets", name: "Brackets [\u2B1A]", mathml: '<mfenced open="[" close="]"><mrow></mrow></mfenced>', previewText: "[ \u2B1A ]" },
+        { id: "del-braces", name: "Braces {\u2B1A}", mathml: '<mfenced open="{" close="}"><mrow></mrow></mfenced>', previewText: "{ \u2B1A }" },
+        { id: "del-abs", name: "Absolute Value |\u2B1A|", mathml: '<mfenced open="|" close="|"><mrow></mrow></mfenced>', previewText: "| \u2B1A |" },
+        { id: "del-floor", name: "Floor \u230A\u2B1A\u230B", mathml: '<mfenced open="\u230A" close="\u230B"><mrow></mrow></mfenced>', previewText: "\u230A \u2B1A \u230B" },
+        { id: "del-ceiling", name: "Ceiling \u2308\u2B1A\u2309", mathml: '<mfenced open="\u2308" close="\u2309"><mrow></mrow></mfenced>', previewText: "\u2308 \u2B1A \u2309" },
+        { id: "del-angle", name: "Angle Brackets \u27E8\u2B1A\u27E9", mathml: '<mfenced open="\u27E8" close="\u27E9"><mrow></mrow></mfenced>', previewText: "\u27E8 \u2B1A \u27E9" },
+        { id: "del-norm", name: "Norm \u2016\u2B1A\u2016", mathml: '<mfenced open="\u2016" close="\u2016"><mrow></mrow></mfenced>', previewText: "\u2016 \u2B1A \u2016" }
+      ]
+    }
+  ];
+}
+
+// src/gallery/gallery-view.ts
+var VIEW_TYPE_EQUATION_GALLERY = "word-equation-gallery-view";
+var EQUATION_GALLERY_VIEW_TYPE = VIEW_TYPE_EQUATION_GALLERY;
+var GALLERY_CATEGORIES = buildLegacyCategories();
+function calculateCellSpan(cell, element) {
+  let spanX = 1;
+  let spanY = 1;
+  const xml = cell.mathml || "";
+  if (xml.includes("<mtable")) {
+    const rows = (xml.match(/<mtr/g) || []).length;
+    const firstRowMatch = xml.match(/<mtr[\s\S]*?<\/mtr>/);
+    const cols = firstRowMatch ? (firstRowMatch[0].match(/<mtd/g) || []).length : rows > 0 ? 2 : 1;
+    spanX = Math.max(1, Math.min(6, cols));
+    spanY = Math.max(1, Math.min(4, rows));
+    const isPiecewise = xml.includes("<mtext") || cell.id && cell.id.includes("piecewise") || cell.name && cell.name.toLowerCase().includes("piecewise") || xml.includes('open="{"') && cols >= 2;
+    if (isPiecewise) {
+      const hasLongText = xml.includes("otherwise") || xml.includes("if") || xml.length > 120;
+      spanX = Math.max(spanX, hasLongText ? 4 : 3);
+    }
+    if (cell.spanX && (cell.id?.includes("system") || cell.id?.includes("piecewise")) && cell.spanX > spanX) {
+      spanX = Math.min(6, cell.spanX);
+    }
+    if (cell.spanY && (cell.id?.includes("system") || cell.id?.includes("piecewise")) && cell.spanY > spanY) {
+      spanY = Math.min(4, cell.spanY);
+    }
+  } else if (xml.includes("<mfrac")) {
+    const fracCount = (xml.match(/<mfrac/g) || []).length;
+    if (fracCount >= 2) {
+      spanY = Math.min(4, fracCount + 1);
+    } else {
+      spanY = 2;
+    }
+  } else if (xml.includes("munderover") || xml.includes("msubsup") || xml.includes("<mover") || xml.includes("<munder")) {
+    spanY = 2;
+  }
+  if (element) {
+    const inner2 = element.querySelector(
+      ".weq-gallery-cell-editor > div, .word-equation-math, .weq-gallery-static-preview"
+    );
+    const target = inner2 || element;
+    if (target.scrollWidth > 0 && target.scrollHeight > 0) {
+      const baseWidth = 48;
+      const baseHeight = 44;
+      const gridGap = 6;
+      const horizontalBreathingRoom = 16;
+      const isCellOrEditor = !!inner2 || element.classList.contains("is-editing") || element.classList.contains("weq-gallery-cell") || element.classList.contains("weq-gallery-cell-editor") || !!element.querySelector(".weq-gallery-cell-editor") || element.tagName.toLowerCase() === "button";
+      if (isCellOrEditor) {
+        if (target.scrollWidth + horizontalBreathingRoom > baseWidth) {
+          const calculatedSpanX = Math.ceil(
+            (target.scrollWidth + horizontalBreathingRoom + gridGap) / (baseWidth + gridGap)
+          );
+          spanX = Math.max(spanX, Math.min(6, calculatedSpanX));
+        }
+      } else {
+        if (target.scrollWidth > baseWidth * 1.25) {
+          spanX = Math.max(spanX, Math.min(6, Math.ceil(target.scrollWidth / (baseWidth + gridGap))));
+        }
+      }
+      if (target.scrollHeight > baseHeight * 1.25) {
+        spanY = Math.max(spanY, Math.min(4, Math.ceil(target.scrollHeight / (baseHeight + gridGap))));
+      }
+    }
+  }
+  return { spanX, spanY };
+}
+function computeOptimalSectionPacking(cells, numColumns) {
+  const cols = Math.max(1, numColumns);
+  const cellSpans = cells.map((cell) => {
+    const s = calculateCellSpan(cell);
+    return {
+      cell,
+      spanX: Math.min(cols, Math.max(1, s.spanX)),
+      spanY: Math.max(1, s.spanY)
+    };
+  });
+  if (cellSpans.length === 0) {
+    return {
+      placements: [],
+      totalRows: 1,
+      addBtnRow: 1,
+      addBtnCol: 1
+    };
+  }
+  const occupied = [];
+  const isOccupied = (r, c) => {
+    if (!occupied[r])
+      return false;
+    return !!occupied[r][c];
+  };
+  const setOccupied = (r, c, spanX, spanY) => {
+    for (let dr = 0; dr < spanY; dr++) {
+      const rowIdx = r + dr;
+      if (!occupied[rowIdx])
+        occupied[rowIdx] = [];
+      for (let dc = 0; dc < spanX; dc++) {
+        occupied[rowIdx][c + dc] = true;
+      }
+    }
+  };
+  const unplaced = [...cellSpans];
+  const placements = [];
+  let curRow = 1;
+  let curCol = 1;
+  while (unplaced.length > 0) {
+    while (isOccupied(curRow, curCol)) {
+      curCol++;
+      if (curCol > cols) {
+        curCol = 1;
+        curRow++;
+      }
+    }
+    const availableWidth = cols - curCol + 1;
+    let bestIdx = -1;
+    let bestScore = -1;
+    for (let i = 0; i < unplaced.length; i++) {
+      const candidate = unplaced[i];
+      if (candidate.spanX > availableWidth)
+        continue;
+      let fits = true;
+      for (let dr = 0; dr < candidate.spanY; dr++) {
+        for (let dc = 0; dc < candidate.spanX; dc++) {
+          if (isOccupied(curRow + dr, curCol + dc)) {
+            fits = false;
+            break;
+          }
+        }
+        if (!fits)
+          break;
+      }
+      if (!fits)
+        continue;
+      let score = 0;
+      if (candidate.spanX === availableWidth) {
+        score += 1e4;
+      }
+      score += candidate.spanX * candidate.spanY * 100 + candidate.spanY * 10 + candidate.spanX;
+      score += (unplaced.length - i) * 0.01;
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx !== -1) {
+      const chosen = unplaced.splice(bestIdx, 1)[0];
+      setOccupied(curRow, curCol, chosen.spanX, chosen.spanY);
+      placements.push({
+        cell: chosen.cell,
+        row: curRow,
+        col: curCol,
+        spanX: chosen.spanX,
+        spanY: chosen.spanY
+      });
+      curCol += chosen.spanX;
+      if (curCol > cols) {
+        curCol = 1;
+        curRow++;
+      }
+    } else {
+      curCol++;
+      if (curCol > cols) {
+        curCol = 1;
+        curRow++;
+      }
+    }
+  }
+  let maxRow = 1;
+  for (const item of placements) {
+    const endRow = item.row + item.spanY - 1;
+    if (endRow > maxRow)
+      maxRow = endRow;
+  }
+  let addRow = maxRow;
+  let addCol = -1;
+  for (let c = 1; c <= cols; c++) {
+    if (!isOccupied(maxRow, c)) {
+      addCol = c;
+      break;
+    }
+  }
+  if (addCol === -1) {
+    addRow = maxRow + 1;
+    addCol = 1;
+  }
+  return {
+    placements,
+    totalRows: Math.max(maxRow, addRow),
+    addBtnRow: addRow,
+    addBtnCol: addCol
+  };
+}
+function packSectionGrid(cells, gridEl, addCellBtn, numColumns) {
+  const baseWidth = 48;
+  const gridGap = 6;
+  const clientWidth = gridEl.clientWidth;
+  const cols = numColumns !== void 0 ? numColumns : clientWidth > 0 ? Math.max(1, Math.floor((clientWidth + gridGap) / (baseWidth + gridGap))) : 4;
+  const packing = computeOptimalSectionPacking(cells, cols);
+  for (const item of packing.placements) {
+    const el = gridEl.querySelector(`.weq-gallery-cell[data-cell-id="${item.cell.id}"]`) || gridEl.querySelector(`.weq-gallery-cell[data-item="${item.cell.id}"]`);
+    if (el) {
+      gridEl.appendChild(el);
+      el.style.gridColumn = `span ${item.spanX}`;
+      el.style.gridRow = `span ${item.spanY}`;
+    }
+  }
+  gridEl.appendChild(addCellBtn);
+  addCellBtn.style.gridRowStart = String(packing.addBtnRow);
+  addCellBtn.style.gridColumnStart = String(packing.addBtnCol);
+  return packing;
+}
+var EquationGalleryView = class extends import_obsidian4.ItemView {
+  plugin;
+  tabs = [];
+  activeTabId = "letters";
+  editingCellId = null;
+  activeContextMenu = null;
+  outsideClickHandler = null;
+  domRenderer = new DomRenderer();
+  staticRenderCache = /* @__PURE__ */ new Map();
+  activeRenameCleanup = null;
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.plugin = plugin;
+    if (this.plugin?.settings?.galleryTabs && Array.isArray(this.plugin.settings.galleryTabs) && this.plugin.settings.galleryTabs.length > 0) {
+      this.tabs = JSON.parse(JSON.stringify(this.plugin.settings.galleryTabs));
+    } else {
+      this.tabs = JSON.parse(JSON.stringify(PRESET_GALLERY_TABS));
+    }
+    if (this.tabs.length > 0) {
+      this.activeTabId = this.tabs[0].id;
+    }
+  }
+  /**
+   * Bug 13: Persists user gallery modifications to plugin settings data.json.
+   */
+  async saveGalleryState() {
+    try {
+      if (this.plugin) {
+        if (!this.plugin.settings) {
+          this.plugin.settings = {};
+        }
+        this.plugin.settings.galleryTabs = JSON.parse(JSON.stringify(this.tabs));
+        if (typeof this.plugin.saveSettings === "function") {
+          await this.plugin.saveSettings();
+        }
+      }
+    } catch (err) {
+      console.error("[WordEquation] Failed to persist gallery state:", err);
+    }
+  }
+  /**
+   * Bug 15 & Bug 19: Inline Rename Input Controller.
+   * Mounts an autofocusing inline input into targetEl with initialValue selected.
+   * Commits on Enter or blur, cancels on Escape.
+   */
+  startInlineRename(targetEl, initialValue, onCommit) {
+    if (this.activeRenameCleanup) {
+      this.activeRenameCleanup();
+      this.activeRenameCleanup = null;
+    }
+    const existingInput = targetEl.querySelector(".weq-gallery-rename-input");
+    if (existingInput) {
+      existingInput.focus();
+      existingInput.select();
+      return existingInput;
+    }
+    const originalDisplay = targetEl.style.display;
+    const originalWidth = targetEl.style.width;
+    const originalBoxSizing = targetEl.style.boxSizing;
+    const originalWritingMode = targetEl.style.writingMode;
+    const originalTransform = targetEl.style.transform;
+    const originalPosition = targetEl.style.position;
+    const originalOverflow = targetEl.style.overflow;
+    const isTabLabel = targetEl.classList.contains("weq-gallery-tab-label");
+    const tabSidebar = isTabLabel ? targetEl.closest(".weq-gallery-tab-sidebar") : null;
+    const originalSidebarOverflow = tabSidebar ? tabSidebar.style.overflow : "";
+    if (tabSidebar) {
+      tabSidebar.style.overflow = "visible";
+    }
+    const tabBtn = isTabLabel ? targetEl.closest(".weq-gallery-tab-btn") : null;
+    const originalTabBtnOverflow = tabBtn ? tabBtn.style.overflow : "";
+    if (tabBtn) {
+      tabBtn.style.overflow = "visible";
+    }
+    if (isTabLabel) {
+      targetEl.style.width = "100%";
+      targetEl.style.boxSizing = "border-box";
+      targetEl.style.display = "flex";
+      targetEl.style.justifyContent = "center";
+      targetEl.style.alignItems = "center";
+      targetEl.style.position = "relative";
+      targetEl.style.writingMode = "horizontal-tb";
+      targetEl.style.transform = "none";
+      targetEl.style.overflow = "visible";
+    }
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "weq-gallery-rename-input";
+    input.value = initialValue;
+    if (isTabLabel) {
+      input.classList.add("weq-rename-expanded");
+      input.style.position = "absolute";
+      input.style.right = "0";
+      input.style.width = "max-content";
+      input.style.minWidth = "120px";
+      input.style.maxWidth = "240px";
+      input.style.zIndex = "100";
+    }
+    const updateInputSize = () => {
+      const len = Math.max(input.value.length, initialValue.length, 10);
+      input.size = Math.min(30, len + 2);
+    };
+    input.addEventListener("input", updateInputSize);
+    updateInputSize();
+    const stopBubble = (ev) => {
+      ev.stopPropagation();
+    };
+    input.addEventListener("click", stopBubble);
+    input.addEventListener("mousedown", stopBubble);
+    input.addEventListener("pointerdown", stopBubble);
+    input.addEventListener("dblclick", stopBubble);
+    let committed = false;
+    const cleanupAndCommit = (save) => {
+      if (committed)
+        return;
+      committed = true;
+      if (this.activeRenameCleanup === activeCleanup) {
+        this.activeRenameCleanup = null;
+      }
+      const newName = save ? input.value.trim() || initialValue : initialValue;
+      if (input.parentNode) {
+        input.parentNode.removeChild(input);
+      }
+      targetEl.style.display = originalDisplay;
+      targetEl.style.width = originalWidth;
+      targetEl.style.boxSizing = originalBoxSizing;
+      targetEl.style.writingMode = originalWritingMode;
+      targetEl.style.transform = originalTransform;
+      targetEl.style.position = originalPosition;
+      targetEl.style.overflow = originalOverflow;
+      if (tabSidebar) {
+        tabSidebar.style.overflow = originalSidebarOverflow;
+      }
+      if (tabBtn) {
+        tabBtn.style.overflow = originalTabBtnOverflow;
+      }
+      targetEl.textContent = newName;
+      if (save && newName !== initialValue) {
+        onCommit(newName);
+        void this.saveGalleryState();
+      }
+    };
+    const activeCleanup = () => cleanupAndCommit(true);
+    this.activeRenameCleanup = activeCleanup;
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        ev.stopPropagation();
+        cleanupAndCommit(true);
+      } else if (ev.key === "Escape") {
+        ev.preventDefault();
+        ev.stopPropagation();
+        cleanupAndCommit(false);
+      }
+    });
+    input.addEventListener("blur", () => {
+      cleanupAndCommit(true);
+    });
+    targetEl.textContent = "";
+    targetEl.appendChild(input);
+    input.focus();
+    input.select();
+    if (typeof requestAnimationFrame !== "undefined") {
+      requestAnimationFrame(() => {
+        input.focus();
+        input.select();
+      });
+    }
+    return input;
+  }
+  getViewType() {
+    return VIEW_TYPE_EQUATION_GALLERY;
+  }
+  getDisplayText() {
+    return "Equation Gallery";
+  }
+  getIcon() {
+    return "sigma";
+  }
+  async onOpen() {
+    const container = this.contentEl;
+    if (typeof container.empty === "function") {
+      container.empty();
+    } else {
+      container.innerHTML = "";
+    }
+    if (typeof container.addClass === "function") {
+      container.addClass("equation-gallery-container");
+      container.addClass("weq-gallery-root");
+    } else {
+      container.classList.add("equation-gallery-container");
+      container.classList.add("weq-gallery-root");
+    }
+    for (const tab of this.tabs) {
+      for (const section of tab.sections) {
+        for (const cell of section.cells) {
+          if (!this.staticRenderCache.has(cell.id)) {
+            this.staticRenderCache.set(cell.id, this.createStaticCellDom(cell));
+          }
+        }
+      }
+    }
+    const preventBlur = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const sidebar = container.createEl("nav", {
+      cls: "weq-gallery-tab-sidebar",
+      attr: { "aria-label": "Equation Gallery Tabs" }
+    });
+    const tabList = sidebar.createDiv({
+      cls: "weq-gallery-tab-list",
+      attr: { role: "tablist", "aria-orientation": "vertical" }
+    });
+    for (const tab of this.tabs) {
+      const isActive = tab.id === this.activeTabId;
+      const tabBtn = tabList.createEl("button", {
+        cls: `weq-gallery-tab-btn ${isActive ? "is-active" : ""}`,
+        attr: {
+          role: "tab",
+          "data-tab-id": tab.id,
+          "aria-selected": isActive ? "true" : "false",
+          type: "button",
+          title: tab.name
+        }
+      });
+      if (tab.icon) {
+        tabBtn.createSpan({ cls: "weq-gallery-tab-icon", text: tab.icon });
+      }
+      tabBtn.createSpan({ cls: "weq-gallery-tab-label", text: tab.name });
+      tabBtn.addEventListener("pointerdown", preventBlur);
+      tabBtn.addEventListener("mousedown", preventBlur);
+      tabBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setActiveTab(tab.id);
+      });
+      tabBtn.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentTab = this.tabs.find((t) => t.id === tab.id) || tab;
+        const labelSpan = tabBtn.querySelector(".weq-gallery-tab-label");
+        if (labelSpan) {
+          this.startInlineRename(labelSpan, currentTab.name, (newName) => {
+            currentTab.name = newName;
+            if (currentTab.isCustom) {
+              currentTab.icon = newName.charAt(0).toUpperCase() || "+";
+              const iconSpan = tabBtn.querySelector(".weq-gallery-tab-icon");
+              if (iconSpan)
+                iconSpan.textContent = currentTab.icon;
+            }
+            tabBtn.setAttribute("title", newName);
+          });
+        }
+      });
+      tabBtn.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.showTabContextMenu(tab, tabBtn, e);
+      });
+    }
+    const addTabBtn = tabList.createEl("button", {
+      cls: "weq-gallery-tab-btn weq-gallery-add-tab-btn",
+      attr: {
+        type: "button",
+        title: "Add Tab",
+        "aria-label": "Add new tab"
+      }
+    });
+    addTabBtn.createSpan({ cls: "weq-gallery-add-icon", text: "+" });
+    addTabBtn.addEventListener("pointerdown", preventBlur);
+    addTabBtn.addEventListener("mousedown", preventBlur);
+    addTabBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.promptAddTab();
+    });
+    const mainContent = container.createEl("main", {
+      cls: "weq-gallery-tab-content",
+      attr: { role: "tabpanel", "data-active-tab": this.activeTabId }
+    });
+    const tabHeader = mainContent.createEl("header", { cls: "weq-gallery-tab-header" });
+    tabHeader.createEl("h4", {
+      text: "Equation Gallery",
+      cls: "equation-gallery-title weq-gallery-title"
+    });
+    for (const tab of this.tabs) {
+      const isActive = tab.id === this.activeTabId;
+      const tabPanel = mainContent.createDiv({
+        cls: `weq-gallery-tab-panel ${isActive ? "is-active" : ""}`,
+        attr: {
+          "data-tab-id": tab.id,
+          style: isActive ? "display: block;" : "display: none;"
+        }
+      });
+      const sectionsContainer = tabPanel.createDiv({ cls: "weq-gallery-sections-container" });
+      const LEGACY_CATEGORY_SECTION_IDS = /* @__PURE__ */ new Set([
+        "uppercase-greek",
+        "matrices",
+        "fractions",
+        "radicals",
+        "scripts",
+        "operators",
+        "integrals",
+        "large-operators",
+        "delimiters",
+        "enclosed",
+        "universal-mathml"
+      ]);
+      for (const section of tab.sections) {
+        const isLegacyCat = LEGACY_CATEGORY_SECTION_IDS.has(section.id);
+        const secEl = sectionsContainer.createEl("section", {
+          cls: isLegacyCat ? "equation-gallery-category weq-gallery-section" : "weq-gallery-section",
+          attr: {
+            "data-category": section.id === "uppercase-greek" ? "greek" : section.id,
+            "data-section-id": section.id
+          }
+        });
+        const secHeader = secEl.createEl("header", {
+          cls: "equation-gallery-category-title weq-gallery-section-header"
+        });
+        const secTitleEl = secHeader.createEl("h4", {
+          text: section.name,
+          cls: "weq-gallery-section-title"
+        });
+        secHeader.addEventListener("dblclick", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const currentSec = tab.sections.find((s) => s.id === section.id) || section;
+          this.startInlineRename(secTitleEl, currentSec.name, (newName) => {
+            currentSec.name = newName;
+          });
+        });
+        secHeader.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.showSectionContextMenu(tab, section, secHeader, secTitleEl, e);
+        });
+        const srCount = secEl.createSpan({
+          cls: "weq-gallery-sr-item-count",
+          text: `${section.cells.length} items`
+        });
+        srCount.style.display = "none";
+        srCount.setAttribute("aria-hidden", "true");
+        const grid = secEl.createDiv({
+          cls: "equation-gallery-grid weq-gallery-cell-grid",
+          attr: { "data-grid-for": section.id }
+        });
+        for (const cell of section.cells) {
+          this.renderCell(cell, grid, section);
+        }
+        const addCellBtn = grid.createEl("button", {
+          cls: "equation-gallery-btn weq-gallery-cell weq-gallery-item weq-gallery-add-cell-btn weq-span-x-1 weq-span-y-1",
+          attr: {
+            type: "button",
+            title: "Add Cell",
+            "aria-label": "Add new cell",
+            "data-span-x": "1",
+            "data-span-y": "1"
+          }
+        });
+        addCellBtn.createSpan({ cls: "weq-gallery-add-cell-icon", text: "+" });
+        packSectionGrid(section.cells, grid, addCellBtn);
+        addCellBtn.addEventListener("pointerdown", preventBlur);
+        addCellBtn.addEventListener("mousedown", preventBlur);
+        addCellBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.promptAddCell(section);
+        });
+      }
+      const addSectionBtn = tabPanel.createEl("button", {
+        cls: "weq-gallery-add-section-btn",
+        attr: {
+          type: "button",
+          title: "Add Section",
+          "aria-label": "Add new section"
+        }
+      });
+      addSectionBtn.createSpan({ cls: "weq-gallery-add-section-icon", text: "+" });
+      addSectionBtn.addEventListener("pointerdown", preventBlur);
+      addSectionBtn.addEventListener("mousedown", preventBlur);
+      addSectionBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.promptAddSection(tab);
+      });
+    }
+    this.setupGlobalClickDismiss();
+  }
+  setActiveTab(tabId) {
+    this.activeTabId = tabId;
+    const tabBtns = this.contentEl.querySelectorAll(".weq-gallery-tab-btn[data-tab-id]");
+    tabBtns.forEach((btn) => {
+      const id = btn.getAttribute("data-tab-id");
+      const isSelected = id === tabId;
+      btn.setAttribute("aria-selected", isSelected ? "true" : "false");
+      if (isSelected) {
+        btn.classList.add("is-active");
+      } else {
+        btn.classList.remove("is-active");
+      }
+    });
+    const panels = this.contentEl.querySelectorAll(".weq-gallery-tab-panel");
+    panels.forEach((p) => {
+      const panel = p;
+      const id = panel.getAttribute("data-tab-id");
+      if (id === tabId) {
+        panel.style.display = "block";
+        panel.classList.add("is-active");
+      } else {
+        panel.style.display = "none";
+        panel.classList.remove("is-active");
+      }
+    });
+    if (this.activeRenameCleanup) {
+      this.activeRenameCleanup();
+      this.activeRenameCleanup = null;
+    }
+  }
+  /**
+   * Generates a static display element using the authentic DomRenderer engine (Bug 11).
+   */
+  createStaticCellDom(cell) {
+    try {
+      let xml = (cell.mathml || "").trim();
+      if (!xml.startsWith("<math") && !xml.startsWith("<?xml")) {
+        xml = `<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">${xml}</math>`;
+      }
+      const ast = parseMathML(xml);
+      const rendered = this.domRenderer.render(ast, {
+        readOnly: true,
+        isFocused: false,
+        inline: true
+      });
+      rendered.classList.add("weq-gallery-static-preview");
+      const fracEl = rendered.querySelector(".eq-fraction");
+      if (fracEl) {
+        const numEl = fracEl.querySelector(".eq-numerator");
+        if (numEl && !numEl.querySelector(".weq-sr-slash")) {
+          const slash = document.createElement("span");
+          slash.className = "weq-sr-slash";
+          slash.textContent = "/";
+          slash.setAttribute("aria-hidden", "true");
+          slash.style.display = "inline";
+          slash.style.fontSize = "0px";
+          slash.style.width = "0px";
+          slash.style.height = "0px";
+          slash.style.opacity = "0";
+          slash.style.overflow = "hidden";
+          slash.style.position = "absolute";
+          numEl.appendChild(slash);
+        }
+      }
+      return rendered;
+    } catch {
+      const fallback = document.createElement("span");
+      fallback.className = "weq-gallery-static-fallback";
+      fallback.textContent = cell.name || "Formula";
+      return fallback;
+    }
+  }
+  renderCell(cell, grid, section) {
+    const span = calculateCellSpan(cell);
+    const cellBtn = grid.createEl("button", {
+      cls: `equation-gallery-btn weq-gallery-cell weq-gallery-item weq-gallery-${cell.id} weq-span-x-${span.spanX} weq-span-y-${span.spanY}`,
+      attr: {
+        type: "button",
+        "data-item": cell.id,
+        "data-cell-id": cell.id,
+        "data-span-x": String(span.spanX),
+        "data-span-y": String(span.spanY),
+        title: cell.name || "Formula"
+      }
+    });
+    if (span.spanX > 1 || span.spanY > 1) {
+      cellBtn.style.gridColumn = `span ${span.spanX}`;
+      cellBtn.style.gridRow = `span ${span.spanY}`;
+      if (span.spanX > 1 && span.spanY > 1) {
+        cellBtn.classList.add(`weq-span-${span.spanX}x${span.spanY}`);
+      }
+    }
+    let staticDom = this.staticRenderCache.get(cell.id);
+    if (!staticDom) {
+      staticDom = this.createStaticCellDom(cell);
+      this.staticRenderCache.set(cell.id, staticDom);
+    }
+    cellBtn.appendChild(staticDom.cloneNode(true));
+    const preventBlur = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    cellBtn.addEventListener("pointerdown", preventBlur);
+    cellBtn.addEventListener("mousedown", preventBlur);
+    cellBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (this.editingCellId === cell.id)
+        return;
+      this.insertMath(cell.mathml);
+    });
+    cellBtn.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.showContextMenu(cell, cellBtn, section, e);
+    });
+    return cellBtn;
+  }
+  insertMath(mathml) {
+    if (this.plugin?.insertMathFromGallery) {
+      this.plugin.insertMathFromGallery(mathml);
+    } else {
+      const activeView = this.app.workspace.getActiveViewOfType(import_obsidian4.MarkdownView);
+      if (activeView?.editor) {
+        const template = `/weq_inline <math xmlns="http://www.w3.org/1998/Math/MathML">${mathml}</math> /weq_inline`;
+        activeView.editor.replaceSelection(template);
+      }
+    }
+  }
+  insertItem(item) {
+    this.insertMath(item.mathml);
+  }
+  /**
+   * Bug 6: Obsidian Native Right-Click Menu Design
+   */
+  showContextMenu(cell, cellEl, section, e) {
+    this.closeContextMenu();
+    const menu = new import_obsidian4.Menu();
+    this.activeContextMenu = menu.dom || menu;
+    menu.addItem((item) => {
+      item.setTitle("Copy MathML").setIcon("copy").onClick(() => {
+        let xml = cell.mathml.trim();
+        if (!xml.startsWith("<math") && !xml.startsWith("<?xml")) {
+          xml = `<math xmlns="http://www.w3.org/1998/Math/MathML">${xml}</math>`;
+        }
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(xml);
+        }
+        new import_obsidian4.Notice("MathML copied to clipboard");
+        this.closeContextMenu();
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Copy LaTeX").setIcon("code").onClick(() => {
+        const latex = cell.latex || convertMathMLToLatex(cell.mathml);
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(latex);
+        }
+        new import_obsidian4.Notice("LaTeX copied to clipboard");
+        this.closeContextMenu();
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Activate / Insert").setIcon("plus-circle").onClick(() => {
+        this.insertMath(cell.mathml);
+        this.closeContextMenu();
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Create Shortcut").setIcon("zap").onClick(async () => {
+        this.closeContextMenu();
+        await this.promptCreateShortcut(cell);
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Edit").setIcon("edit").onClick(() => {
+        this.closeContextMenu();
+        if (this.plugin?.cancelHideGalleryTimeout) {
+          this.plugin.cancelHideGalleryTimeout();
+        }
+        this.startEditingCell(cell, cellEl);
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Delete").setIcon("trash").onClick(async () => {
+        this.closeContextMenu();
+        const cellIndex = section.cells.findIndex((c) => c.id === cell.id);
+        if (cellIndex !== -1) {
+          section.cells.splice(cellIndex, 1);
+        }
+        this.staticRenderCache.delete(cell.id);
+        await this.saveGalleryState();
+        this.onOpen();
+      });
+    });
+    menu.showAtMouseEvent(e);
+  }
+  /**
+   * Bug 1: Tab Header Right-Click Context Menu (Rename & Delete)
+   */
+  showTabContextMenu(tab, tabBtn, e) {
+    this.closeContextMenu();
+    const menu = new import_obsidian4.Menu();
+    this.activeContextMenu = menu.dom || menu;
+    menu.addItem((item) => {
+      item.setTitle("Rename").setIcon("edit").onClick(() => {
+        this.closeContextMenu();
+        const currentTab = this.tabs.find((t) => t.id === tab.id) || tab;
+        const labelSpan = tabBtn.querySelector(".weq-gallery-tab-label");
+        if (labelSpan) {
+          this.startInlineRename(labelSpan, currentTab.name, (newName) => {
+            currentTab.name = newName;
+            if (currentTab.isCustom) {
+              currentTab.icon = newName.charAt(0).toUpperCase() || "+";
+              const iconSpan = tabBtn.querySelector(".weq-gallery-tab-icon");
+              if (iconSpan)
+                iconSpan.textContent = currentTab.icon;
+            }
+            tabBtn.setAttribute("title", newName);
+          });
+        }
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Delete").setIcon("trash").onClick(async () => {
+        this.closeContextMenu();
+        const tabIndex = this.tabs.findIndex((t) => t.id === tab.id);
+        if (tabIndex !== -1) {
+          this.tabs.splice(tabIndex, 1);
+          if (this.activeTabId === tab.id) {
+            this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : "";
+          }
+          await this.saveGalleryState();
+          this.onOpen();
+        }
+      });
+    });
+    menu.showAtMouseEvent(e);
+  }
+  /**
+   * Bug 1: Section Header Right-Click Context Menu (Rename & Delete)
+   */
+  showSectionContextMenu(tab, section, secHeader, secTitleEl, e) {
+    this.closeContextMenu();
+    const menu = new import_obsidian4.Menu();
+    this.activeContextMenu = menu.dom || menu;
+    menu.addItem((item) => {
+      item.setTitle("Rename").setIcon("edit").onClick(() => {
+        this.closeContextMenu();
+        const currentSec = tab.sections.find((s) => s.id === section.id) || section;
+        this.startInlineRename(secTitleEl, currentSec.name, (newName) => {
+          currentSec.name = newName;
+        });
+      });
+    });
+    menu.addItem((item) => {
+      item.setTitle("Delete").setIcon("trash").onClick(async () => {
+        this.closeContextMenu();
+        const secIndex = tab.sections.findIndex((s) => s.id === section.id);
+        if (secIndex !== -1) {
+          tab.sections.splice(secIndex, 1);
+          await this.saveGalleryState();
+          this.onOpen();
+        }
+      });
+    });
+    menu.showAtMouseEvent(e);
+  }
+  closeContextMenu() {
+    if (this.activeContextMenu) {
+      if (typeof this.activeContextMenu.close === "function") {
+        this.activeContextMenu.close();
+      } else if (this.activeContextMenu.remove) {
+        this.activeContextMenu.remove();
+      }
+      this.activeContextMenu = null;
+    }
+  }
+  setupGlobalClickDismiss() {
+    if (this.outsideClickHandler) {
+      document.removeEventListener("click", this.outsideClickHandler);
+    }
+    this.outsideClickHandler = (e) => {
+      if (this.activeContextMenu) {
+        const dom = this.activeContextMenu.dom || this.activeContextMenu;
+        if (dom && typeof dom.contains === "function" && !dom.contains(e.target)) {
+          this.closeContextMenu();
+        }
+      }
+    };
+    document.addEventListener("click", this.outsideClickHandler);
+  }
+  findSectionForGrid(grid) {
+    const sectionId = grid.getAttribute("data-grid-for");
+    if (!sectionId)
+      return null;
+    for (const tab of this.tabs) {
+      for (const section of tab.sections) {
+        if (section.id === sectionId)
+          return section;
+      }
+    }
+    return null;
+  }
+  /**
+   * Bug 8: Dynamically updates the cell's 2D grid spanning in real time as content changes.
+   */
+  updateCellSpanLive(cell, cellEl, currentXml) {
+    if (currentXml) {
+      cell.mathml = currentXml;
+    }
+    const span = calculateCellSpan(cell, cellEl);
+    cell.spanX = span.spanX;
+    cell.spanY = span.spanY;
+    cellEl.setAttribute("data-span-x", String(span.spanX));
+    cellEl.setAttribute("data-span-y", String(span.spanY));
+    cellEl.style.gridColumn = `span ${span.spanX}`;
+    cellEl.style.gridRow = `span ${span.spanY}`;
+    for (let x = 1; x <= 6; x++) {
+      cellEl.classList.remove(`weq-span-x-${x}`);
+    }
+    for (let y = 1; y <= 4; y++) {
+      cellEl.classList.remove(`weq-span-y-${y}`);
+    }
+    cellEl.classList.remove("weq-span-2x2", "weq-span-3x2", "weq-span-4x2", "weq-span-2x3", "weq-span-3x3", "weq-span-4x3");
+    cellEl.classList.add(`weq-span-x-${span.spanX}`, `weq-span-y-${span.spanY}`);
+    if (span.spanX > 1 && span.spanY > 1) {
+      cellEl.classList.add(`weq-span-${span.spanX}x${span.spanY}`);
+    }
+  }
+  /**
+   * Bug 9: Selecting "Edit" immediately mounts the editor and enters the caret without a second click.
+   */
+  startEditingCell(cell, cellEl) {
+    captureDocumentContext(this.app);
+    if (this.plugin?.cancelHideGalleryTimeout) {
+      this.plugin.cancelHideGalleryTimeout();
+    }
+    if (this.editingCellId) {
+      this.finishEditingActiveCell();
+    }
+    this.editingCellId = cell.id;
+    cellEl.classList.add("is-editing");
+    cellEl.innerHTML = "";
+    const editorContainer = document.createElement("div");
+    editorContainer.className = "weq-gallery-cell-editor";
+    editorContainer.style.display = "flex";
+    editorContainer.style.alignItems = "center";
+    editorContainer.style.justifyContent = "center";
+    editorContainer.style.width = "100%";
+    editorContainer.style.height = "100%";
+    editorContainer.style.boxSizing = "border-box";
+    editorContainer.style.padding = "4px 6px";
+    cellEl.appendChild(editorContainer);
+    const box = new InteractiveEquationBox({
+      container: editorContainer,
+      initialContent: cell.mathml,
+      onChange: (newXml) => {
+        cell.mathml = newXml;
+        this.updateCellSpanLive(cell, cellEl, newXml);
+      }
+    });
+    editorContainer.__interactiveBox = box;
+    box.focus();
+    if (typeof requestAnimationFrame !== "undefined") {
+      requestAnimationFrame(() => {
+        box.focus();
+      });
+    }
+    const finish = () => {
+      try {
+        const serialized = serializeMathML(box.ast, { display: "inline", pretty: false });
+        if (serialized && serialized.trim()) {
+          cell.mathml = serialized.trim();
+        }
+      } catch {
+      }
+      this.finishEditingCell(cell, cellEl);
+    };
+    editorContainer.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" && !ev.shiftKey) {
+        ev.preventDefault();
+        finish();
+      } else if (ev.key === "Escape") {
+        ev.preventDefault();
+        finish();
+      }
+    });
+    editorContainer.addEventListener("focusout", (ev) => {
+      if (!editorContainer.contains(ev.relatedTarget)) {
+        finish();
+      }
+    });
+  }
+  finishEditingCell(cell, cellEl) {
+    const span = calculateCellSpan(cell, cellEl);
+    cell.spanX = span.spanX;
+    cell.spanY = span.spanY;
+    cellEl.classList.remove("is-editing");
+    cellEl.innerHTML = "";
+    cellEl.setAttribute("data-span-x", String(span.spanX));
+    cellEl.setAttribute("data-span-y", String(span.spanY));
+    cellEl.style.gridColumn = `span ${span.spanX}`;
+    cellEl.style.gridRow = `span ${span.spanY}`;
+    cellEl.className = `equation-gallery-btn weq-gallery-cell weq-gallery-item weq-gallery-${cell.id} weq-span-x-${span.spanX} weq-span-y-${span.spanY}`;
+    if (span.spanX > 1 && span.spanY > 1) {
+      cellEl.classList.add(`weq-span-${span.spanX}x${span.spanY}`);
+    }
+    const updatedStaticDom = this.createStaticCellDom(cell);
+    this.staticRenderCache.set(cell.id, updatedStaticDom);
+    cellEl.appendChild(updatedStaticDom.cloneNode(true));
+    const grid = cellEl.closest(".weq-gallery-cell-grid");
+    const addCellBtn = grid?.querySelector(".weq-gallery-add-cell-btn");
+    if (grid && addCellBtn) {
+      const section = this.findSectionForGrid(grid);
+      if (section && section.cells.some((c) => c.id === cell.id)) {
+        packSectionGrid(section.cells, grid, addCellBtn);
+      }
+    }
+    void this.saveGalleryState();
+    this.editingCellId = null;
+    restoreDocumentContext(this.app);
+  }
+  finishEditingActiveCell() {
+    if (!this.editingCellId)
+      return;
+    const cellEl = this.contentEl.querySelector(`.weq-gallery-cell[data-cell-id="${this.editingCellId}"]`);
+    if (cellEl) {
+      cellEl.classList.remove("is-editing");
+    }
+    this.editingCellId = null;
+    restoreDocumentContext(this.app);
+  }
+  /**
+   * Bug 7: Create shortcut workflow with automatic settings tab opening and trigger focusing.
+   */
+  async promptCreateShortcut(cell) {
+    const defaultTrigger = "\\" + cell.id.replace(/[^a-zA-Z0-9]/g, "");
+    const trigger = defaultTrigger;
+    if (this.plugin?.settings) {
+      this.plugin.settings.customShortcuts.push({
+        trigger,
+        expansion: cell.mathml,
+        scope: "inline"
+      });
+      if (typeof this.plugin.saveSettings === "function") {
+        await this.plugin.saveSettings();
+      }
+      setCustomShortcuts(this.plugin.settings.customShortcuts);
+    }
+    new import_obsidian4.Notice(`Shortcut created: ${trigger}`);
+    const appSetting = this.app?.setting;
+    if (appSetting) {
+      if (typeof appSetting.open === "function") {
+        appSetting.open();
+      }
+      const tabId = this.plugin.manifest?.id || "obsidian-word-equation";
+      let activeTab = null;
+      if (typeof appSetting.openTabById === "function") {
+        activeTab = appSetting.openTabById(tabId);
+      }
+      const targetTab = activeTab || appSetting.activeTab;
+      if (targetTab && typeof targetTab.display === "function") {
+        targetTab.display();
+      }
+      const focusTarget = () => {
+        const tab = activeTab || appSetting.activeTab;
+        if (tab && typeof tab.focusShortcutTrigger === "function") {
+          tab.focusShortcutTrigger();
+        } else {
+          const container = tab?.containerEl || appSetting.containerEl || document.body;
+          const inputs = container.querySelectorAll(".weq-input-trigger");
+          if (inputs.length > 0) {
+            const lastInput = inputs[inputs.length - 1];
+            lastInput.focus();
+            lastInput.select();
+          }
+        }
+      };
+      focusTarget();
+      setTimeout(focusTarget, 60);
+    }
+  }
+  createTabWithName(name) {
+    const newTab = {
+      id: "tab-" + Date.now(),
+      name,
+      icon: name.charAt(0).toUpperCase() || "+",
+      sections: [],
+      // Bug 17: New tab should be empty with only + Add Section
+      isCustom: true
+    };
+    this.tabs.push(newTab);
+    this.activeTabId = newTab.id;
+    this.onOpen();
+    void this.saveGalleryState();
+    return newTab;
+  }
+  createSectionWithName(tab, name) {
+    const newSec = {
+      id: "sec-" + Date.now(),
+      name,
+      cells: [],
+      isCustom: true
+    };
+    tab.sections.push(newSec);
+    this.onOpen();
+    void this.saveGalleryState();
+    return newSec;
+  }
+  /**
+   * Bug 19: Add New Tab immediately with default name 'New Tab' and active inline rename (no modal).
+   */
+  promptAddTab(customName) {
+    const defaultName = customName || "New Tab";
+    const newTab = this.createTabWithName(defaultName);
+    if (!customName) {
+      const tabBtn = this.contentEl.querySelector(`.weq-gallery-tab-btn[data-tab-id="${newTab.id}"]`);
+      const labelSpan = tabBtn?.querySelector(".weq-gallery-tab-label");
+      if (labelSpan) {
+        this.startInlineRename(labelSpan, defaultName, (newName) => {
+          newTab.name = newName;
+          if (newTab.isCustom) {
+            newTab.icon = newName.charAt(0).toUpperCase() || "+";
+            const iconSpan = tabBtn?.querySelector(".weq-gallery-tab-icon");
+            if (iconSpan)
+              iconSpan.textContent = newTab.icon;
+          }
+          tabBtn?.setAttribute("title", newName);
+        });
+      }
+    }
+  }
+  /**
+   * Bug 19: Add New Section immediately with default name 'New Section' and active inline rename (no modal).
+   */
+  promptAddSection(tab, customName) {
+    const defaultName = customName || "New Section";
+    const newSec = this.createSectionWithName(tab, defaultName);
+    if (!customName) {
+      const secEl = this.contentEl.querySelector(`.weq-gallery-section[data-section-id="${newSec.id}"]`);
+      const titleEl = secEl?.querySelector(".weq-gallery-section-title");
+      if (titleEl) {
+        this.startInlineRename(titleEl, defaultName, (newName) => {
+          newSec.name = newName;
+        });
+      }
+    }
+  }
+  promptAddCell(section) {
+    const newCell2 = {
+      id: "cell-" + Date.now(),
+      name: "Custom Formula",
+      mathml: "<mrow></mrow>",
+      // Bug 16: Blank equation, no 'x' placeholder
+      spanX: 1,
+      spanY: 1,
+      isCustom: true
+    };
+    section.cells.push(newCell2);
+    this.onOpen();
+    void this.saveGalleryState();
+    const newCellEl = this.contentEl.querySelector(`.weq-gallery-cell[data-cell-id="${newCell2.id}"]`);
+    if (newCellEl) {
+      this.startEditingCell(newCell2, newCellEl);
+    }
+  }
+  async onClose() {
+    this.closeContextMenu();
+    if (this.activeRenameCleanup) {
+      this.activeRenameCleanup();
+      this.activeRenameCleanup = null;
+    }
+    if (this.outsideClickHandler) {
+      document.removeEventListener("click", this.outsideClickHandler);
+      this.outsideClickHandler = null;
+    }
+  }
+};
+
 // src/conversion/markdown-scanner.ts
 function convertMarkdownContent(content, direction, delimiter = "math-word") {
   if (!content) {
@@ -33785,16 +37309,16 @@ $$`;
 }
 
 // src/conversion/commands.ts
-var import_obsidian4 = require("obsidian");
+var import_obsidian5 = require("obsidian");
 var BACKUP_WARNING_MESSAGE = "Warning: Please back up your vault before proceeding! Converting equations in-place...";
 var BACKUP_WARNING_DURATION_MS = 7e3;
 async function convertCurrentNote(plugin, direction) {
-  new import_obsidian4.Notice(BACKUP_WARNING_MESSAGE, BACKUP_WARNING_DURATION_MS);
+  new import_obsidian5.Notice(BACKUP_WARNING_MESSAGE, BACKUP_WARNING_DURATION_MS);
   const app = plugin.app;
   if (!app) {
     return { convertedCount: 0 };
   }
-  const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian4.MarkdownView);
+  const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
   let activeFile = app.workspace?.getActiveFile?.() || activeView?.file || activeView?.file || null;
   if (!activeFile && app.workspace?.activeLeaf?.view) {
     const leafView = app.workspace.activeLeaf.view;
@@ -33803,7 +37327,7 @@ async function convertCurrentNote(plugin, direction) {
     }
   }
   if (!activeFile) {
-    new import_obsidian4.Notice("No active note to convert.");
+    new import_obsidian5.Notice("No active note to convert.");
     return { convertedCount: 0 };
   }
   const startTime = performance.now();
@@ -33820,9 +37344,9 @@ async function convertCurrentNote(plugin, direction) {
         }
       }
       const targetFormat = direction === "latex-to-mathml" ? "MathML" : "LaTeX";
-      new import_obsidian4.Notice(`Converted ${result.count} equation(s) to ${targetFormat} in current note.`);
+      new import_obsidian5.Notice(`Converted ${result.count} equation(s) to ${targetFormat} in current note.`);
     } else {
-      new import_obsidian4.Notice("No equations found to convert in current note.");
+      new import_obsidian5.Notice("No equations found to convert in current note.");
     }
     const durationMs = Math.round(performance.now() - startTime);
     logDebugEvent("conversion", () => ({
@@ -33848,12 +37372,12 @@ async function convertCurrentNote(plugin, direction) {
       inputSnippet: "",
       error: String(err?.message || err)
     }));
-    new import_obsidian4.Notice(`Conversion failed: ${err?.message || err}`);
+    new import_obsidian5.Notice(`Conversion failed: ${err?.message || err}`);
     return { convertedCount: 0 };
   }
 }
 async function convertEntireVault(plugin, direction) {
-  new import_obsidian4.Notice(BACKUP_WARNING_MESSAGE, BACKUP_WARNING_DURATION_MS);
+  new import_obsidian5.Notice(BACKUP_WARNING_MESSAGE, BACKUP_WARNING_DURATION_MS);
   const app = plugin.app;
   if (!app) {
     return { filesModified: 0, equationsConverted: 0 };
@@ -33863,7 +37387,7 @@ async function convertEntireVault(plugin, direction) {
   const delimiter = plugin.settings?.defaultDelimiter || "math-word";
   let filesModified = 0;
   let equationsConverted = 0;
-  const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian4.MarkdownView);
+  const activeView = app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
   const activeFile = app.workspace?.getActiveFile?.();
   for (const file of files) {
     try {
@@ -33885,7 +37409,7 @@ async function convertEntireVault(plugin, direction) {
     }
   }
   const targetFormat = direction === "latex-to-mathml" ? "MathML" : "LaTeX";
-  new import_obsidian4.Notice(
+  new import_obsidian5.Notice(
     `Vault conversion complete: ${equationsConverted} equation(s) converted across ${filesModified} file(s) to ${targetFormat}.`
   );
   const durationMs = Math.round(performance.now() - startTime);
@@ -33937,15 +37461,22 @@ var DEFAULT_SETTINGS = {
   defaultDelimiter: "math-word",
   autoShowGallery: false,
   customShortcuts: [
-    { trigger: "\\tensor", expansion: "\u2297" },
-    { trigger: "\\approxeq", expansion: "\u224A" }
+    { trigger: "\\tensor", expansion: "\u2297", scope: "inline" },
+    { trigger: "\\approxeq", expansion: "\u224A", scope: "inline" }
   ],
   debugMode: false
 };
 var activeFirstInteractionCleanup = null;
-var WordEquationPlugin = class extends import_obsidian5.Plugin {
+var WordEquationPlugin = class extends import_obsidian6.Plugin {
   settings = Object.assign({}, DEFAULT_SETTINGS);
+  hideGalleryTimeout = null;
   firstInteractionCleanup = null;
+  cancelHideGalleryTimeout() {
+    if (this.hideGalleryTimeout) {
+      clearTimeout(this.hideGalleryTimeout);
+      this.hideGalleryTimeout = null;
+    }
+  }
   async onload() {
     await this.loadSettings();
     getDebugLogger().init(this.app, this.manifest.id, this.settings.debugMode);
@@ -33958,6 +37489,7 @@ var WordEquationPlugin = class extends import_obsidian5.Plugin {
     const readingViewProcessor = createReadingViewProcessor();
     this.registerMarkdownCodeBlockProcessor("math-word", readingViewProcessor);
     this.registerMarkdownCodeBlockProcessor("weq", readingViewProcessor);
+    this.registerMarkdownPostProcessor(createTableInlinePostProcessor());
     this.registerView(
       VIEW_TYPE_EQUATION_GALLERY,
       (leaf) => new EquationGalleryView(leaf, this)
@@ -33978,6 +37510,17 @@ ${initialXml}
       const template = `/weq_inline ${initialXml} /weq_inline`;
       editor.replaceSelection(template);
     };
+    const insertFullPageEquation = (editor) => {
+      const delimiter = this.settings.defaultDelimiter === "weq" ? "weq-page" : "math-page";
+      const initialXml = `<math xmlns="http://www.w3.org/1998/Math/MathML" display="full-page">
+  <mrow></mrow>
+</math>`;
+      const template = `\`\`\`${delimiter}
+${initialXml}
+\`\`\`
+`;
+      editor.replaceSelection(template);
+    };
     this.addCommand({
       id: "insert-block-equation",
       name: "Insert block equation",
@@ -33988,6 +37531,11 @@ ${initialXml}
       id: "insert-inline-equation",
       name: "Insert inline equation",
       editorCallback: insertInlineEquation
+    });
+    this.addCommand({
+      id: "insert-full-page-equation",
+      name: "Insert full-page math block",
+      editorCallback: insertFullPageEquation
     });
     this.addCommand({
       id: "toggle-equation-gallery",
@@ -34113,23 +37661,24 @@ ${xml}
       }
     }
     registerConversionCommands(this);
-    let hideGalleryTimeout = null;
     this.register(
       onActiveEquationChange((active) => {
         if (!this.settings.autoShowGallery)
           return;
         if (active) {
-          if (hideGalleryTimeout) {
-            clearTimeout(hideGalleryTimeout);
-            hideGalleryTimeout = null;
-          }
+          this.cancelHideGalleryTimeout();
           this.activateGalleryView();
         } else {
-          if (hideGalleryTimeout) {
-            clearTimeout(hideGalleryTimeout);
-          }
-          hideGalleryTimeout = setTimeout(() => {
-            hideGalleryTimeout = null;
+          this.cancelHideGalleryTimeout();
+          this.hideGalleryTimeout = setTimeout(() => {
+            this.hideGalleryTimeout = null;
+            const galleryLeaves = this.app.workspace?.getLeavesOfType ? this.app.workspace.getLeavesOfType(VIEW_TYPE_EQUATION_GALLERY) : [];
+            for (const leaf of galleryLeaves) {
+              const view = leaf.view;
+              if (view && (view.editingCellId || view.contentEl?.contains(document.activeElement))) {
+                return;
+              }
+            }
             const currentState = getActiveEquationState();
             if (!currentState || !currentState.isFocused) {
               this.hideGalleryView();
@@ -34139,10 +37688,7 @@ ${xml}
       })
     );
     this.register(() => {
-      if (hideGalleryTimeout) {
-        clearTimeout(hideGalleryTimeout);
-        hideGalleryTimeout = null;
-      }
+      this.cancelHideGalleryTimeout();
     });
     this.addSettingTab(new WordEquationSettingTab(this.app, this));
     if (this.app?.workspace?.onLayoutReady) {
@@ -34156,7 +37702,7 @@ ${xml}
   captureStartupInitializationState() {
     const captureState = () => {
       const workspace = this.app?.workspace;
-      const activeView = workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
+      const activeView = workspace?.getActiveViewOfType?.(import_obsidian6.MarkdownView);
       const activeFile = workspace?.getActiveFile?.() || activeView?.file || null;
       const activeFilePath = activeFile?.path || null;
       const activeViewType = activeView?.getViewType?.() || workspace?.activeLeaf?.view?.getViewType?.() || null;
@@ -34336,7 +37882,7 @@ ${xml}
   insertMathFromGallery(snippet) {
     const activeState = getActiveEquationState();
     const activeWidget = getActiveEquationWidget();
-    let activeLeaf = this.app.workspace?.getActiveViewOfType?.(import_obsidian5.MarkdownView);
+    let activeLeaf = this.app.workspace?.getActiveViewOfType?.(import_obsidian6.MarkdownView);
     if (!activeLeaf) {
       const mdLeaves = this.app.workspace?.getLeavesOfType?.("markdown") || [];
       activeLeaf = mdLeaves[0]?.view || this.app.workspace?.getMostRecentLeaf?.()?.view;
@@ -34377,6 +37923,12 @@ ${xml}
   }
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    if (Array.isArray(this.settings.customShortcuts)) {
+      this.settings.customShortcuts.forEach((s) => {
+        if (s && !s.scope)
+          s.scope = "inline";
+      });
+    }
     setCustomShortcuts(this.settings.customShortcuts);
     getDebugLogger().setEnabled(this.settings.debugMode);
   }

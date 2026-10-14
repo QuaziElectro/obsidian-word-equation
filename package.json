@@ -1,0 +1,43 @@
+{
+  "name": "obsidian-word-equation",
+  "version": "1.0.0",
+  "description": "Microsoft Word-like visual equation editing with MathML in Obsidian",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e-obsidian": "node tests/e2e-obsidian/obsidian-real-e2e.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "equation",
+    "mathml",
+    "word",
+    "math"
+  ],
+  "author": "WordEquation",
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.26.3",
+    "@types/jsdom": "^21.1.6",
+    "@types/node": "^20.12.7",
+    "esbuild": "^0.20.2",
+    "jsdom": "^24.0.0",
+    "obsidian": "^1.5.7-1",
+    "playwright-core": "^1.63.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  },
+  "dependencies": {
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.26.3",
+    "mathml-to-latex": "^1.8.0",
+    "temml": "^0.13.5"
+  }
+}

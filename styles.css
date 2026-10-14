@@ -42,10 +42,100 @@
   box-shadow: 0 0 0 2px var(--interactive-accent-hover, rgba(112, 93, 207, 0.25));
 }
 
+/* Table Cell Full-Page Equations - Full-Cell Sizing */
+td:has(.word-equation-full-page),
+th:has(.word-equation-full-page),
+td.table-cell-has-fullpage-equation,
+th.table-cell-has-fullpage-equation {
+  padding: 0 !important;
+}
+
+td .word-equation-full-page,
+th .word-equation-full-page,
+.table-cell-wrapper .word-equation-full-page,
+.word-equation-full-page {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+td .word-equation-full-page .word-equation-math,
+th .word-equation-full-page .word-equation-math,
+.table-cell-wrapper .word-equation-full-page .word-equation-math,
+.word-equation-math.eq-full-page {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Table Cell Block Equations (Full-Line) - Centered on full line, standard padding and radius */
+.word-equation-table-block,
+td .word-equation-table-block,
+th .word-equation-table-block,
+.table-cell-wrapper .word-equation-table-block {
+  display: flex !important;
+  width: 100% !important;
+  margin: 0.25em 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.word-equation-table-block .word-equation-math,
+td .word-equation-table-block .word-equation-math,
+th .word-equation-table-block .word-equation-math,
+.table-cell-wrapper .word-equation-table-block .word-equation-math {
+  display: inline-flex !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 2.2em !important;
+  margin: 0 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Table Cell Inline Equations - Consistent Box Model Inside Table Cells */
+.word-equation-table-inline,
+td .word-equation-inline,
+th .word-equation-inline,
+.table-cell-wrapper .word-equation-inline {
+  font-size: 1.1em;
+  margin: 0 !important;
+  vertical-align: middle;
+}
+
+.word-equation-table-inline .word-equation-math,
+td .word-equation-inline .word-equation-math,
+th .word-equation-inline .word-equation-math,
+.table-cell-wrapper .word-equation-inline .word-equation-math {
+  padding: 2px 4px !important;
+  min-height: 1.6em !important;
+  min-width: 2em !important;
+}
+
+
 /* Slots */
 .eq-slot {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-width: 6px;
   min-height: 1.2em;
   padding: 0 1px;
@@ -54,11 +144,31 @@
   vertical-align: middle;
 }
 
+/* Fenced Delimiters Vertical Alignment (Bug 6) */
+.eq-fenced {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.eq-fence-open,
+.eq-fence-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
 /* Empty Placeholder Box (⬚) */
 .eq-placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
   min-width: 0.9em;
   height: 1em;
   border: 1px dashed transparent;
@@ -322,18 +432,45 @@
   box-shadow: none !important;
 }
 
-/* Suppress individual child highlights when entire composite structure is selected */
+/* =========================================================================
+   Universal Child Highlight Suppression
+   When a parent container or structure is selected, suppress all child backgrounds,
+   placeholders, and token highlights to guarantee a single unified highlight.
+   ========================================================================= */
+
+/* 1. When entire equation is selected, suppress all internal elements */
+.word-equation-math.eq-selected *,
+.word-equation-block.eq-selected *,
+.word-equation-inline.eq-selected * {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* 2. When composite structure (matrix, fraction, radical) is selected, suppress all children and placeholders */
+.eq-selected-structure *,
 .eq-selected-structure .eq-selected-structure,
-.eq-selected-structure .eq-selected-token,
-.eq-selected-structure .eq-token.eq-selected-token,
-.eq-selected-structure .eq-placeholder.eq-selected-token,
-.eq-selected-structure .eq-partial-selected,
-.eq-selected-structure .eq-numerator.eq-partial-selected,
-.eq-selected-structure .eq-denominator.eq-partial-selected,
-.eq-selected-structure .eq-slot.eq-partial-selected,
-.eq-selected-structure .eq-slot:not([data-slot-role="root"]).eq-partial-selected,
+.eq-selected-structure .eq-placeholder,
+.eq-selected-structure .eq-placeholder.eq-focused,
+.eq-selected-structure .eq-placeholder.eq-placeholder-highlighted,
+.eq-selected-structure .eq-slot,
+.eq-selected-structure .eq-selected-slot,
 .eq-selected-structure .eq-slot.eq-selected-slot,
-.eq-selected-structure .eq-selected-slot {
+.eq-selected-structure .eq-slot.eq-partial-selected,
+.eq-selected-structure .eq-partial-selected,
+.eq-selected-structure .eq-token,
+.eq-selected-structure .eq-selected-token,
+.eq-selected-structure .eq-token.eq-selected-token {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* 3. When slot is selected, suppress child tokens and placeholders */
+.eq-selected-slot *,
+.eq-selected-slot .eq-placeholder,
+.eq-selected-slot .eq-placeholder.eq-focused,
+.eq-partial-selected .eq-selected-token,
+.eq-partial-selected .eq-placeholder,
+.eq-placeholder-highlighted .eq-placeholder {
   background-color: transparent !important;
   box-shadow: none !important;
 }
@@ -417,7 +554,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: var(--weq-cell-base-height, 44px);
+  min-width: var(--weq-cell-base-width, 48px);
   padding: 4px 6px;
   background-color: var(--background-secondary, rgba(128, 128, 128, 0.08));
   border: 1px solid var(--background-modifier-border, #ccc);
@@ -455,5 +593,613 @@
   overflow: visible !important;
 }
 
+/* Enclosed, Phantom, Space & Multiscripts Styles */
+.eq-enclosed {
+  display: inline-block;
+  padding: 1px 3px;
+  vertical-align: middle;
+}
+.eq-enclosed-box, .eq-enclosed[data-notation="box"] {
+  border: 1px solid currentColor;
+}
+.eq-enclosed-circle, .eq-enclosed[data-notation="circle"] {
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  padding: 2px 5px;
+}
+.eq-enclosed-roundedbox, .eq-enclosed[data-notation="roundedbox"] {
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+.eq-enclosed-horizontalstrike, .eq-enclosed[data-notation="horizontalstrike"] {
+  text-decoration: line-through;
+}
+.eq-enclosed-actuarial, .eq-enclosed[data-notation="actuarial"] {
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  padding-right: 2px;
+}
+.eq-phantom {
+  visibility: hidden;
+  display: inline-block;
+}
+.eq-space {
+  display: inline-block;
+  min-width: 0.5em;
+}
+.eq-multiscripts {
+  display: inline-flex;
+  align-items: center;
+}
+.eq-prescripts,
+.eq-postscripts {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: 0.75em;
+  line-height: 1;
+}
 
+/* ==========================================================================
+   Modular Vertical-Tab Equation Gallery (Feature 1)
+   ========================================================================== */
+
+/* Gallery Container Root - Reverse row so navigation is on window edge (right side) */
+.equation-gallery-container.weq-gallery-root {
+  display: flex;
+  flex-direction: row-reverse;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-interface, sans-serif);
+}
+
+/* Right Vertical Tab Sidebar (Window Edge) */
+.weq-gallery-tab-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  height: 100%;
+  background-color: var(--background-secondary-alt, var(--background-secondary));
+  border-left: 1px solid var(--background-modifier-border, rgba(128, 128, 128, 0.2));
+  border-right: none;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0;
+  box-sizing: border-box;
+}
+
+.weq-gallery-tab-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+/* Vertical Tab Button with Equal Distribution Across Full Length */
+.weq-gallery-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  flex: 1 1 0;
+  height: 100%;
+  min-height: 0;
+  padding: 8px 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.weq-gallery-tab-btn:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.weq-gallery-tab-btn.is-active,
+.weq-gallery-tab-btn[aria-selected="true"] {
+  background-color: var(--background-primary);
+  color: var(--text-accent, #705dcf);
+  border-color: var(--background-modifier-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Vertical Text Orientation */
+.weq-gallery-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-size: 0.78em;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.weq-gallery-tab-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* Add Tab Button (+) fixed size at bottom */
+.weq-gallery-add-tab-btn {
+  flex: 0 0 36px;
+  min-height: 36px;
+  height: 36px;
+  border: 1px dashed var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.weq-gallery-add-tab-btn:hover {
+  border-color: var(--interactive-accent, #705dcf);
+  color: var(--interactive-accent, #705dcf);
+  background-color: var(--background-modifier-hover);
+}
+
+/* Right Tab Content Panel */
+.weq-gallery-tab-content {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+.weq-gallery-tab-header {
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* Bug 3 (Gen69): Deduplicate gallery header divider line - single clean separator on container */
+.weq-gallery-tab-header .weq-gallery-title,
+.weq-gallery-tab-header .equation-gallery-title {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.weq-gallery-tab-title {
+  margin: 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.weq-gallery-active-tab-title {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Section Container & Headers */
+.weq-gallery-section {
+  margin-bottom: 20px;
+}
+
+.weq-gallery-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--background-modifier-border);
+}
+
+.weq-gallery-section-title {
+  margin: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.weq-gallery-section-count {
+  display: none !important;
+}
+
+/* Dynamic Extensible Grid */
+.weq-gallery-cell-grid {
+  --weq-cell-base-width: 48px;
+  --weq-cell-base-height: 44px;
+  --weq-grid-gap: 6px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--weq-cell-base-width), 1fr));
+  grid-auto-rows: var(--weq-cell-base-height);
+  grid-auto-flow: row; /* Bug 7: Deterministic row-major layout, packed row-by-row */
+  gap: var(--weq-grid-gap);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+/* Individual Cell Base */
+.weq-gallery-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: var(--weq-cell-base-width, 48px);
+  min-height: var(--weq-cell-base-height, 44px);
+  padding: 4px 6px;
+  background-color: var(--background-secondary, rgba(128, 128, 128, 0.08));
+  border: 1px solid var(--background-modifier-border, #ccc);
+  border-radius: 4px;
+  color: var(--text-normal);
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', 'Times New Roman', serif;
+  font-size: 1.05em;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+  overflow: hidden;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.weq-gallery-cell:hover {
+  background-color: var(--background-modifier-hover, rgba(112, 93, 207, 0.15));
+  border-color: var(--interactive-accent, #705dcf);
+  color: var(--text-accent, #705dcf);
+}
+
+.weq-gallery-cell:active {
+  transform: scale(0.98);
+}
+
+/* Dynamic Multi-Cell Spanning: Wide Expressions (X-axis) */
+.weq-gallery-cell.weq-span-x-2,
+.weq-gallery-cell[data-span-x="2"] { grid-column: span 2; }
+.weq-gallery-cell.weq-span-x-3,
+.weq-gallery-cell[data-span-x="3"] { grid-column: span 3; }
+.weq-gallery-cell.weq-span-x-4,
+.weq-gallery-cell[data-span-x="4"] { grid-column: span 4; }
+.weq-gallery-cell.weq-span-x-5,
+.weq-gallery-cell[data-span-x="5"] { grid-column: span 5; }
+.weq-gallery-cell.weq-span-x-6,
+.weq-gallery-cell[data-span-x="6"] { grid-column: span 6; }
+
+/* Dynamic Multi-Cell Spanning: Tall Expressions (Y-axis) */
+.weq-gallery-cell.weq-span-y-2,
+.weq-gallery-cell[data-span-y="2"] {
+  grid-row: span 2;
+  min-height: calc(var(--weq-cell-base-height, 44px) * 2 + var(--weq-grid-gap, 6px));
+}
+.weq-gallery-cell.weq-span-y-3,
+.weq-gallery-cell[data-span-y="3"] {
+  grid-row: span 3;
+  min-height: calc(var(--weq-cell-base-height, 44px) * 3 + var(--weq-grid-gap, 6px) * 2);
+}
+.weq-gallery-cell.weq-span-y-4,
+.weq-gallery-cell[data-span-y="4"] {
+  grid-row: span 4;
+  min-height: calc(var(--weq-cell-base-height, 44px) * 4 + var(--weq-grid-gap, 6px) * 3);
+}
+
+/* Dynamic Multi-Cell Spanning: 2D Composite Structures */
+.weq-gallery-cell.weq-span-2x2 { grid-column: span 2; grid-row: span 2; min-height: calc(var(--weq-cell-base-height, 44px) * 2 + var(--weq-grid-gap, 6px)); }
+.weq-gallery-cell.weq-span-3x2 { grid-column: span 3; grid-row: span 2; min-height: calc(var(--weq-cell-base-height, 44px) * 2 + var(--weq-grid-gap, 6px)); }
+.weq-gallery-cell.weq-span-4x2 { grid-column: span 4; grid-row: span 2; min-height: calc(var(--weq-cell-base-height, 44px) * 2 + var(--weq-grid-gap, 6px)); }
+.weq-gallery-cell.weq-span-2x3 { grid-column: span 2; grid-row: span 3; min-height: calc(var(--weq-cell-base-height, 44px) * 3 + var(--weq-grid-gap, 6px) * 2); }
+.weq-gallery-cell.weq-span-3x3 { grid-column: span 3; grid-row: span 3; min-height: calc(var(--weq-cell-base-height, 44px) * 3 + var(--weq-grid-gap, 6px) * 2); }
+.weq-gallery-cell.weq-span-4x3 { grid-column: span 4; grid-row: span 3; min-height: calc(var(--weq-cell-base-height, 44px) * 3 + var(--weq-grid-gap, 6px) * 2); }
+
+/* Add Button (+) Styling - same dimensions as standard gallery cells with green plus sign */
+.weq-gallery-add-cell-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: var(--weq-cell-base-height, 44px);
+  min-width: var(--weq-cell-base-width, 48px);
+  border: 1px dashed var(--background-modifier-border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  grid-column: span 1;
+  grid-row: span 1;
+  box-sizing: border-box;
+  padding: 4px 6px;
+}
+
+.weq-gallery-add-cell-btn .weq-gallery-add-cell-icon {
+  color: var(--color-green, #2ecc71);
+  font-size: 1.4em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.weq-gallery-add-cell-btn:hover {
+  border-color: var(--interactive-accent, #705dcf);
+  background-color: var(--background-modifier-hover);
+}
+
+/* Bug 18: Add Section Button Design unified with + icon buttons */
+.weq-gallery-add-section-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  margin: 12px auto 6px auto;
+  background: transparent;
+  border: 1px dashed var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.weq-gallery-add-section-btn .weq-gallery-add-section-icon {
+  font-size: 1.4em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--interactive-accent, #705dcf);
+}
+
+.weq-gallery-add-section-btn:hover {
+  border-color: var(--interactive-accent, #705dcf);
+  background-color: var(--background-modifier-hover);
+  color: var(--interactive-accent, #705dcf);
+}
+
+/* Gallery Creation Modal Dialog (Bug 12) */
+.weq-gallery-prompt-modal {
+  padding: 16px;
+}
+
+.weq-gallery-modal-input-row {
+  margin: 12px 0;
+}
+
+.weq-gallery-modal-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  box-sizing: border-box;
+}
+
+.weq-gallery-modal-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Editing State for In-Cell Equation Editor (Bug 14: consistent centering) */
+.weq-gallery-cell.is-editing {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  background-color: var(--background-primary) !important;
+  border-color: var(--interactive-accent, #705dcf) !important;
+  box-shadow: 0 0 0 2px var(--interactive-accent, #705dcf) !important;
+  cursor: text !important;
+  z-index: 10;
+}
+
+.weq-gallery-cell-editor {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  box-sizing: border-box !important;
+}
+
+.weq-gallery-cell-editor .word-equation-math,
+.weq-gallery-cell-editor .weq-settings-equation-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+}
+
+.weq-gallery-cell-editor .eq-slot[data-slot-role="root"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+/* Bug 6: Strict vertical centering for gallery cell placeholders and slots */
+.weq-gallery-cell .weq-gallery-static-preview,
+.weq-gallery-static-preview .word-equation-math,
+.weq-gallery-cell .eq-slot,
+.weq-gallery-cell .eq-matrix-cell {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+}
+
+.weq-gallery-cell .eq-placeholder {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  align-self: center !important;
+}
+
+/* Bug 6: Suppress redundant inner equation boundary inside gallery cells */
+.weq-gallery-cell .word-equation-math,
+.weq-gallery-item .word-equation-math,
+.weq-gallery-static-preview .word-equation-math,
+.weq-gallery-cell-editor .word-equation-math {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  min-height: auto !important;
+  min-width: auto !important;
+}
+
+/* Bug 9: Gallery static cell cursor fix */
+.weq-gallery-static-preview,
+.weq-gallery-static-preview * {
+  pointer-events: none !important;
+  cursor: pointer !important;
+}
+
+.weq-gallery-cell:not(.is-editing) {
+  cursor: pointer !important;
+}
+
+.weq-gallery-cell:not(.is-editing) * {
+  cursor: pointer !important;
+}
+
+.weq-gallery-cell.is-editing,
+.weq-gallery-cell.is-editing .word-equation-math {
+  cursor: text !important;
+}
+
+/* Bug 15 & Bug 19: Inline Rename Input */
+.weq-gallery-rename-input {
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  color: var(--text-normal);
+  background: var(--background-primary);
+  border: 1px solid var(--interactive-accent, #705dcf);
+  border-radius: 4px;
+  padding: 2px 6px;
+  width: 100%;
+  max-width: 200px;
+  box-sizing: border-box;
+  outline: none;
+  line-height: normal;
+}
+
+/* Bug 9: Tab rename input sizing to match tab button's available width */
+.weq-gallery-tab-btn .weq-gallery-tab-label:has(.weq-gallery-rename-input),
+.weq-gallery-tab-btn .weq-gallery-rename-input-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.weq-gallery-tab-btn .weq-gallery-rename-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 2px 2px !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: 0.78em !important;
+  line-height: 1.2 !important;
+}
+
+/* Bug 4 (Gen69): Sidebar tab rename dynamic popout expansion to prevent text clipping */
+.weq-gallery-tab-sidebar:has(.weq-gallery-rename-input),
+.weq-gallery-tab-list:has(.weq-gallery-rename-input),
+.weq-gallery-tab-btn:has(.weq-gallery-rename-input) {
+  overflow: visible !important;
+}
+
+.weq-gallery-tab-btn .weq-gallery-tab-label:has(.weq-gallery-rename-input) {
+  position: relative !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  overflow: visible !important;
+  height: 100% !important;
+}
+
+.weq-gallery-tab-btn .weq-gallery-tab-label .weq-gallery-rename-input,
+.weq-gallery-tab-btn .weq-gallery-rename-input.weq-rename-expanded {
+  position: absolute !important;
+  right: 0 !important;
+  width: max-content !important;
+  min-width: 120px !important;
+  max-width: 240px !important;
+  z-index: 100 !important;
+  background: var(--background-primary) !important;
+  border: 1px solid var(--interactive-accent, #705dcf) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-size: 0.85em !important;
+  text-align: left !important;
+  line-height: normal !important;
+  color: var(--text-normal) !important;
+}
+
+/* Right-Click Context Menu */
+.weq-gallery-context-menu {
+  min-width: 160px;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weq-gallery-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-normal);
+  font-size: 0.88em;
+  font-family: var(--font-interface, sans-serif);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  user-select: none;
+}
+
+.weq-gallery-menu-item:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-accent, #705dcf);
+}
 

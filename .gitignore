@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+main.js.map
+dist/
+build/
+
+# Obsidian test vaults & browser profile caches
+test-vault/
+.test-profile/
+
+# Internal Agent Workspaces & Reports (Local Development)
+.agents/
+.antigravityignore
+BUG_REPORT*.md
+FEATURE_REPORT*.md
+ORIGINAL_REQUEST.md
+PROJECT.md
+TEST_INFRA.md
+debug-log.json
+*.log
+
+# Environment & OS
+.env
+.DS_Store
+Thumbs.db
